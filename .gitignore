@@ -1,0 +1,82 @@
+# Object files
+*.o
+*.ko
+*.obj
+
+# Libraries
+*.lib
+*.a
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+*.ilk
+
+# Symbols
+*.pdb
+
+# Build artifacts
+bazel-bin/
+bazel-genfiles/
+bazel-iris_frontend/
+bazel-out/
+bazel-testlogs/
+
+# Build artifacts as files
+bazel-bin
+bazel-genfiles
+bazel-Iris
+bazel-out
+bazel-testlogs
+
+# Executables
+bin/
+*.exe
+*.out
+*.app
+
+# Build files
+CMakeCache.txt
+*.cmake
+*.filters
+*.vcxproj
+*.sln
+*.lastbuildstate
+*.sdf
+*.suo
+*.cache
+*.opensdf
+*.unsuccessfulbuild
+*.exp
+*.user
+*.stackdump
+*.nativecodeanalysis.xml
+*.nativecodeanalysis.all.xml
+*.opendb
+*.VC.db
+*.build
+
+# Log files
+*.tlog
+*.log
+
+# Project files
+*.sublime-project
+*.sublime-workspace
+launch.json
+
+# OSX Files
+*.DS_Store
+
+# Directories
+build/
+CMakeFiles/
+CMakeScripts/
+iris.xcodeproj/
+.vscode/
+.vs/
+
+#Makefiles
+Makefile
