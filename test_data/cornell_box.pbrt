@@ -8,7 +8,7 @@ Film "image"
    "integer xresolution" [512]
    "integer yresolution" [512]
 
-SurfaceIntegrator "path"
+Integrator "path"
 
 WorldBegin
 
