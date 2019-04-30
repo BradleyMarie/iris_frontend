@@ -34,23 +34,27 @@ int main(int argc, char** argv) {
   gflags::SetUsageMessage("A pbrt frontend for the iris renderer.");
   gflags::ParseCommandLineFlags(&argc, &argv, true);
 
-  if (argc == 1) {
-    std::string input = ReadToString(std::cin);
-    ParseAndRenderScene(GetWorkingDirectory(), std::move(input));
-  } else {
-    for (int i = 1; i < argc; i++) {
-      std::ifstream file(argv[i]);
-      if (!file.is_open()) {
-        std::cerr << "ERROR: Could not open file " << argv[i];
-        return EXIT_FAILURE;
-      }
-
-      std::string input = ReadToString(file);
-      file.close();
-
-      ParseAndRenderScene(GetParentDirectory(argv[i]), std::move(input));
-    }
+  if (2 < argc) {
+    std::cerr << "ERROR: Only one file input supported";
+    return EXIT_FAILURE;
   }
+
+  std::string input, search_dir;
+  if (argc == 1) {
+    input = ReadToString(std::cin);
+    search_dir = GetWorkingDirectory();
+  } else {
+    std::ifstream file(argv[1]);
+    if (!file.is_open()) {
+      std::cerr << "ERROR: Could not open file " << argv[1];
+      return EXIT_FAILURE;
+    }
+
+    input = ReadToString(file);
+    search_dir = GetParentDirectory(argv[1]);
+  }
+
+  ParseAndRenderScene(search_dir, std::move(input));
 
   return EXIT_SUCCESS;
 }
