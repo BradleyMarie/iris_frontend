@@ -1,9 +1,11 @@
 #include <cstdlib>
-#include <fstream>
 #include <iostream>
 #include <vector>
 
 #include "gflags/gflags.h"
+#include "src/tokenizer.h"
+
+using iris::Tokenizer;
 
 DEFINE_uint32(num_threads, 0,
               "The number of threads to use for rendering. If zero, the "
@@ -12,14 +14,10 @@ DEFINE_uint32(num_threads, 0,
 
 namespace {
 
-void ParseAndRenderScene(const std::string& search_dir, std::string&& scene) {}
-
-std::string ReadToString(std::istream& stream) {
-  std::string input;
-  for (std::string line; std::getline(stream, line);) {
-    input += line;
+void ParseAndRenderScene(const std::string& search_dir, Tokenizer tokenizer) {
+  for (auto token = tokenizer.Next(); token; token = tokenizer.Next()) {
+    std::cout << "token: '" << *token << "'" << std::endl;
   }
-  return input;
 }
 
 std::string GetWorkingDirectory() { return ""; }
@@ -39,22 +37,17 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
 
-  std::string input, search_dir;
+  Tokenizer tokenizer;
+  std::string search_dir;
   if (argc == 1) {
-    input = ReadToString(std::cin);
+    tokenizer = Tokenizer::FromConsole();
     search_dir = GetWorkingDirectory();
   } else {
-    std::ifstream file(argv[1]);
-    if (!file.is_open()) {
-      std::cerr << "ERROR: Could not open file " << argv[1];
-      return EXIT_FAILURE;
-    }
-
-    input = ReadToString(file);
+    tokenizer = Tokenizer::FromFile(argv[1]);
     search_dir = GetParentDirectory(argv[1]);
   }
 
-  ParseAndRenderScene(search_dir, std::move(input));
+  ParseAndRenderScene(search_dir, std::move(tokenizer));
 
   return EXIT_SUCCESS;
 }
