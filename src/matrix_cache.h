@@ -6,7 +6,23 @@ namespace iris {
 
 class MatrixCache {
  public:
-  Matrix Lookup(Matrix matrix) { return *m_transforms.insert(matrix).first; }
+  Matrix Lookup(Matrix matrix) {
+    float_t contents[4][4];
+    MatrixReadContents(matrix.get(), contents);
+    if (contents[0][0] == (float_t)1.0 && contents[0][1] == (float_t)0.0 &&
+        contents[0][2] == (float_t)0.0 && contents[0][3] == (float_t)0.0 &&
+        contents[1][0] == (float_t)0.0 && contents[1][1] == (float_t)1.0 &&
+        contents[1][2] == (float_t)0.0 && contents[1][3] == (float_t)0.0 &&
+        contents[2][0] == (float_t)0.0 && contents[2][1] == (float_t)0.0 &&
+        contents[2][2] == (float_t)1.0 && contents[2][3] == (float_t)0.0 &&
+        contents[3][0] == (float_t)0.0 && contents[3][1] == (float_t)0.0 &&
+        contents[3][2] == (float_t)0.0 && contents[3][3] == (float_t)1.0) {
+      return Matrix(nullptr);
+    }
+
+    return *m_transforms.insert(matrix).first;
+  }
+
   void clear() { m_transforms.clear(); }
 
  private:
