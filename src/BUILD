@@ -11,8 +11,9 @@ cc_binary(
 )
 
 cc_library(
-    name = "matrix_cache",
-    hdrs = ["matrix_cache.h"],
+    name = "matrix_manager",
+    hdrs = ["matrix_manager.h"],
+    srcs = ["matrix_manager.cc"],
     deps = [
         ":pointer_types",
     ],
@@ -34,8 +35,8 @@ cc_library(
 
 cc_library(
     name = "tokenizer",
-    srcs = ["tokenizer.cc"],
     hdrs = ["tokenizer.h"],
+    srcs = ["tokenizer.cc"],
     deps = [
         "@com_github_abseil_abseil_cpp//absl/strings",
         "@com_github_abseil_abseil_cpp//absl/types:optional"

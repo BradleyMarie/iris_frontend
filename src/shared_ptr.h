@@ -12,6 +12,7 @@ class SharedPtr {
       m_ptr = other.m_ptr;
       Retain(m_ptr);
     }
+    return *this;
   }
 
   Type* get() { return m_ptr; }
