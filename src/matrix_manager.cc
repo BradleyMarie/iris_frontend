@@ -101,7 +101,111 @@ void MatrixManager::Rotate(float_t theta, float_t x, float_t y, float_t z) {
 void MatrixManager::LookAt(float_t eye_x, float_t eye_y, float_t eye_z,
                            float_t look_x, float_t look_y, float_t look_z,
                            float_t up_x, float_t up_y, float_t up_z) {
-  // TODO
+  if (!isfinite(eye_x)) {
+    std::cerr << "ERROR: Invalid eye_x parameter to LookAt " << eye_x
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  if (!isfinite(eye_y)) {
+    std::cerr << "ERROR: Invalid eye_y parameter to LookAt " << eye_y
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  if (!isfinite(eye_z)) {
+    std::cerr << "ERROR: Invalid eye_z parameter to LookAt " << eye_z
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  if (!isfinite(look_x)) {
+    std::cerr << "ERROR: Invalid look_x parameter to LookAt " << look_x
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  if (!isfinite(look_y)) {
+    std::cerr << "ERROR: Invalid look_y parameter to LookAt " << look_y
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  if (!isfinite(look_z)) {
+    std::cerr << "ERROR: Invalid look_z parameter to LookAt " << look_z
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  if (!isfinite(up_x)) {
+    std::cerr << "ERROR: Invalid up_x parameter to LookAt " << up_x
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  if (!isfinite(up_y)) {
+    std::cerr << "ERROR: Invalid up_y parameter to LookAt " << up_y
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  if (!isfinite(up_z)) {
+    std::cerr << "ERROR: Invalid up_z parameter to LookAt " << up_z
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  if (eye_x == look_x && eye_y == look_y && eye_z == look_z) {
+    std::cerr << "ERROR: Eye and look parameters of LookAt must be different "
+                 "points"
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  if (up_x == (float_t)0.0 && up_y == (float_t)0.0 && up_z == (float_t)0.0) {
+    std::cerr << "ERROR: Zero length up paramater to LookAt" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  POINT3 pos = PointCreate(eye_x, eye_y, eye_z);
+  POINT3 look = PointCreate(look_x, look_y, look_z);
+
+  VECTOR3 direction = PointSubtract(look, pos);
+  direction = VectorNormalize(direction, nullptr, nullptr);
+
+  VECTOR3 up = VectorCreate(up_x, up_y, up_z);
+  up = VectorNormalize(up, nullptr, nullptr);
+
+  VECTOR3 right = VectorCrossProduct(up, direction);
+  if (right.x == (float_t)0.0 && right.y == (float_t)0.0 &&
+      right.z == (float_t)0.0) {
+    std::cerr << "ERROR: Parallel look and up vectors for LookAt" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  up = VectorCrossProduct(direction, right);
+
+  Matrix inverse;
+  ISTATUS status = MatrixAllocate(
+      right.x, up.x, direction.x, pos.x, right.y, up.y, direction.y, pos.y,
+      right.z, up.z, direction.z, pos.z, (float_t)0.0, (float_t)0.0,
+      (float_t)0.0, (float_t)1.0, inverse.release_and_get_address());
+
+  switch (status) {
+    case ISTATUS_ARITHMETIC_ERROR:
+      std::cerr << "ERROR: Non-invertible matrix" << std::endl;
+      exit(EXIT_FAILURE);
+    case ISTATUS_ALLOCATION_FAILED:
+      std::cerr << "ERROR: Allocation failed" << std::endl;
+      exit(EXIT_FAILURE);
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
+
+  Matrix transform;
+  *transform.release_and_get_address() = MatrixGetInverse(inverse.get());
+
+  Transform(transform);
 }
 
 void MatrixManager::CoordinateSystem(const std::string& name) {
