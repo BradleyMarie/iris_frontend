@@ -85,7 +85,7 @@ void MatrixManager::Rotate(float_t theta, float_t x, float_t y, float_t z) {
       exit(EXIT_FAILURE);
     case ISTATUS_INVALID_ARGUMENT_COMBINATION_00:
       std::cerr
-          << "ERROR: One of the x, y, or z arguments to Rotate must be non-zero"
+          << "ERROR: One of the x, y, or z parameter of Rotate must be non-zero"
           << std::endl;
       exit(EXIT_FAILURE);
     case ISTATUS_ALLOCATION_FAILED:
