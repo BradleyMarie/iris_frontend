@@ -11,6 +11,28 @@ cc_binary(
 )
 
 cc_library(
+    name = "matrix_cache",
+    hdrs = ["matrix_cache.h"],
+    deps = [
+        ":pointer_types",
+    ],
+)
+
+cc_library(
+    name = "pointer_types",
+    hdrs = ["pointer_types.h"],
+    deps = [
+        ":shared_ptr",
+        "@com_github_bradleymarie_iris//iris_physx:iris_physx",
+    ],
+)
+
+cc_library(
+    name = "shared_ptr",
+    hdrs = ["shared_ptr.h"],
+)
+
+cc_library(
     name = "tokenizer",
     srcs = ["tokenizer.cc"],
     hdrs = ["tokenizer.h"],
