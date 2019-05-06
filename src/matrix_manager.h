@@ -54,7 +54,18 @@ class MatrixManager {
         return Matrix();
       }
 
-      return *m_transforms.insert(matrix).first;
+      auto it = m_transforms.find(matrix);
+      if (it != m_transforms.end()) {
+        return *it;
+      }
+
+      Matrix inverse;
+      *inverse.release_and_get_address() = MatrixGetInverse(matrix.get());
+
+      m_transforms.insert(matrix);
+      m_transforms.insert(inverse);
+
+      return matrix;
     }
 
    private:
