@@ -24,6 +24,8 @@ cc_library(
     hdrs = ["pointer_types.h"],
     deps = [
         ":shared_ptr",
+        ":unique_ptr",
+        "@com_github_bradleymarie_iris//iris_camera:iris_camera",
         "@com_github_bradleymarie_iris//iris_physx:iris_physx",
     ],
 )
@@ -41,4 +43,9 @@ cc_library(
         "@com_github_abseil_abseil_cpp//absl/strings",
         "@com_github_abseil_abseil_cpp//absl/types:optional"
     ],
+)
+
+cc_library(
+    name = "unique_ptr",
+    hdrs = ["unique_ptr.h"],
 )
