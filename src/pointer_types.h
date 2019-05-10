@@ -16,8 +16,10 @@ typedef UniquePtr<INTEGRATOR, IntegratorFree> Integrator;
 typedef SharedPtr<MATERIAL, MaterialRetain, MaterialRelease> Material;
 typedef SharedPtr<MATRIX, MatrixRetain, MatrixRelease> Matrix;
 typedef SharedPtr<LIGHT, LightRetain, LightRelease> Light;
+typedef UniquePtr<LIGHT_SAMPLER, LightSamplerFree> LightSampler;
 typedef UniquePtr<RANDOM, RandomFree> Random;
 typedef SharedPtr<REFLECTOR, ReflectorRetain, ReflectorRelease> Reflector;
+typedef UniquePtr<SCENE, SceneFree> Scene;
 typedef SharedPtr<SPECTRUM, SpectrumRetain, SpectrumRelease> Spectrum;
 
 }  // namespace iris
