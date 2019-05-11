@@ -11,13 +11,17 @@ class Tokenizer {
   static Tokenizer FromConsole();
   static Tokenizer FromFile(const std::string& path);
 
+  absl::optional<absl::string_view> Peek();
   absl::optional<absl::string_view> Next();
 
  private:
+  absl::optional<absl::string_view> ParseNext();
+
   const char* ToPointer(std::string::const_iterator iter) const {
     return m_serialized.data() + (iter - m_serialized.begin());
   }
 
+  absl::optional<absl::optional<absl::string_view>> m_next;
   std::string m_serialized;
   std::string::const_iterator m_position;
   std::string m_escaped;

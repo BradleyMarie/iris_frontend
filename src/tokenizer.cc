@@ -51,7 +51,25 @@ Tokenizer Tokenizer::FromFile(const std::string& path) {
   return Tokenizer(std::move(scene));
 }
 
+absl::optional<absl::string_view> Tokenizer::Peek() {
+  if (!m_next) {
+    m_next = ParseNext();
+  }
+
+  return *m_next;
+}
+
 absl::optional<absl::string_view> Tokenizer::Next() {
+  if (m_next) {
+    auto result = *m_next;
+    m_next = absl::nullopt;
+    return result;
+  }
+
+  return ParseNext();
+}
+
+absl::optional<absl::string_view> Tokenizer::ParseNext() {
   while (m_position != m_serialized.end()) {
     const char* token_start = ToPointer(m_position++);
     if (std::isspace(static_cast<unsigned char>(*token_start))) {
