@@ -7,25 +7,44 @@
 
 namespace iris {
 
-enum ParameterType {
-  TYPE_BOOL,
-  TYPE_INT,
-  TYPE_FLOAT,
-  TYPE_POINT,
-  TYPE_VECTOR,
-  TYPE_NORMAL,
-  TYPE_SPECTRUM,
-  TYPE_STRING
+struct BoolParameter {
+  std::vector<bool> data;
 };
 
-struct Parameter {
-  std::string name;
-  ParameterType type;
-  absl::variant<std::vector<bool>, std::vector<int>, std::vector<float_t>,
-                std::vector<POINT3>, std::vector<VECTOR3>,
-                std::vector<std::string>>
-      data;
+struct IntParameter {
+  std::vector<int> data;
 };
+
+struct FloatParameter {
+  std::vector<float_t> data;
+};
+
+struct SpectrumParameter {
+  std::vector<float_t> data;
+};
+
+struct Point3Parameter {
+  std::vector<POINT3> data;
+};
+
+struct Vector3Parameter {
+  std::vector<VECTOR3> data;
+};
+
+struct NormalParameter {
+  std::vector<VECTOR3> data;
+};
+
+struct StringParameter {
+  std::vector<std::string> data;
+};
+
+typedef absl::variant<BoolParameter, IntParameter, FloatParameter,
+                      SpectrumParameter, Point3Parameter, Vector3Parameter,
+                      NormalParameter, StringParameter>
+    ParameterData;
+
+typedef std::pair<std::string, ParameterData> Parameter;
 
 absl::optional<Parameter> ParseNextParam(Tokenizer& tokenizer);
 

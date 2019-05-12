@@ -20,32 +20,32 @@ static bool IsQuotedToken(const absl::optional<absl::string_view>& token) {
   return *token->begin() == '"' && *token->end() == '"';
 }
 
-static std::vector<float_t> ParseFloat(Tokenizer& tokenizer) {
-  return std::vector<float_t>();
+static FloatParameter ParseFloat(Tokenizer& tokenizer) {
+  return FloatParameter();
 }
 
-static std::vector<int> ParseInt(Tokenizer& tokenizer) {
-  return std::vector<int>();
+static IntParameter ParseInt(Tokenizer& tokenizer) { return IntParameter(); }
+
+static BoolParameter ParseBool(Tokenizer& tokenizer) { return BoolParameter(); }
+
+static Point3Parameter ParsePoint3(Tokenizer& tokenizer) {
+  return Point3Parameter();
 }
 
-static std::vector<bool> ParseBool(Tokenizer& tokenizer) {
-  return std::vector<bool>();
+static Vector3Parameter ParseVector3(Tokenizer& tokenizer) {
+  return Vector3Parameter();
 }
 
-static std::vector<POINT3> ParsePoint3(Tokenizer& tokenizer) {
-  return std::vector<POINT3>();
+static NormalParameter ParseNormal(Tokenizer& tokenizer) {
+  return NormalParameter();
 }
 
-static std::vector<VECTOR3> ParseVector3(Tokenizer& tokenizer) {
-  return std::vector<VECTOR3>();
+static StringParameter ParseString(Tokenizer& tokenizer) {
+  return StringParameter();
 }
 
-static std::vector<std::string> ParseString(Tokenizer& tokenizer) {
-  return std::vector<std::string>();
-}
-
-static std::vector<float_t> ParseSpectrum(Tokenizer& tokenizer) {
-  return std::vector<float_t>();
+static SpectrumParameter ParseSpectrum(Tokenizer& tokenizer) {
+  return SpectrumParameter();
 }
 
 }  // namespace
@@ -69,17 +69,14 @@ absl::optional<Parameter> ParseNextParam(Tokenizer& tokenizer) {
   }
 
   Parameter result;
-  result.name = std::string(type_and_name[1].data(), type_and_name[1].size());
+  result.first = std::string(type_and_name[1].data(), type_and_name[1].size());
 
   if (type_and_name[0] == "float") {
-    result.type = TYPE_FLOAT;
-    result.data = ParseFloat(tokenizer);
+    result.second = ParseFloat(tokenizer);
   } else if (type_and_name[0] == "integer") {
-    result.type = TYPE_INT;
-    result.data = ParseInt(tokenizer);
+    result.second = ParseInt(tokenizer);
   } else if (type_and_name[0] == "bool") {
-    result.type = TYPE_BOOL;
-    result.data = ParseBool(tokenizer);
+    result.second = ParseBool(tokenizer);
   } else if (type_and_name[0] == "point2") {
     std::cerr << "ERROR: Illegal parameter type: " << type_and_name[0]
               << std::endl;
@@ -89,23 +86,17 @@ absl::optional<Parameter> ParseNextParam(Tokenizer& tokenizer) {
               << std::endl;
     exit(EXIT_FAILURE);
   } else if (type_and_name[0] == "point3") {
-    result.type = TYPE_POINT;
-    result.data = ParsePoint3(tokenizer);
+    result.second = ParsePoint3(tokenizer);
   } else if (type_and_name[0] == "vector3") {
-    result.type = TYPE_VECTOR;
-    result.data = ParseVector3(tokenizer);
+    result.second = ParseVector3(tokenizer);
   } else if (type_and_name[0] == "point") {
-    result.type = TYPE_POINT;
-    result.data = ParsePoint3(tokenizer);
+    result.second = ParsePoint3(tokenizer);
   } else if (type_and_name[0] == "vector") {
-    result.type = TYPE_VECTOR;
-    result.data = ParseVector3(tokenizer);
+    result.second = ParseVector3(tokenizer);
   } else if (type_and_name[0] == "normal") {
-    result.type = TYPE_NORMAL;
-    result.data = ParseVector3(tokenizer);
+    result.second = ParseNormal(tokenizer);
   } else if (type_and_name[0] == "string") {
-    result.type = TYPE_STRING;
-    result.data = ParseString(tokenizer);
+    result.second = ParseString(tokenizer);
   } else if (type_and_name[0] == "texture") {
     std::cerr << "ERROR: Illegal parameter type: " << type_and_name[0]
               << std::endl;
@@ -127,8 +118,7 @@ absl::optional<Parameter> ParseNextParam(Tokenizer& tokenizer) {
               << std::endl;
     exit(EXIT_FAILURE);
   } else if (type_and_name[0] == "spectrum") {
-    result.type = TYPE_SPECTRUM;
-    result.data = ParseSpectrum(tokenizer);
+    result.second = ParseSpectrum(tokenizer);
   } else {
     std::cerr << "ERROR: Illegal parameter type: " << type_and_name[0]
               << std::endl;
