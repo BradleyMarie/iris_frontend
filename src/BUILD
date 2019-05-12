@@ -6,7 +6,7 @@ cc_binary(
     deps = [
         ":tokenizer",
         "@com_github_bradleymarie_iris//iris_physx:iris_physx",
-        "@com_github_gflags_gflags//:gflags"
+        "@com_github_gflags_gflags//:gflags",
     ],
 )
 
@@ -16,6 +16,19 @@ cc_library(
     srcs = ["matrix_manager.cc"],
     deps = [
         ":pointer_types",
+    ],
+)
+
+cc_library(
+    name = "param_parser",
+    hdrs = ["param_parser.h"],
+    srcs = ["param_parser.cc"],
+    deps = [
+        ":tokenizer",
+        "@com_github_abseil_abseil_cpp//absl/strings",
+        "@com_github_abseil_abseil_cpp//absl/types:optional",
+        "@com_github_abseil_abseil_cpp//absl/types:variant",
+        "@com_github_bradleymarie_iris//iris:iris",
     ],
 )
 
@@ -41,7 +54,7 @@ cc_library(
     srcs = ["tokenizer.cc"],
     deps = [
         "@com_github_abseil_abseil_cpp//absl/strings",
-        "@com_github_abseil_abseil_cpp//absl/types:optional"
+        "@com_github_abseil_abseil_cpp//absl/types:optional",
     ],
 )
 
