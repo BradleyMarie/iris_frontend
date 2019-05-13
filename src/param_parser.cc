@@ -35,6 +35,20 @@ static bool ParseQuotedTokenToString(absl::string_view token,
   return true;
 }
 
+static bool ParseQuotedTokenToBool(absl::string_view token, bool* result) {
+  if (token == "\"true\"") {
+    *result = true;
+    return true;
+  }
+
+  if (token == "\"false\"") {
+    *result = false;
+    return true;
+  }
+
+  return false;
+}
+
 template <typename Type, bool (*ParseFunc)(absl::string_view, Type*)>
 void ParseSingle(absl::string_view token, const char* lower_type_name,
                  std::vector<Type>* result) {
@@ -96,7 +110,8 @@ static IntParameter ParseInt(Tokenizer& tokenizer) {
 }
 
 static BoolParameter ParseBool(Tokenizer& tokenizer) {
-  auto data = ParseData<bool, absl::SimpleAtob>(tokenizer, "Bool", "bool");
+  auto data =
+      ParseData<bool, ParseQuotedTokenToBool>(tokenizer, "Bool", "bool");
   return BoolParameter{std::move(data)};
 }
 
