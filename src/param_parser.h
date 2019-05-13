@@ -1,8 +1,10 @@
+#include <utility>
 #include <vector>
 
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
-#include "iris/iris.h"
+#include "iris_physx/iris_physx.h"
+#include "src/pointer_types.h"
 #include "src/tokenizer.h"
 
 namespace iris {
@@ -20,7 +22,7 @@ struct FloatParameter {
 };
 
 struct SpectrumParameter {
-  std::vector<float_t> data;
+  std::vector<std::pair<Spectrum, Reflector>> data;
 };
 
 struct Point3Parameter {

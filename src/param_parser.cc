@@ -3,73 +3,255 @@
 #include <iostream>
 #include <vector>
 
+#include "absl/strings/numbers.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
+#include "iris_physx_toolkit/interpolated_spectrum.h"
 
 namespace iris {
 namespace {
 
-static bool IsQuotedToken(const absl::optional<absl::string_view>& token) {
-  if (!token) {
+static absl::optional<absl::string_view> ParseQuotedToken(
+    absl::string_view token) {
+  if (token.size() <= 2 || token.front() != '"' || token.back() != '"') {
+    return absl::nullopt;
+  }
+
+  token.remove_prefix(1);
+  token.remove_suffix(1);
+
+  return token;
+}
+
+static bool ParseQuotedTokenToString(absl::string_view token,
+                                     std::string* result) {
+  auto parsed = ParseQuotedToken(token);
+  if (!parsed) {
     return false;
   }
 
-  if (token->begin() == token->end()) {
-    return false;
+  result->assign(parsed->data(), parsed->size());
+
+  return true;
+}
+
+template <typename Type, bool (*ParseFunc)(absl::string_view, Type*)>
+void ParseSingle(absl::string_view token, const char* lower_type_name,
+                 std::vector<Type>* result) {
+  Type value;
+  bool success = ParseFunc(token, &value);
+
+  if (!success) {
+    std::cerr << "ERROR: Failed to parse " << lower_type_name
+              << " parameter: " << token << std::endl;
+    exit(EXIT_FAILURE);
   }
 
-  return *token->begin() == '"' && *token->end() == '"';
+  result->push_back(value);
+}
+
+template <typename Type, bool (*ParseFunc)(absl::string_view, Type*)>
+void ParseLoop(Tokenizer& tokenizer, const char* type_name,
+               const char* lower_type_name, std::vector<Type>* result) {
+  for (;;) {
+    auto token = tokenizer.Next();
+
+    if (!token) {
+      std::cerr << "ERROR: " << type_name
+                << " parameter arrays must end with ']'" << std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    if (*token == "]") {
+      break;
+    }
+
+    ParseSingle<Type, ParseFunc>(*token, lower_type_name, result);
+  }
+}
+
+template <typename Type, bool (*ParseFunc)(absl::string_view, Type*)>
+std::vector<Type> ParseData(Tokenizer& tokenizer, const char* type_name,
+                            const char* lower_type_name) {
+  auto token = *tokenizer.Next();
+
+  std::vector<Type> result;
+  if (token != "[") {
+    ParseSingle<Type, ParseFunc>(token, lower_type_name, &result);
+  } else {
+    ParseLoop<Type, ParseFunc>(tokenizer, type_name, lower_type_name, &result);
+  }
+
+  return result;
 }
 
 static FloatParameter ParseFloat(Tokenizer& tokenizer) {
-  return FloatParameter();
+  auto data = ParseData<float_t, absl::SimpleAtof>(tokenizer, "Float", "float");
+  return FloatParameter{std::move(data)};
 }
 
-static IntParameter ParseInt(Tokenizer& tokenizer) { return IntParameter(); }
+static IntParameter ParseInt(Tokenizer& tokenizer) {
+  auto data = ParseData<int, absl::SimpleAtoi>(tokenizer, "Int", "int");
+  return IntParameter{std::move(data)};
+}
 
-static BoolParameter ParseBool(Tokenizer& tokenizer) { return BoolParameter(); }
+static BoolParameter ParseBool(Tokenizer& tokenizer) {
+  auto data = ParseData<bool, absl::SimpleAtob>(tokenizer, "Bool", "bool");
+  return BoolParameter{std::move(data)};
+}
+
+template <typename Type, Type (*Create)(float_t x, float_t y, float_t z),
+          bool (*Validate)(Type)>
+static std::vector<Type> ParseFloatTuple(Tokenizer& tokenizer,
+                                         const char* type_name,
+                                         const char* lower_type_name) {
+  auto data = ParseData<float_t, absl::SimpleAtof>(tokenizer, type_name,
+                                                   lower_type_name);
+  if (data.size() % 3 != 0) {
+    std::cerr << "ERROR: The number of parameters for " << lower_type_name
+              << " must be divisible by 3" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  std::vector<Type> result;
+  for (size_t i = 0; i < data.size(); i += 3) {
+    auto value = Create(data[i], data[i + 1], data[i + 2]);
+    if (!Validate(value)) {
+      std::cerr << "ERROR: Could not construct a " << lower_type_name
+                << " from values (" << data[i] << ", " << data[i + 1] << ", "
+                << data[i + 2] << ")" << std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    result.push_back(value);
+  }
+
+  return result;
+}
+
+static Point3Parameter ParsePoint(Tokenizer& tokenizer) {
+  auto data = ParseFloatTuple<POINT3, PointCreate, PointValidate>(
+      tokenizer, "Point", "point");
+  return Point3Parameter{std::move(data)};
+}
 
 static Point3Parameter ParsePoint3(Tokenizer& tokenizer) {
-  return Point3Parameter();
+  auto data = ParseFloatTuple<POINT3, PointCreate, PointValidate>(
+      tokenizer, "Point3", "point3");
+  return Point3Parameter{std::move(data)};
+}
+
+static Vector3Parameter ParseVector(Tokenizer& tokenizer) {
+  auto data = ParseFloatTuple<VECTOR3, VectorCreate, VectorValidate>(
+      tokenizer, "Vector", "vector");
+  return Vector3Parameter{std::move(data)};
 }
 
 static Vector3Parameter ParseVector3(Tokenizer& tokenizer) {
-  return Vector3Parameter();
+  auto data = ParseFloatTuple<VECTOR3, VectorCreate, VectorValidate>(
+      tokenizer, "Vector3", "vector3");
+  return Vector3Parameter{std::move(data)};
 }
 
 static NormalParameter ParseNormal(Tokenizer& tokenizer) {
-  return NormalParameter();
+  auto data = ParseFloatTuple<VECTOR3, VectorCreate, VectorValidate>(
+      tokenizer, "Normal", "normal");
+  return NormalParameter{std::move(data)};
 }
 
 static StringParameter ParseString(Tokenizer& tokenizer) {
-  return StringParameter();
+  auto data = ParseData<std::string, ParseQuotedTokenToString>(
+      tokenizer, "String", "string");
+  return StringParameter{std::move(data)};
+}
+
+template <typename ContainerType, typename PointerType,
+          ISTATUS (*Allocate)(const float_t*, const float_t*, size_t,
+                              PointerType*)>
+static ContainerType AllocateSpectrum(const std::vector<float_t>& data,
+                                      const std::vector<float_t>& wavelengths,
+                                      const std::vector<float_t>& intensities) {
+  ContainerType result;
+  ISTATUS status =
+      Allocate(wavelengths.data(), intensities.data(), wavelengths.size(),
+               result.release_and_get_address());
+  if (status == ISTATUS_ALLOCATION_FAILED) {
+    std::cerr << "ERROR: Allocation failed" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  if (status != ISTATUS_SUCCESS) {
+    std::cerr << "ERROR: Could not construct a spectrum from values ("
+              << absl::StrJoin(data, ", ") << ")" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  return result;
 }
 
 static SpectrumParameter ParseSpectrum(Tokenizer& tokenizer) {
-  return SpectrumParameter();
+  if (ParseQuotedToken(*tokenizer.Peek())) {
+    std::cerr << "ERROR: String values are unsupported for Spectrum parameters"
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  auto data =
+      ParseData<float_t, absl::SimpleAtof>(tokenizer, "Spectrum", "spectrum");
+  if (data.size() % 2 != 0) {
+    std::cerr << "ERROR: The number of parameters for spectrum must be "
+                 "divisible by 2"
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  std::vector<float_t> wavelengths;
+  std::vector<float_t> intensities;
+  for (size_t i = 0; i < data.size(); i += 2) {
+    wavelengths.push_back(data[i]);
+    intensities.push_back(data[i + 1]);
+  }
+
+  Spectrum spectrum =
+      AllocateSpectrum<Spectrum, PSPECTRUM, InterpolatedSpectrumAllocate>(
+          data, wavelengths, intensities);
+  Reflector reflector =
+      AllocateSpectrum<Reflector, PREFLECTOR, InterpolatedReflectorAllocate>(
+          data, wavelengths, intensities);
+
+  std::vector<std::pair<Spectrum, Reflector>> result;
+  result.push_back(std::make_pair(spectrum, reflector));
+  return SpectrumParameter{std::move(result)};
 }
 
 }  // namespace
 
 absl::optional<Parameter> ParseNextParam(Tokenizer& tokenizer) {
-  if (!IsQuotedToken(tokenizer.Peek())) {
+  auto quoted_token = tokenizer.Peek();
+  if (!quoted_token) {
     return absl::nullopt;
   }
 
-  absl::string_view serialized_type_and_name = *tokenizer.Next();
-  serialized_type_and_name.remove_prefix(1);
-  serialized_type_and_name.remove_suffix(1);
+  auto unquoted_token = ParseQuotedToken(*quoted_token);
+  if (!unquoted_token) {
+    return absl::nullopt;
+  }
 
   std::vector<absl::string_view> type_and_name =
-      absl::StrSplit(serialized_type_and_name, " ", absl::SkipEmpty());
+      absl::StrSplit(*unquoted_token, " ", absl::SkipEmpty());
 
   if (type_and_name.size() != 2) {
     std::cerr << "ERROR: Failed to parse parameter type and name: "
-              << serialized_type_and_name << std::endl;
+              << *quoted_token << std::endl;
     exit(EXIT_FAILURE);
   }
 
   Parameter result;
   result.first = std::string(type_and_name[1].data(), type_and_name[1].size());
+
+  if (!tokenizer.Peek()) {
+    std::cerr << "ERROR: No parameters found for parameter: " << *quoted_token
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
 
   if (type_and_name[0] == "float") {
     result.second = ParseFloat(tokenizer);
@@ -90,9 +272,9 @@ absl::optional<Parameter> ParseNextParam(Tokenizer& tokenizer) {
   } else if (type_and_name[0] == "vector3") {
     result.second = ParseVector3(tokenizer);
   } else if (type_and_name[0] == "point") {
-    result.second = ParsePoint3(tokenizer);
+    result.second = ParsePoint(tokenizer);
   } else if (type_and_name[0] == "vector") {
-    result.second = ParseVector3(tokenizer);
+    result.second = ParseVector(tokenizer);
   } else if (type_and_name[0] == "normal") {
     result.second = ParseNormal(tokenizer);
   } else if (type_and_name[0] == "string") {

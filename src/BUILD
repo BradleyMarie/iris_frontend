@@ -24,11 +24,13 @@ cc_library(
     hdrs = ["param_parser.h"],
     srcs = ["param_parser.cc"],
     deps = [
+        ":pointer_types",
         ":tokenizer",
         "@com_github_abseil_abseil_cpp//absl/strings",
         "@com_github_abseil_abseil_cpp//absl/types:optional",
         "@com_github_abseil_abseil_cpp//absl/types:variant",
-        "@com_github_bradleymarie_iris//iris:iris",
+        "@com_github_bradleymarie_iris//iris_physx:iris_physx",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:interpolated_spectrum",
     ],
 )
 
