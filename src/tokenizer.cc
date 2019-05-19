@@ -1,7 +1,6 @@
 #include "src/tokenizer.h"
 
 #include <cctype>
-#include <fstream>
 #include <iostream>
 
 namespace iris {
@@ -32,24 +31,6 @@ static char ReadEscapedCharacter(char ch) {
 }
 
 }  // namespace
-
-Tokenizer Tokenizer::FromConsole() {
-  std::string scene((std::istreambuf_iterator<char>(std::cin)),
-                    (std::istreambuf_iterator<char>()));
-  return Tokenizer(std::move(scene));
-}
-
-Tokenizer Tokenizer::FromFile(const std::string& path) {
-  std::ifstream file(path);
-  if (!file) {
-    std::cerr << "ERROR: Error opening file " << path << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  std::string scene((std::istreambuf_iterator<char>(file)),
-                    (std::istreambuf_iterator<char>()));
-  return Tokenizer(std::move(scene));
-}
 
 absl::optional<absl::string_view> Tokenizer::Peek() {
   if (!m_next) {
@@ -147,10 +128,6 @@ absl::optional<absl::string_view> Tokenizer::ParseNext() {
 
     return absl::string_view(token_start, ToPointer(m_position) - token_start);
   }
-
-  m_serialized.resize(0);
-  m_position = m_serialized.begin();
-  m_escaped.resize(0);
 
   return absl::nullopt;
 }

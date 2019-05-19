@@ -8,11 +8,10 @@ namespace iris {
 
 class Tokenizer {
  public:
-  Tokenizer() : Tokenizer("") {}
+  Tokenizer(const Tokenizer&) = delete;
+  Tokenizer& operator=(const Tokenizer&) = delete;
   Tokenizer(std::string serialized)
       : m_serialized(std::move(serialized)), m_position(m_serialized.begin()) {}
-  static Tokenizer FromConsole();
-  static Tokenizer FromFile(const std::string& path);
 
   absl::optional<absl::string_view> Peek();
   absl::optional<absl::string_view> Next();
