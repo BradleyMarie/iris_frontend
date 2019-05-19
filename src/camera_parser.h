@@ -8,6 +8,7 @@
 
 #include "absl/strings/string_view.h"
 #include "src/matrix_manager.h"
+#include "src/output_writer.h"
 #include "src/pointer_types.h"
 #include "src/tokenizer.h"
 
@@ -17,7 +18,7 @@ typedef std::function<LightSampler(const std::vector<Light>&)>
     LightSamplerFactory;
 
 typedef std::tuple<Camera, PixelSampler, Framebuffer, Integrator,
-                   LightSamplerFactory, ColorIntegrator, std::string>
+                   LightSamplerFactory, ColorIntegrator, OutputWriter>
     CameraConfig;
 
 CameraConfig ParseCamera(Tokenizer& tokenizer, MatrixManager& matrix_manager);

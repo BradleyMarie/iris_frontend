@@ -16,7 +16,6 @@ using iris::MatrixManager;
 using iris::Random;
 using iris::SampleTracer;
 using iris::Tokenizer;
-using iris::WriteOutput;
 
 DEFINE_double(epsilon, 0.001,
               "The amount of error tolerated in distance calculations. Must be "
@@ -396,7 +395,7 @@ void ParseAndRender(const std::string& search_dir, Tokenizer& tokenizer) {
       exit(EXIT_FAILURE);
   }
 
-  WriteOutput(std::get<2>(camera_params), std::get<6>(camera_params));
+  std::get<6>(camera_params)(std::get<2>(camera_params));
 }
 
 std::string GetWorkingDirectory() { return ""; }

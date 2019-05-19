@@ -1,7 +1,12 @@
+#include <iostream>
+
 #include "src/output_writer.h"
 
 namespace iris {
 
-void WriteOutput(const Framebuffer& framebuffer, const std::string& path) {}
+OutputWriter ParseOutputWriter(absl::string_view path) {
+  std::cerr << "ERROR: ParseOutputWriter not implemented" << std::endl;
+  exit(EXIT_FAILURE);
+}
 
 }  // namespace iris

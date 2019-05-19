@@ -6,6 +6,7 @@ cc_library(
     srcs = ["camera_parser.cc"],
     deps = [
         ":matrix_manager",
+        ":output_writer",
         ":pointer_types",
         ":tokenizer",
         "@com_github_abseil_abseil_cpp//absl/strings",
@@ -42,6 +43,7 @@ cc_library(
     srcs = ["output_writer.cc"],
     deps = [
         ":pointer_types",
+        "@com_github_abseil_abseil_cpp//absl/strings",
     ],
 )
 
