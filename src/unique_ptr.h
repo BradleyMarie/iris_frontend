@@ -1,3 +1,6 @@
+#ifndef _SRC_UNIQUE_PTR_
+#define _SRC_UNIQUE_PTR_
+
 namespace iris {
 
 template <typename Type, void (*Release)(Type*)>
@@ -42,3 +45,5 @@ class UniquePtr {
 };
 
 }  // namespace iris
+
+#endif  // _SRC_UNIQUE_PTR_

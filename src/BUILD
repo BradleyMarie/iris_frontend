@@ -57,6 +57,19 @@ cc_library(
 )
 
 cc_library(
+    name = "scene_parser",
+    hdrs = ["scene_parser.h"],
+    srcs = ["scene_parser.cc"],
+    deps = [
+        ":matrix_manager",
+        ":pointer_types",
+        ":tokenizer",
+        "@com_github_abseil_abseil_cpp//absl/strings",
+        "@com_github_abseil_abseil_cpp//absl/types:optional",
+    ],
+)
+
+cc_library(
     name = "shared_ptr",
     hdrs = ["shared_ptr.h"],
 )

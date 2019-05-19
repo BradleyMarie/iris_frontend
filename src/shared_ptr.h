@@ -1,3 +1,6 @@
+#ifndef _SRC_SHARED_PTR_
+#define _SRC_SHARED_PTR_
+
 namespace iris {
 
 template <typename Type, void (*Retain)(Type*), void (*Release)(Type*)>
@@ -40,3 +43,5 @@ class SharedPtr {
 };
 
 }  // namespace iris
+
+#endif  // _SRC_SHARED_PTR_

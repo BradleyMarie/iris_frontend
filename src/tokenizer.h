@@ -1,3 +1,6 @@
+#ifndef _SRC_TOKENIZER_
+#define _SRC_TOKENIZER_
+
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 
@@ -28,3 +31,5 @@ class Tokenizer {
 };
 
 }  // namespace iris
+
+#endif  // _SRC_TOKENIZER_

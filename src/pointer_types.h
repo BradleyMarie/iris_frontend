@@ -1,3 +1,6 @@
+#ifndef _SRC_POINTER_TYPES_
+#define _SRC_POINTER_TYPES_
+
 #include "iris_camera/iris_camera.h"
 #include "iris_physx/iris_physx.h"
 #include "src/shared_ptr.h"
@@ -23,3 +26,5 @@ typedef UniquePtr<SCENE, SceneFree> Scene;
 typedef SharedPtr<SPECTRUM, SpectrumRetain, SpectrumRelease> Spectrum;
 
 }  // namespace iris
+
+#endif  // _SRC_POINTER_TYPES_

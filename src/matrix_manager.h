@@ -1,3 +1,6 @@
+#ifndef _SRC_MATRIX_MANAGER_
+#define _SRC_MATRIX_MANAGER_
+
 #include <map>
 #include <set>
 
@@ -100,3 +103,5 @@ class MatrixManager {
 };
 
 }  // namespace iris
+
+#endif  // _SRC_MATRIX_MANAGER_

@@ -1,3 +1,6 @@
+#ifndef _SRC_PARAM_PARSER_
+#define _SRC_PARAM_PARSER_
+
 #include <utility>
 #include <vector>
 
@@ -51,3 +54,5 @@ typedef std::pair<std::string, ParameterData> Parameter;
 absl::optional<Parameter> ParseNextParam(Tokenizer& tokenizer);
 
 }  // namespace iris
+
+#endif  // _SRC_PARAM_PARSER_
