@@ -7,33 +7,10 @@
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
 #include "iris_physx_toolkit/interpolated_spectrum.h"
+#include "src/quoted_string.h"
 
 namespace iris {
 namespace {
-
-static absl::optional<absl::string_view> ParseQuotedToken(
-    absl::string_view token) {
-  if (token.size() <= 2 || token.front() != '"' || token.back() != '"') {
-    return absl::nullopt;
-  }
-
-  token.remove_prefix(1);
-  token.remove_suffix(1);
-
-  return token;
-}
-
-static bool ParseQuotedTokenToString(absl::string_view token,
-                                     std::string* result) {
-  auto parsed = ParseQuotedToken(token);
-  if (!parsed) {
-    return false;
-  }
-
-  result->assign(parsed->data(), parsed->size());
-
-  return true;
-}
 
 static bool ParseQuotedTokenToBool(absl::string_view token, bool* result) {
   if (token == "\"true\"") {
@@ -203,7 +180,7 @@ static ContainerType AllocateSpectrum(const std::vector<float_t>& data,
 }
 
 static SpectrumParameter ParseSpectrum(Tokenizer& tokenizer) {
-  if (ParseQuotedToken(*tokenizer.Peek())) {
+  if (UnquoteToken(*tokenizer.Peek())) {
     std::cerr << "ERROR: String values are unsupported for Spectrum parameters"
               << std::endl;
     exit(EXIT_FAILURE);
@@ -245,7 +222,7 @@ absl::optional<Parameter> ParseNextParam(Tokenizer& tokenizer) {
     return absl::nullopt;
   }
 
-  auto unquoted_token = ParseQuotedToken(*quoted_token);
+  auto unquoted_token = UnquoteToken(*quoted_token);
   if (!unquoted_token) {
     return absl::nullopt;
   }

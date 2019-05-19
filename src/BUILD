@@ -26,6 +26,7 @@ cc_library(
     deps = [
         ":pointer_types",
         ":tokenizer",
+        ":quoted_string",
         "@com_github_abseil_abseil_cpp//absl/strings",
         "@com_github_abseil_abseil_cpp//absl/types:optional",
         "@com_github_abseil_abseil_cpp//absl/types:variant",
@@ -42,6 +43,16 @@ cc_library(
         ":unique_ptr",
         "@com_github_bradleymarie_iris//iris_camera:iris_camera",
         "@com_github_bradleymarie_iris//iris_physx:iris_physx",
+    ],
+)
+
+cc_library(
+    name = "quoted_string",
+    hdrs = ["quoted_string.h"],
+    srcs = ["quoted_string.cc"],
+    deps = [
+        "@com_github_abseil_abseil_cpp//absl/strings",
+        "@com_github_abseil_abseil_cpp//absl/types:optional",
     ],
 )
 
