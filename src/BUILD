@@ -1,11 +1,28 @@
 package(default_visibility = ["//visibility:private"])
 
+cc_library(
+    name = "camera_parser",
+    hdrs = ["camera_parser.h"],
+    srcs = ["camera_parser.cc"],
+    deps = [
+        ":matrix_manager",
+        ":pointer_types",
+        ":tokenizer",
+        "@com_github_abseil_abseil_cpp//absl/strings",
+    ],
+)
+
 cc_binary(
     name = "iris",
-    srcs = ["main.cc"],
+    srcs = ["iris.cc"],
     deps = [
+        ":camera_parser",
+        ":output_writer",
+        ":scene_parser",
         ":tokenizer",
+        "@com_github_bradleymarie_iris//iris_advanced_toolkit:pcg_random",
         "@com_github_bradleymarie_iris//iris_physx:iris_physx",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:sample_tracer",
         "@com_github_gflags_gflags//:gflags",
     ],
 )
@@ -14,6 +31,15 @@ cc_library(
     name = "matrix_manager",
     hdrs = ["matrix_manager.h"],
     srcs = ["matrix_manager.cc"],
+    deps = [
+        ":pointer_types",
+    ],
+)
+
+cc_library(
+    name = "output_writer",
+    hdrs = ["output_writer.h"],
+    srcs = ["output_writer.cc"],
     deps = [
         ":pointer_types",
     ],
@@ -65,7 +91,6 @@ cc_library(
         ":pointer_types",
         ":tokenizer",
         "@com_github_abseil_abseil_cpp//absl/strings",
-        "@com_github_abseil_abseil_cpp//absl/types:optional",
     ],
 )
 
