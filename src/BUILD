@@ -6,6 +6,7 @@ cc_library(
     srcs = ["camera_parser.cc"],
     deps = [
         ":matrix_manager",
+        ":matrix_parser",
         ":output_writer",
         ":pointer_types",
         ":tokenizer",
@@ -34,6 +35,16 @@ cc_library(
     srcs = ["matrix_manager.cc"],
     deps = [
         ":pointer_types",
+    ],
+)
+
+cc_library(
+    name = "matrix_parser",
+    hdrs = ["matrix_parser.h"],
+    srcs = ["matrix_parser.cc"],
+    deps = [
+        ":matrix_manager",
+        ":tokenizer",
     ],
 )
 
