@@ -14,6 +14,17 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "finite_float_t",
+    srcs = ["finite_float_t.cc"],
+    hdrs = ["finite_float_t.h"],
+    deps = [
+        "@com_github_bradleymarie_iris//iris",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
 cc_binary(
     name = "iris",
     srcs = ["iris.cc"],
