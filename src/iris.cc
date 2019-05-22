@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "absl/flags/flag.h"
+#include "absl/flags/internal/usage.h"
 #include "absl/flags/parse.h"
 #include "iris_advanced_toolkit/pcg_random.h"
 #include "iris_physx_toolkit/sample_tracer.h"
@@ -410,6 +411,8 @@ std::string GetParentDirectory(const std::string& file_name) {
 }  // namespace
 
 int main(int argc, char** argv) {
+  absl::flags_internal::SetProgramUsageMessage(
+      "A pbrt frontend for the iris renderer.");
   auto unparsed = absl::ParseCommandLine(argc, argv);
   if (2 < unparsed.size()) {
     std::cerr << "ERROR: Only one file input supported";

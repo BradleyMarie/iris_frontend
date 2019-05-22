@@ -25,6 +25,7 @@ cc_binary(
         "@com_github_bradleymarie_iris//iris_advanced_toolkit:pcg_random",
         "@com_github_bradleymarie_iris//iris_physx",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:sample_tracer",
+        "@com_google_absl//absl/flags:config",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
     ],
