@@ -429,7 +429,7 @@ int main(int argc, char** argv) {
     std::ifstream file(unparsed[1]);
     if (!file) {
       std::cerr << "ERROR: Error opening file " << unparsed[1] << std::endl;
-      exit(EXIT_FAILURE);
+      return EXIT_FAILURE;
     }
 
     scene.assign((std::istreambuf_iterator<char>(file)),
