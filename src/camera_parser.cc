@@ -72,6 +72,13 @@ CameraConfig ParseCamera(Tokenizer& tokenizer, MatrixManager& matrix_manager) {
       continue;
     }
 
+    if (token == "TransformTimes") {
+      std::cerr << "ERROR: Invalid directive before WorldBegin: " << *token
+                << std::endl;
+      exit(EXIT_FAILURE);
+      continue;
+    }
+
     std::cerr << "ERROR: Invalid directive before WorldBegin: " << *token
               << std::endl;
     exit(EXIT_FAILURE);

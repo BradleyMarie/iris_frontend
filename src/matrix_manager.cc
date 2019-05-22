@@ -208,11 +208,11 @@ void MatrixManager::LookAt(float_t eye_x, float_t eye_y, float_t eye_z,
   Transform(transform);
 }
 
-void MatrixManager::CoordinateSystem(const std::string& name) {
+void MatrixManager::CoordinateSystem(absl::string_view name) {
   m_coordinate_systems[name] = m_current;
 }
 
-void MatrixManager::CoordSysTransform(const std::string& name) {
+void MatrixManager::CoordSysTransform(absl::string_view name) {
   auto result = m_coordinate_systems.find(name);
   if (result != m_coordinate_systems.end()) {
     std::cerr << "WARNING: No coordinate system with name '" << name

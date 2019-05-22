@@ -1,9 +1,10 @@
 #ifndef _SRC_MATRIX_MANAGER_
 #define _SRC_MATRIX_MANAGER_
 
-#include <map>
 #include <set>
 
+#include "absl/container/flat_hash_map.h"
+#include "absl/strings/string_view.h"
 #include "src/pointer_types.h"
 
 namespace iris {
@@ -25,8 +26,8 @@ class MatrixManager {
   void LookAt(float_t eye_x, float_t eye_y, float_t eye_z, float_t look_x,
               float_t look_y, float_t look_z, float_t up_x, float_t up_y,
               float_t up_z);
-  void CoordinateSystem(const std::string& name);
-  void CoordSysTransform(const std::string& name);
+  void CoordinateSystem(absl::string_view name);
+  void CoordSysTransform(absl::string_view name);
   void Transform(float_t m00, float_t m01, float_t m02, float_t m03,
                  float_t m10, float_t m11, float_t m12, float_t m13,
                  float_t m20, float_t m21, float_t m22, float_t m23,
@@ -97,7 +98,8 @@ class MatrixManager {
   };
 
   Active m_active;
-  std::map<std::string, std::pair<Matrix, Matrix>> m_coordinate_systems;
+  absl::flat_hash_map<std::string, std::pair<Matrix, Matrix>>
+      m_coordinate_systems;
   std::pair<Matrix, Matrix> m_current;
   Cache m_cache;
 };

@@ -35,6 +35,8 @@ cc_library(
     hdrs = ["matrix_manager.h"],
     deps = [
         ":pointer_types",
+        "@com_github_abseil_abseil_cpp//absl/container:flat_hash_map",
+        "@com_github_abseil_abseil_cpp//absl/strings",
     ],
 )
 
@@ -44,6 +46,7 @@ cc_library(
     hdrs = ["matrix_parser.h"],
     deps = [
         ":matrix_manager",
+        ":quoted_string",
         ":tokenizer",
     ],
 )
