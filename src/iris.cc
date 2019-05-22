@@ -413,6 +413,7 @@ std::string GetParentDirectory(const std::string& file_name) {
 int main(int argc, char** argv) {
   absl::flags_internal::SetProgramUsageMessage(
       "A pbrt frontend for the iris renderer.");
+
   auto unparsed = absl::ParseCommandLine(argc, argv);
   if (2 < unparsed.size()) {
     std::cerr << "ERROR: Only one file input supported";
