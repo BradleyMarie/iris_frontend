@@ -10,7 +10,7 @@ cc_library(
         ":output_writer",
         ":pointer_types",
         ":tokenizer",
-        "@com_github_abseil_abseil_cpp//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -25,7 +25,8 @@ cc_binary(
         "@com_github_bradleymarie_iris//iris_advanced_toolkit:pcg_random",
         "@com_github_bradleymarie_iris//iris_physx",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:sample_tracer",
-        "@com_github_gflags_gflags//:gflags",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
     ],
 )
 
@@ -35,8 +36,8 @@ cc_library(
     hdrs = ["matrix_manager.h"],
     deps = [
         ":pointer_types",
-        "@com_github_abseil_abseil_cpp//absl/container:flat_hash_map",
-        "@com_github_abseil_abseil_cpp//absl/strings",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -57,7 +58,7 @@ cc_library(
     hdrs = ["output_writer.h"],
     deps = [
         ":pointer_types",
-        "@com_github_abseil_abseil_cpp//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -69,11 +70,11 @@ cc_library(
         ":pointer_types",
         ":quoted_string",
         ":tokenizer",
-        "@com_github_abseil_abseil_cpp//absl/strings",
-        "@com_github_abseil_abseil_cpp//absl/types:optional",
-        "@com_github_abseil_abseil_cpp//absl/types:variant",
         "@com_github_bradleymarie_iris//iris_physx",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:interpolated_spectrum",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+        "@com_google_absl//absl/types:variant",
     ],
 )
 
@@ -93,8 +94,8 @@ cc_library(
     srcs = ["quoted_string.cc"],
     hdrs = ["quoted_string.h"],
     deps = [
-        "@com_github_abseil_abseil_cpp//absl/strings",
-        "@com_github_abseil_abseil_cpp//absl/types:optional",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
     ],
 )
 
@@ -106,7 +107,7 @@ cc_library(
         ":matrix_manager",
         ":pointer_types",
         ":tokenizer",
-        "@com_github_abseil_abseil_cpp//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -120,8 +121,8 @@ cc_library(
     srcs = ["tokenizer.cc"],
     hdrs = ["tokenizer.h"],
     deps = [
-        "@com_github_abseil_abseil_cpp//absl/strings",
-        "@com_github_abseil_abseil_cpp//absl/types:optional",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
     ],
 )
 
