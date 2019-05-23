@@ -2,7 +2,6 @@
 #include <iostream>
 
 #include "absl/strings/numbers.h"
-#include "absl/strings/str_join.h"
 #include "src/matrix_parser.h"
 #include "src/quoted_string.h"
 
@@ -84,11 +83,7 @@ static void ParseTransform(Tokenizer& tokenizer,
   std::array<FiniteFloatT, 16> params;
   std::array<std::string, 16> strings;
   ParseFiniteFloats(tokenizer, "Transform", params, &strings);
-  if (!matrix_manager.Transform(params)) {
-    std::cerr << "ERROR: Transform parameters were non-invertible: ["
-              << absl::StrJoin(strings, ", ") << " ]" << std::endl;
-    exit(EXIT_FAILURE);
-  }
+  matrix_manager.Transform(params, strings);
 }
 
 static void ParseConcatTransform(Tokenizer& tokenizer,
@@ -96,11 +91,7 @@ static void ParseConcatTransform(Tokenizer& tokenizer,
   std::array<FiniteFloatT, 16> params;
   std::array<std::string, 16> strings;
   ParseFiniteFloats(tokenizer, "ConcatTransform", params, &strings);
-  if (!matrix_manager.ConcatTransform(params)) {
-    std::cerr << "ERROR: ConcatTransform parameters were non-invertible: ["
-              << absl::StrJoin(strings, ", ") << " ]" << std::endl;
-    exit(EXIT_FAILURE);
-  }
+  matrix_manager.ConcatTransform(params, strings);
 }
 
 static void ParseCoordinateSystem(Tokenizer& tokenizer,

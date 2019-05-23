@@ -3,6 +3,7 @@
 
 #include <array>
 #include <set>
+#include <string>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/string_view.h"
@@ -28,8 +29,10 @@ class MatrixManager {
   void LookAt(const std::array<FiniteFloatT, 9>& params);
   void CoordinateSystem(absl::string_view name);
   void CoordSysTransform(absl::string_view name);
-  bool Transform(const std::array<FiniteFloatT, 16>& params);
-  bool ConcatTransform(const std::array<FiniteFloatT, 16>& params);
+  void Transform(const std::array<FiniteFloatT, 16>& params,
+                 const std::array<std::string, 16> unparsed_params);
+  void ConcatTransform(const std::array<FiniteFloatT, 16>& params,
+                       const std::array<std::string, 16> unparsed_params);
   void ActiveTransform(Active active);
 
  private:

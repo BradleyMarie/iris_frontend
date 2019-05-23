@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "absl/strings/str_join.h"
+
 namespace iris {
 
 MatrixManager::MatrixManager() : m_active(ALL_TRANSFORMS) {}
@@ -141,7 +143,9 @@ void MatrixManager::CoordSysTransform(absl::string_view name) {
   }
 }
 
-bool MatrixManager::Transform(const std::array<FiniteFloatT, 16>& params) {
+void MatrixManager::Transform(
+    const std::array<FiniteFloatT, 16>& params,
+    const std::array<std::string, 16> unparsed_params) {
   Matrix transform;
   ISTATUS status = MatrixAllocate(
       params[0].Get(), params[1].Get(), params[2].Get(), params[3].Get(),
@@ -152,7 +156,9 @@ bool MatrixManager::Transform(const std::array<FiniteFloatT, 16>& params) {
 
   switch (status) {
     case ISTATUS_ARITHMETIC_ERROR:
-      return false;
+      std::cerr << "ERROR: Transform parameters were non-invertible: ["
+                << absl::StrJoin(unparsed_params, ", ") << " ]" << std::endl;
+      exit(EXIT_FAILURE);
     case ISTATUS_ALLOCATION_FAILED:
       std::cerr << "ERROR: Allocation failed" << std::endl;
       exit(EXIT_FAILURE);
@@ -161,11 +167,11 @@ bool MatrixManager::Transform(const std::array<FiniteFloatT, 16>& params) {
   }
 
   Set(transform);
-  return true;
 }
 
-bool MatrixManager::ConcatTransform(
-    const std::array<FiniteFloatT, 16>& params) {
+void MatrixManager::ConcatTransform(
+    const std::array<FiniteFloatT, 16>& params,
+    const std::array<std::string, 16> unparsed_params) {
   Matrix transform;
   ISTATUS status = MatrixAllocate(
       params[0].Get(), params[1].Get(), params[2].Get(), params[3].Get(),
@@ -176,7 +182,9 @@ bool MatrixManager::ConcatTransform(
 
   switch (status) {
     case ISTATUS_ARITHMETIC_ERROR:
-      return false;
+      std::cerr << "ERROR: ConcatTransform parameters were non-invertible: ["
+                << absl::StrJoin(unparsed_params, ", ") << " ]" << std::endl;
+      exit(EXIT_FAILURE);
     case ISTATUS_ALLOCATION_FAILED:
       std::cerr << "ERROR: Allocation failed" << std::endl;
       exit(EXIT_FAILURE);
@@ -185,7 +193,6 @@ bool MatrixManager::ConcatTransform(
   }
 
   Transform(transform);
-  return true;
 }
 
 void MatrixManager::ActiveTransform(Active active) {
