@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "absl/strings/numbers.h"
+#include "absl/strings/str_join.h"
 #include "src/matrix_parser.h"
 #include "src/quoted_string.h"
 
@@ -9,8 +10,9 @@ namespace iris {
 namespace {
 
 template <size_t N>
-void ParseFloats(Tokenizer& tokenizer, const char* name,
-                 std::array<float_t, N>& array) {
+void ParseFiniteFloats(Tokenizer& tokenizer, const char* name,
+                       std::array<FiniteFloatT, N>& array,
+                       std::array<std::string, N>* strings = nullptr) {
   for (size_t i = 0; i < N; i++) {
     auto token = tokenizer.Next();
     if (!token) {
@@ -19,9 +21,34 @@ void ParseFloats(Tokenizer& tokenizer, const char* name,
       exit(EXIT_FAILURE);
     }
 
-    if (!absl::SimpleAtof(*token, &array[i])) {
-      std::cerr << "ERROR: Failed to parse " << name << " parameter: " << *token
+    if (!ParseFiniteFloatT(*token, &array[i])) {
+      std::cerr << "ERROR: Failed to parse " << name
+                << " parameter to a finite floating point value: " << *token
                 << std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    if (strings) {
+      (*strings)[i].assign(token->begin(), token->size());
+    }
+  }
+}
+
+template <size_t N>
+void ParseFiniteNonZeroFloats(Tokenizer& tokenizer, const char* name,
+                              std::array<FiniteNonZeroFloatT, N>& array) {
+  for (size_t i = 0; i < N; i++) {
+    auto token = tokenizer.Next();
+    if (!token) {
+      std::cerr << "ERROR: " << name << " requires " << N << " parameters"
+                << std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    if (!ParseFiniteNonZeroFloatT(*token, &array[i])) {
+      std::cerr << "ERROR: Failed to parse " << name
+                << " parameter to a finite, non-zero floating point value: "
+                << *token << std::endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -29,48 +56,51 @@ void ParseFloats(Tokenizer& tokenizer, const char* name,
 
 static void ParseTranslate(Tokenizer& tokenizer,
                            MatrixManager& matrix_manager) {
-  std::array<float_t, 3> params;
-  ParseFloats(tokenizer, "Translate", params);
-  matrix_manager.Translate(params[0], params[1], params[2]);
+  std::array<FiniteFloatT, 3> params;
+  ParseFiniteFloats(tokenizer, "Translate", params);
+  matrix_manager.Translate(params);
 }
 
 static void ParseScale(Tokenizer& tokenizer, MatrixManager& matrix_manager) {
-  std::array<float_t, 3> params;
-  ParseFloats(tokenizer, "Scale", params);
-  matrix_manager.Scale(params[0], params[1], params[2]);
+  std::array<FiniteNonZeroFloatT, 3> params;
+  ParseFiniteNonZeroFloats(tokenizer, "Scale", params);
+  matrix_manager.Scale(params);
 }
 
 static void ParseRotate(Tokenizer& tokenizer, MatrixManager& matrix_manager) {
-  std::array<float_t, 4> params;
-  ParseFloats(tokenizer, "Rotate", params);
-  matrix_manager.Rotate(params[0], params[1], params[2], params[3]);
+  std::array<FiniteFloatT, 4> params;
+  ParseFiniteFloats(tokenizer, "Rotate", params);
+  matrix_manager.Rotate(params);
 }
 
 static void ParseLookAt(Tokenizer& tokenizer, MatrixManager& matrix_manager) {
-  std::array<float_t, 9> params;
-  ParseFloats(tokenizer, "LookAt", params);
-  matrix_manager.LookAt(params[0], params[1], params[2], params[3], params[4],
-                        params[5], params[6], params[7], params[8]);
+  std::array<FiniteFloatT, 9> params;
+  ParseFiniteFloats(tokenizer, "LookAt", params);
+  matrix_manager.LookAt(params);
 }
 
 static void ParseTransform(Tokenizer& tokenizer,
                            MatrixManager& matrix_manager) {
-  std::array<float_t, 16> params;
-  ParseFloats(tokenizer, "Transform", params);
-  matrix_manager.Transform(params[0], params[1], params[2], params[3],
-                           params[4], params[5], params[6], params[7],
-                           params[8], params[9], params[10], params[11],
-                           params[12], params[13], params[14], params[15]);
+  std::array<FiniteFloatT, 16> params;
+  std::array<std::string, 16> strings;
+  ParseFiniteFloats(tokenizer, "Transform", params, &strings);
+  if (!matrix_manager.Transform(params)) {
+    std::cerr << "ERROR: Transform parameters were non-invertible: ["
+              << absl::StrJoin(strings, ", ") << " ]" << std::endl;
+    exit(EXIT_FAILURE);
+  }
 }
 
 static void ParseConcatTransform(Tokenizer& tokenizer,
                                  MatrixManager& matrix_manager) {
-  std::array<float_t, 16> params;
-  ParseFloats(tokenizer, "ConcatTransform", params);
-  matrix_manager.Transform(params[0], params[1], params[2], params[3],
-                           params[4], params[5], params[6], params[7],
-                           params[8], params[9], params[10], params[11],
-                           params[12], params[13], params[14], params[15]);
+  std::array<FiniteFloatT, 16> params;
+  std::array<std::string, 16> strings;
+  ParseFiniteFloats(tokenizer, "ConcatTransform", params, &strings);
+  if (!matrix_manager.ConcatTransform(params)) {
+    std::cerr << "ERROR: ConcatTransform parameters were non-invertible: ["
+              << absl::StrJoin(strings, ", ") << " ]" << std::endl;
+    exit(EXIT_FAILURE);
+  }
 }
 
 static void ParseCoordinateSystem(Tokenizer& tokenizer,

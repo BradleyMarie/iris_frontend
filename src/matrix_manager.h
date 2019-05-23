@@ -1,10 +1,12 @@
 #ifndef _SRC_MATRIX_MANAGER_
 #define _SRC_MATRIX_MANAGER_
 
+#include <array>
 #include <set>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/string_view.h"
+#include "src/finite_float_t.h"
 #include "src/pointer_types.h"
 
 namespace iris {
@@ -20,22 +22,14 @@ class MatrixManager {
   MatrixManager();
   const std::pair<Matrix, Matrix>& GetCurrent();
   void Identity();
-  void Translate(float_t x, float_t y, float_t z);
-  void Scale(float_t x, float_t y, float_t z);
-  void Rotate(float_t theta, float_t x, float_t y, float_t z);
-  void LookAt(float_t eye_x, float_t eye_y, float_t eye_z, float_t look_x,
-              float_t look_y, float_t look_z, float_t up_x, float_t up_y,
-              float_t up_z);
+  void Translate(const std::array<FiniteFloatT, 3>& params);
+  void Scale(const std::array<FiniteNonZeroFloatT, 3>& params);
+  void Rotate(const std::array<FiniteFloatT, 4>& params);
+  void LookAt(const std::array<FiniteFloatT, 9>& params);
   void CoordinateSystem(absl::string_view name);
   void CoordSysTransform(absl::string_view name);
-  void Transform(float_t m00, float_t m01, float_t m02, float_t m03,
-                 float_t m10, float_t m11, float_t m12, float_t m13,
-                 float_t m20, float_t m21, float_t m22, float_t m23,
-                 float_t m30, float_t m31, float_t m32, float_t m33);
-  void ConcatTransform(float_t m00, float_t m01, float_t m02, float_t m03,
-                       float_t m10, float_t m11, float_t m12, float_t m13,
-                       float_t m20, float_t m21, float_t m22, float_t m23,
-                       float_t m30, float_t m31, float_t m32, float_t m33);
+  bool Transform(const std::array<FiniteFloatT, 16>& params);
+  bool ConcatTransform(const std::array<FiniteFloatT, 16>& params);
   void ActiveTransform(Active active);
 
  private:

@@ -11,13 +11,26 @@ class FiniteFloatT {
  public:
   FiniteFloatT(float_t v);
   FiniteFloatT() : m_value(absl::nullopt) {}
-  float_t Get() { return m_value.value(); }
+  float_t Get() const { return m_value.value(); }
 
  private:
   absl::optional<float_t> m_value;
 };
 
 bool ParseFiniteFloatT(absl::string_view token, FiniteFloatT* value);
+
+class FiniteNonZeroFloatT {
+ public:
+  FiniteNonZeroFloatT(float_t v);
+  FiniteNonZeroFloatT() : m_value(absl::nullopt) {}
+  float_t Get() const { return m_value.value(); }
+
+ private:
+  absl::optional<float_t> m_value;
+};
+
+bool ParseFiniteNonZeroFloatT(absl::string_view token,
+                              FiniteNonZeroFloatT* value);
 
 }  // namespace iris
 

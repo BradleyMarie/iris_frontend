@@ -47,6 +47,7 @@ cc_library(
     srcs = ["matrix_manager.cc"],
     hdrs = ["matrix_manager.h"],
     deps = [
+        ":finite_float_t",
         ":pointer_types",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/strings",

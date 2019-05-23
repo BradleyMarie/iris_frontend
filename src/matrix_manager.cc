@@ -14,21 +14,13 @@ const std::pair<Matrix, Matrix>& MatrixManager::GetCurrent() {
 
 void MatrixManager::Identity() { Set(Matrix()); }
 
-void MatrixManager::Translate(float_t x, float_t y, float_t z) {
+void MatrixManager::Translate(const std::array<FiniteFloatT, 3>& params) {
   Matrix translation;
-  ISTATUS status =
-      MatrixAllocateTranslation(x, y, z, translation.release_and_get_address());
+  ISTATUS status = MatrixAllocateTranslation(
+      params[0].Get(), params[1].Get(), params[2].Get(),
+      translation.release_and_get_address());
 
   switch (status) {
-    case ISTATUS_INVALID_ARGUMENT_00:
-      std::cerr << "ERROR: Invalid x parameter to Translate " << x << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_01:
-      std::cerr << "ERROR: Invalid y parameter to Translate " << x << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_02:
-      std::cerr << "ERROR: Invalid z parameter to Translate " << x << std::endl;
-      exit(EXIT_FAILURE);
     case ISTATUS_ALLOCATION_FAILED:
       std::cerr << "ERROR: Allocation failed" << std::endl;
       exit(EXIT_FAILURE);
@@ -39,21 +31,13 @@ void MatrixManager::Translate(float_t x, float_t y, float_t z) {
   Transform(translation);
 }
 
-void MatrixManager::Scale(float_t x, float_t y, float_t z) {
+void MatrixManager::Scale(const std::array<FiniteNonZeroFloatT, 3>& params) {
   Matrix scalar;
   ISTATUS status =
-      MatrixAllocateScalar(x, y, z, scalar.release_and_get_address());
+      MatrixAllocateScalar(params[0].Get(), params[1].Get(), params[2].Get(),
+                           scalar.release_and_get_address());
 
   switch (status) {
-    case ISTATUS_INVALID_ARGUMENT_00:
-      std::cerr << "ERROR: Invalid x parameter to Scale " << x << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_01:
-      std::cerr << "ERROR: Invalid y parameter to Scale " << x << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_02:
-      std::cerr << "ERROR: Invalid z parameter to Scale " << x << std::endl;
-      exit(EXIT_FAILURE);
     case ISTATUS_ALLOCATION_FAILED:
       std::cerr << "ERROR: Allocation failed" << std::endl;
       exit(EXIT_FAILURE);
@@ -64,25 +48,13 @@ void MatrixManager::Scale(float_t x, float_t y, float_t z) {
   Transform(scalar);
 }
 
-void MatrixManager::Rotate(float_t theta, float_t x, float_t y, float_t z) {
+void MatrixManager::Rotate(const std::array<FiniteFloatT, 4>& params) {
   Matrix rotation;
-  ISTATUS status = MatrixAllocateRotation(theta, x, y, z,
+  ISTATUS status = MatrixAllocateRotation(params[0].Get(), params[1].Get(),
+                                          params[2].Get(), params[3].Get(),
                                           rotation.release_and_get_address());
 
   switch (status) {
-    case ISTATUS_INVALID_ARGUMENT_00:
-      std::cerr << "ERROR: Invalid theta parameter to Rotate " << x
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_01:
-      std::cerr << "ERROR: Invalid x parameter to Rotate " << x << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_02:
-      std::cerr << "ERROR: Invalid y parameter to Rotate " << x << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_03:
-      std::cerr << "ERROR: Invalid z parameter to Rotate " << x << std::endl;
-      exit(EXIT_FAILURE);
     case ISTATUS_INVALID_ARGUMENT_COMBINATION_00:
       std::cerr << "ERROR: One of the x, y, or z parameters of Rotate must be "
                    "non-zero"
@@ -98,82 +70,29 @@ void MatrixManager::Rotate(float_t theta, float_t x, float_t y, float_t z) {
   Transform(rotation);
 }
 
-void MatrixManager::LookAt(float_t eye_x, float_t eye_y, float_t eye_z,
-                           float_t look_x, float_t look_y, float_t look_z,
-                           float_t up_x, float_t up_y, float_t up_z) {
-  if (!isfinite(eye_x)) {
-    std::cerr << "ERROR: Invalid eye_x parameter to LookAt " << eye_x
-              << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  if (!isfinite(eye_y)) {
-    std::cerr << "ERROR: Invalid eye_y parameter to LookAt " << eye_y
-              << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  if (!isfinite(eye_z)) {
-    std::cerr << "ERROR: Invalid eye_z parameter to LookAt " << eye_z
-              << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  if (!isfinite(look_x)) {
-    std::cerr << "ERROR: Invalid look_x parameter to LookAt " << look_x
-              << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  if (!isfinite(look_y)) {
-    std::cerr << "ERROR: Invalid look_y parameter to LookAt " << look_y
-              << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  if (!isfinite(look_z)) {
-    std::cerr << "ERROR: Invalid look_z parameter to LookAt " << look_z
-              << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  if (!isfinite(up_x)) {
-    std::cerr << "ERROR: Invalid up_x parameter to LookAt " << up_x
-              << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  if (!isfinite(up_y)) {
-    std::cerr << "ERROR: Invalid up_y parameter to LookAt " << up_y
-              << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  if (!isfinite(up_z)) {
-    std::cerr << "ERROR: Invalid up_z parameter to LookAt " << up_z
-              << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  if (eye_x == look_x && eye_y == look_y && eye_z == look_z) {
+void MatrixManager::LookAt(const std::array<FiniteFloatT, 9>& params) {
+  if (params[0].Get() == params[3].Get() &&
+      params[1].Get() == params[4].Get() &&
+      params[2].Get() == params[5].Get()) {
     std::cerr << "ERROR: Eye and look parameters of LookAt must be different "
                  "points"
               << std::endl;
     exit(EXIT_FAILURE);
   }
 
-  if (up_x == (float_t)0.0 && up_y == (float_t)0.0 && up_z == (float_t)0.0) {
+  if (params[6].Get() == (float_t)0.0 && params[7].Get() == (float_t)0.0 &&
+      params[8].Get() == (float_t)0.0) {
     std::cerr << "ERROR: Zero length up paramater to LookAt" << std::endl;
     exit(EXIT_FAILURE);
   }
 
-  POINT3 pos = PointCreate(eye_x, eye_y, eye_z);
-  POINT3 look = PointCreate(look_x, look_y, look_z);
+  POINT3 pos = PointCreate(params[0].Get(), params[1].Get(), params[2].Get());
+  POINT3 look = PointCreate(params[3].Get(), params[4].Get(), params[5].Get());
 
   VECTOR3 direction = PointSubtract(look, pos);
   direction = VectorNormalize(direction, nullptr, nullptr);
 
-  VECTOR3 up = VectorCreate(up_x, up_y, up_z);
+  VECTOR3 up = VectorCreate(params[6].Get(), params[7].Get(), params[8].Get());
   up = VectorNormalize(up, nullptr, nullptr);
 
   VECTOR3 right = VectorCrossProduct(up, direction);
@@ -222,85 +141,18 @@ void MatrixManager::CoordSysTransform(absl::string_view name) {
   }
 }
 
-void MatrixManager::Transform(float_t m00, float_t m01, float_t m02,
-                              float_t m03, float_t m10, float_t m11,
-                              float_t m12, float_t m13, float_t m20,
-                              float_t m21, float_t m22, float_t m23,
-                              float_t m30, float_t m31, float_t m32,
-                              float_t m33) {
+bool MatrixManager::Transform(const std::array<FiniteFloatT, 16>& params) {
   Matrix transform;
-  ISTATUS status =
-      MatrixAllocate(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23,
-                     m30, m31, m32, m33, transform.release_and_get_address());
+  ISTATUS status = MatrixAllocate(
+      params[0].Get(), params[1].Get(), params[2].Get(), params[3].Get(),
+      params[4].Get(), params[5].Get(), params[6].Get(), params[7].Get(),
+      params[8].Get(), params[9].Get(), params[10].Get(), params[11].Get(),
+      params[12].Get(), params[13].Get(), params[14].Get(), params[15].Get(),
+      transform.release_and_get_address());
 
   switch (status) {
-    case ISTATUS_INVALID_ARGUMENT_00:
-      std::cerr << "ERROR: Invalid m00 parameter to Transform " << m00
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_01:
-      std::cerr << "ERROR: Invalid m01 parameter to Transform " << m01
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_02:
-      std::cerr << "ERROR: Invalid m02 parameter to Transform " << m02
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_03:
-      std::cerr << "ERROR: Invalid m03 parameter to Transform " << m03
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_04:
-      std::cerr << "ERROR: Invalid m10 parameter to Transform " << m10
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_05:
-      std::cerr << "ERROR: Invalid m11 parameter to Transform " << m11
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_06:
-      std::cerr << "ERROR: Invalid m12 parameter to Transform " << m12
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_07:
-      std::cerr << "ERROR: Invalid m13 parameter to Transform " << m13
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_08:
-      std::cerr << "ERROR: Invalid m20 parameter to Transform " << m20
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_09:
-      std::cerr << "ERROR: Invalid m21 parameter to Transform " << m21
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_10:
-      std::cerr << "ERROR: Invalid m22 parameter to Transform " << m22
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_11:
-      std::cerr << "ERROR: Invalid m23 parameter to Transform " << m23
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_12:
-      std::cerr << "ERROR: Invalid m30 parameter to Transform " << m30
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_13:
-      std::cerr << "ERROR: Invalid m31 parameter to Transform " << m31
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_14:
-      std::cerr << "ERROR: Invalid m32 parameter to Transform " << m32
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_15:
-      std::cerr << "ERROR: Invalid m33 parameter to Transform " << m33
-                << std::endl;
-      exit(EXIT_FAILURE);
     case ISTATUS_ARITHMETIC_ERROR:
-      std::cerr << "ERROR: Non-invertible matrix" << std::endl;
-      exit(EXIT_FAILURE);
+      return false;
     case ISTATUS_ALLOCATION_FAILED:
       std::cerr << "ERROR: Allocation failed" << std::endl;
       exit(EXIT_FAILURE);
@@ -309,87 +161,22 @@ void MatrixManager::Transform(float_t m00, float_t m01, float_t m02,
   }
 
   Set(transform);
+  return true;
 }
 
-void MatrixManager::ConcatTransform(float_t m00, float_t m01, float_t m02,
-                                    float_t m03, float_t m10, float_t m11,
-                                    float_t m12, float_t m13, float_t m20,
-                                    float_t m21, float_t m22, float_t m23,
-                                    float_t m30, float_t m31, float_t m32,
-                                    float_t m33) {
+bool MatrixManager::ConcatTransform(
+    const std::array<FiniteFloatT, 16>& params) {
   Matrix transform;
-  ISTATUS status =
-      MatrixAllocate(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23,
-                     m30, m31, m32, m33, transform.release_and_get_address());
+  ISTATUS status = MatrixAllocate(
+      params[0].Get(), params[1].Get(), params[2].Get(), params[3].Get(),
+      params[4].Get(), params[5].Get(), params[6].Get(), params[7].Get(),
+      params[8].Get(), params[9].Get(), params[10].Get(), params[11].Get(),
+      params[12].Get(), params[13].Get(), params[14].Get(), params[15].Get(),
+      transform.release_and_get_address());
 
   switch (status) {
-    case ISTATUS_INVALID_ARGUMENT_00:
-      std::cerr << "ERROR: Invalid m00 parameter to Transform " << m00
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_01:
-      std::cerr << "ERROR: Invalid m01 parameter to Transform " << m01
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_02:
-      std::cerr << "ERROR: Invalid m02 parameter to Transform " << m02
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_03:
-      std::cerr << "ERROR: Invalid m03 parameter to Transform " << m03
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_04:
-      std::cerr << "ERROR: Invalid m10 parameter to Transform " << m10
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_05:
-      std::cerr << "ERROR: Invalid m11 parameter to Transform " << m11
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_06:
-      std::cerr << "ERROR: Invalid m12 parameter to Transform " << m12
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_07:
-      std::cerr << "ERROR: Invalid m13 parameter to Transform " << m13
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_08:
-      std::cerr << "ERROR: Invalid m20 parameter to Transform " << m20
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_09:
-      std::cerr << "ERROR: Invalid m21 parameter to Transform " << m21
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_10:
-      std::cerr << "ERROR: Invalid m22 parameter to Transform " << m22
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_11:
-      std::cerr << "ERROR: Invalid m23 parameter to Transform " << m23
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_12:
-      std::cerr << "ERROR: Invalid m30 parameter to Transform " << m30
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_13:
-      std::cerr << "ERROR: Invalid m31 parameter to Transform " << m31
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_14:
-      std::cerr << "ERROR: Invalid m32 parameter to Transform " << m32
-                << std::endl;
-      exit(EXIT_FAILURE);
-    case ISTATUS_INVALID_ARGUMENT_15:
-      std::cerr << "ERROR: Invalid m33 parameter to Transform " << m33
-                << std::endl;
-      exit(EXIT_FAILURE);
     case ISTATUS_ARITHMETIC_ERROR:
-      std::cerr << "ERROR: Non-invertible matrix" << std::endl;
-      exit(EXIT_FAILURE);
+      return false;
     case ISTATUS_ALLOCATION_FAILED:
       std::cerr << "ERROR: Allocation failed" << std::endl;
       exit(EXIT_FAILURE);
@@ -398,6 +185,7 @@ void MatrixManager::ConcatTransform(float_t m00, float_t m01, float_t m02,
   }
 
   Transform(transform);
+  return true;
 }
 
 void MatrixManager::ActiveTransform(Active active) {
@@ -414,7 +202,7 @@ void MatrixManager::Transform(Matrix m) {
 
     switch (status) {
       case ISTATUS_ARITHMETIC_ERROR:
-        std::cerr << "ERROR: Non-invertible matrix" << std::endl;
+        std::cerr << "ERROR: Non-invertible matrix product" << std::endl;
         exit(EXIT_FAILURE);
       case ISTATUS_ALLOCATION_FAILED:
         std::cerr << "ERROR: Allocation failed" << std::endl;
@@ -431,7 +219,7 @@ void MatrixManager::Transform(Matrix m) {
 
     switch (status) {
       case ISTATUS_ARITHMETIC_ERROR:
-        std::cerr << "ERROR: Non-invertible matrix" << std::endl;
+        std::cerr << "ERROR: Non-invertible matrix product" << std::endl;
         exit(EXIT_FAILURE);
       case ISTATUS_ALLOCATION_FAILED:
         std::cerr << "ERROR: Allocation failed" << std::endl;
