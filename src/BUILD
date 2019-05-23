@@ -8,8 +8,10 @@ cc_library(
         ":matrix_manager",
         ":matrix_parser",
         ":output_writer",
+        ":param_parser",
         ":pointer_types",
         ":tokenizer",
+        "@com_github_bradleymarie_iris//iris_camera_toolkit:grid_pixel_sampler",
         "@com_google_absl//absl/strings",
     ],
 )
