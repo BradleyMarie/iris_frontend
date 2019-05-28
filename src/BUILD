@@ -5,6 +5,7 @@ cc_library(
     srcs = ["camera_parser.cc"],
     hdrs = ["camera_parser.h"],
     deps = [
+        ":directive_parser",
         ":matrix_manager",
         ":matrix_parser",
         ":output_writer",
@@ -13,6 +14,16 @@ cc_library(
         ":tokenizer",
         "@com_github_bradleymarie_iris//iris_camera_toolkit:grid_pixel_sampler",
         "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "directive_parser",
+    hdrs = ["directive_parser.h"],
+    deps = [
+        ":matrix_manager",
+        ":quoted_string",
+        ":tokenizer",
     ],
 )
 

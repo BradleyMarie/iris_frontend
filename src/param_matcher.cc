@@ -10,14 +10,16 @@ bool ParamMatcher::Match(const Parameter& parameter) {
   }
 
   if (parameter.second.index() != m_index) {
-    std::cerr << "ERROR: Wrong type for " << m_type_name
-              << " parameter : " << m_parameter_name << std::endl;
+    std::cerr << "ERROR: Wrong type for " << m_type_name << " "
+              << m_base_type_name << " parameter : " << m_parameter_name
+              << std::endl;
     exit(EXIT_FAILURE);
   }
 
   if (m_found) {
-    std::cerr << "ERROR: Redefinition of " << m_type_name
-              << " parameter: " << m_parameter_name << std::endl;
+    std::cerr << "ERROR: Redefinition of " << m_type_name << " "
+              << m_base_type_name << " parameter: " << m_parameter_name
+              << std::endl;
     exit(EXIT_FAILURE);
   }
 
@@ -27,14 +29,16 @@ bool ParamMatcher::Match(const Parameter& parameter) {
 }
 
 void ParamMatcher::NumberOfElementsError[[noreturn]]() {
-  std::cerr << "ERROR: Wrong number of values for " << m_type_name
-            << " parameter: " << m_parameter_name << std::endl;
+  std::cerr << "ERROR: Wrong number of values for " << m_type_name << " "
+            << m_base_type_name << " parameter: " << m_parameter_name
+            << std::endl;
   exit(EXIT_FAILURE);
 }
 
 void ParamMatcher::ElementRangeError[[noreturn]]() {
-  std::cerr << "ERROR: Out of range value for " << m_type_name
-            << " parameter: " << m_parameter_name << std::endl;
+  std::cerr << "ERROR: Out of range value for " << m_type_name << " "
+            << m_base_type_name << " parameter: " << m_parameter_name
+            << std::endl;
   exit(EXIT_FAILURE);
 }
 

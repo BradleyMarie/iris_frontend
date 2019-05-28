@@ -2,6 +2,7 @@
 
 #include "iris_camera_toolkit/grid_pixel_sampler.h"
 #include "src/camera_parser.h"
+#include "src/directive_parser.h"
 #include "src/matrix_parser.h"
 #include "src/param_matcher.h"
 
@@ -13,22 +14,13 @@ void ValidateResult(const CameraConfig& result) {
   exit(EXIT_FAILURE);
 }
 
-PixelSampler ParseSampler(Tokenizer& tokenizer) {
-  auto token = tokenizer.Next();
-  if (!token) {
-    std::cerr << "ERROR: Sampler type not specified" << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  if (token != "stratified") {
-    std::cerr << "ERROR: Invalid Sampler specified: " << *token << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  SingleBoolMatcher jitter("stratified Sampler", "jitter", false);
-  SingleUInt16Matcher xsamples("stratified Sampler", "xsamples", 2);
-  SingleUInt16Matcher ysamples("stratified Sampler", "ysamples", 2);
-  ParseAllParameter<3>("stratified Sampler", tokenizer,
+PixelSampler ParseStratifiedSampler(const char* base_type_name,
+                                    const char* type_name, Tokenizer& tokenizer,
+                                    MatrixManager& matrix_manager) {
+  SingleBoolMatcher jitter(base_type_name, type_name, "jitter", false);
+  SingleUInt16Matcher xsamples(base_type_name, type_name, "xsamples", 2);
+  SingleUInt16Matcher ysamples(base_type_name, type_name, "ysamples", 2);
+  ParseAllParameter<3>(base_type_name, type_name, tokenizer,
                        {&jitter, &xsamples, &ysamples});
 
   PixelSampler result;
@@ -69,7 +61,9 @@ CameraConfig ParseCamera(Tokenizer& tokenizer, MatrixManager& matrix_manager) {
     }
 
     if (token == "Sampler") {
-      auto sampler = ParseSampler(tokenizer);
+      auto sampler = ParseDirective<PixelSampler, 1>(
+          "Sampler", tokenizer, matrix_manager,
+          {std::make_pair("stratified", ParseStratifiedSampler)});
       std::get<1>(result) = std::move(sampler);
       continue;
     }

@@ -12,9 +12,10 @@ class ParamMatcher {
   bool Match(const Parameter& parameter);
 
  protected:
-  ParamMatcher(const char* type_name, const char* parameter_name,
-               size_t variant_index)
+  ParamMatcher(const char* base_type_name, const char* type_name,
+               const char* parameter_name, size_t variant_index)
       : m_parameter_name(parameter_name),
+        m_base_type_name(base_type_name),
         m_type_name(type_name),
         m_index(variant_index),
         m_found(false) {}
@@ -31,6 +32,7 @@ class ParamMatcher {
 
  private:
   const char* m_parameter_name;
+  const char* m_base_type_name;
   const char* m_type_name;
   size_t m_index;
   bool m_found;
@@ -39,9 +41,10 @@ class ParamMatcher {
 template <typename VariantType, typename ValueType>
 class SingleValueMatcher : public ParamMatcher {
  public:
-  SingleValueMatcher(const char* type_name, const char* parameter_name,
-                     ValueType default_value)
-      : ParamMatcher(type_name, parameter_name, GetIndex<VariantType>()),
+  SingleValueMatcher(const char* base_type_name, const char* type_name,
+                     const char* parameter_name, ValueType default_value)
+      : ParamMatcher(base_type_name, type_name, parameter_name,
+                     GetIndex<VariantType>()),
         m_value(default_value) {}
   const ValueType& Get() { return m_value; }
 
@@ -61,10 +64,12 @@ template <typename VariantType, typename ValueType, ValueType Minimum,
           ValueType Maximum>
 class PreBoundedSingleValueMatcher : public ParamMatcher {
  public:
-  PreBoundedSingleValueMatcher(const char* type_name,
+  PreBoundedSingleValueMatcher(const char* base_type_name,
+                               const char* type_name,
                                const char* parameter_name,
                                ValueType default_value)
-      : ParamMatcher(type_name, parameter_name, GetIndex<VariantType>()),
+      : ParamMatcher(base_type_name, type_name, parameter_name,
+                     GetIndex<VariantType>()),
         m_value(default_value) {}
   const ValueType& Get() { return m_value; }
 
@@ -91,7 +96,8 @@ typedef PreBoundedSingleValueMatcher<IntParameter, uint16_t, 0, UINT16_MAX>
 
 template <size_t NumParams>
 void MatchParameter(
-    const char* type_name, const Parameter& parameter,
+    const char* base_type_name, const char* type_name,
+    const Parameter& parameter,
     const std::array<ParamMatcher*, NumParams>& supported_parameters) {
   for (auto& matcher : supported_parameters) {
     if (matcher->Match(parameter)) {
@@ -100,17 +106,18 @@ void MatchParameter(
   }
 
   std::cerr << "ERROR: Unrecognized or misconfigured parameter to " << type_name
-            << ": " << parameter.first << std::endl;
+            << " " << base_type_name << ": " << parameter.first << std::endl;
   exit(EXIT_FAILURE);
 }
 
 template <size_t NumParams>
 void ParseAllParameter(
-    const char* type_name, Tokenizer& tokenizer,
+    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
     const std::array<ParamMatcher*, NumParams>& supported_parameters) {
   for (auto param = ParseNextParam(tokenizer); param;
        param = ParseNextParam(tokenizer)) {
-    MatchParameter<NumParams>(type_name, *param, supported_parameters);
+    MatchParameter<NumParams>(base_type_name, type_name, *param,
+                              supported_parameters);
   }
 }
 
