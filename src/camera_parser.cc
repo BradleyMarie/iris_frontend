@@ -18,8 +18,8 @@ PixelSampler ParseStratifiedSampler(const char* base_type_name,
                                     const char* type_name, Tokenizer& tokenizer,
                                     MatrixManager& matrix_manager) {
   SingleBoolMatcher jitter(base_type_name, type_name, "jitter", false);
-  SingleUInt16Matcher xsamples(base_type_name, type_name, "xsamples", 2);
-  SingleUInt16Matcher ysamples(base_type_name, type_name, "ysamples", 2);
+  NonZeroSingleUInt16Matcher xsamples(base_type_name, type_name, "xsamples", 2);
+  NonZeroSingleUInt16Matcher ysamples(base_type_name, type_name, "ysamples", 2);
   ParseAllParameter<3>(base_type_name, type_name, tokenizer,
                        {&jitter, &xsamples, &ysamples});
 

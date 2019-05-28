@@ -91,8 +91,8 @@ class PreBoundedSingleValueMatcher : public ParamMatcher {
 
 typedef SingleValueMatcher<IntParameter, bool> SingleBoolMatcher;
 
-typedef PreBoundedSingleValueMatcher<IntParameter, uint16_t, 0, UINT16_MAX>
-    SingleUInt16Matcher;
+typedef PreBoundedSingleValueMatcher<IntParameter, uint16_t, 1, UINT16_MAX>
+    NonZeroSingleUInt16Matcher;
 
 template <size_t NumParams>
 void MatchParameter(
