@@ -8,7 +8,7 @@ cc_library(
         ":matrix_manager",
         ":matrix_parser",
         ":output_writer",
-        ":param_parser",
+        ":param_matcher",
         ":pointer_types",
         ":tokenizer",
         "@com_github_bradleymarie_iris//iris_camera_toolkit:grid_pixel_sampler",
@@ -90,6 +90,15 @@ cc_library(
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:variant",
+    ],
+)
+
+cc_library(
+    name = "param_matcher",
+    srcs = ["param_matcher.cc"],
+    hdrs = ["param_matcher.h"],
+    deps = [
+        ":param_parser",
     ],
 )
 

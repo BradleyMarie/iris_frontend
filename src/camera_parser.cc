@@ -3,7 +3,7 @@
 #include "iris_camera_toolkit/grid_pixel_sampler.h"
 #include "src/camera_parser.h"
 #include "src/matrix_parser.h"
-#include "src/param_parser.h"
+#include "src/param_matcher.h"
 
 namespace iris {
 namespace {
@@ -25,75 +25,16 @@ PixelSampler ParseSampler(Tokenizer& tokenizer) {
     exit(EXIT_FAILURE);
   }
 
-  absl::optional<bool> jitter;
-  absl::optional<uint16_t> xsamples;
-  absl::optional<uint16_t> ysamples;
-
-  for (auto param = ParseNextParam(tokenizer); param;
-       param = ParseNextParam(tokenizer)) {
-    if (param->first == "xsamples" &&
-        absl::holds_alternative<IntParameter>(param->second) &&
-        absl::get<IntParameter>(param->second).data.size() == 1) {
-      if (xsamples) {
-        std::cerr << "ERROR: Duplicate parameter definition: " << param->first
-                  << std::endl;
-        exit(EXIT_FAILURE);
-      }
-
-      auto value = absl::get<IntParameter>(param->second).data[0];
-      if (value <= 0 || UINT16_MAX < value) {
-        std::cerr << "ERROR: Out of range parameter: " << param->first
-                  << std::endl;
-        exit(EXIT_FAILURE);
-      }
-
-      xsamples = value;
-      continue;
-    }
-
-    if (param->first == "ysamples" &&
-        absl::holds_alternative<IntParameter>(param->second) &&
-        absl::get<IntParameter>(param->second).data.size() == 1) {
-      if (xsamples) {
-        std::cerr << "ERROR: Duplicate parameter definition: " << param->first
-                  << std::endl;
-        exit(EXIT_FAILURE);
-      }
-
-      auto value = absl::get<IntParameter>(param->second).data[0];
-      if (value <= 0 || UINT16_MAX < value) {
-        std::cerr << "ERROR: Out of range parameter: " << param->first
-                  << std::endl;
-        exit(EXIT_FAILURE);
-      }
-
-      ysamples = value;
-      continue;
-    }
-
-    if (param->first == "jitter" &&
-        absl::holds_alternative<BoolParameter>(param->second) &&
-        absl::get<BoolParameter>(param->second).data.size() == 1) {
-      if (jitter) {
-        std::cerr << "ERROR: Duplicate parameter definition: " << param->first
-                  << std::endl;
-        exit(EXIT_FAILURE);
-      }
-
-      jitter = absl::get<BoolParameter>(param->second).data[0];
-      continue;
-    }
-
-    std::cerr << "ERROR: Unrecognized or misconfigured parameter to stratified "
-                 "Sampler: "
-              << param->first << std::endl;
-    exit(EXIT_FAILURE);
-  }
+  SingleBoolMatcher jitter("stratified Sampler", "jitter", false);
+  SingleUInt16Matcher xsamples("stratified Sampler", "xsamples", 2);
+  SingleUInt16Matcher ysamples("stratified Sampler", "ysamples", 2);
+  ParseAllParameter<3>("stratified Sampler", tokenizer,
+                       {&jitter, &xsamples, &ysamples});
 
   PixelSampler result;
-  ISTATUS status = GridPixelSamplerAllocate(
-      xsamples.value_or(2), ysamples.value_or(2), jitter.value_or(true), 1, 1,
-      false, result.release_and_get_address());
+  ISTATUS status =
+      GridPixelSamplerAllocate(xsamples.Get(), ysamples.Get(), jitter.Get(), 1,
+                               1, false, result.release_and_get_address());
   switch (status) {
     case ISTATUS_ALLOCATION_FAILED:
       std::cerr << "ERROR: Allocation failed" << std::endl;
