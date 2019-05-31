@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "iris_camera_toolkit/grid_pixel_sampler.h"
+#include "iris_physx_toolkit/path_tracer.h"
 #include "src/camera_parser.h"
 #include "src/directive_parser.h"
 #include "src/matrix_parser.h"
@@ -27,6 +28,30 @@ PixelSampler ParseStratifiedSampler(const char* base_type_name,
   ISTATUS status =
       GridPixelSamplerAllocate(xsamples.Get(), ysamples.Get(), jitter.Get(), 1,
                                1, false, result.release_and_get_address());
+  switch (status) {
+    case ISTATUS_ALLOCATION_FAILED:
+      std::cerr << "ERROR: Allocation failed" << std::endl;
+      exit(EXIT_FAILURE);
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
+
+  return result;
+}
+
+Integrator ParsePathIntegrator(const char* base_type_name,
+                               const char* type_name, Tokenizer& tokenizer,
+                               MatrixManager& matrix_manager) {
+  NonZeroSingleUInt8Matcher maxdepth(base_type_name, type_name, "maxdepth", 5);
+  PositiveScalarSingleFloatTMatcher rrthreshold(base_type_name, type_name,
+                                                "rrthreshold", (float_t)1.0);
+  ParseAllParameter<2>(base_type_name, type_name, tokenizer,
+                       {&maxdepth, &rrthreshold});
+
+  Integrator result;
+  ISTATUS status =
+      PathTracerAllocate(std::min((uint8_t)3, maxdepth.Get()), maxdepth.Get(),
+                         rrthreshold.Get(), result.release_and_get_address());
   switch (status) {
     case ISTATUS_ALLOCATION_FAILED:
       std::cerr << "ERROR: Allocation failed" << std::endl;
@@ -111,7 +136,11 @@ CameraConfig ParseCamera(Tokenizer& tokenizer, MatrixManager& matrix_manager) {
     }
 
     if (token == "Integrator") {
-      // TODO
+      auto integrator = ParseDirectiveOnce<Integrator, 1>(
+          "Integrator", tokenizer, matrix_manager,
+          {std::make_pair("path", ParsePathIntegrator)},
+          std::get<1>(result).get());
+      std::get<3>(result) = std::move(integrator);
       continue;
     }
 

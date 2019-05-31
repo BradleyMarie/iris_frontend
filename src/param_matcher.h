@@ -116,10 +116,39 @@ class PreBoundedSingleValueMatcher : public ParamMatcher {
   ValueType m_value;
 };
 
+typedef PreBoundedSingleValueMatcher<IntParameter, uint8_t, int, 1, UINT8_MAX>
+    NonZeroSingleUInt8Matcher;
 typedef PreBoundedSingleValueMatcher<IntParameter, uint16_t, int, 1, UINT16_MAX>
     NonZeroSingleUInt16Matcher;
 typedef PreBoundedSingleValueMatcher<IntParameter, size_t, int, 1, INT_MAX>
     NonZeroSingleSizeTMatcher;
+
+class PositiveScalarSingleFloatTMatcher : public ParamMatcher {
+ public:
+  PositiveScalarSingleFloatTMatcher(const char* base_type_name,
+                                    const char* type_name,
+                                    const char* parameter_name,
+                                    float_t default_value)
+      : ParamMatcher(base_type_name, type_name, parameter_name,
+                     GetIndex<FloatParameter>()),
+        m_value(default_value) {}
+  const float_t& Get() { return m_value; }
+
+ private:
+  void Match(const ParameterData& data) final {
+    if (absl::get<FloatParameter>(data).data.size() != 1) {
+      NumberOfElementsError();
+    }
+    auto value = absl::get<FloatParameter>(data).data[0];
+    if (value < (float_t)0.0 || (float_t)1.0 < value) {
+      ElementRangeError();
+    }
+    m_value = static_cast<float_t>(absl::get<FloatParameter>(data).data[0]);
+  }
+
+ private:
+  float_t m_value;
+};
 
 template <size_t NumParams>
 void MatchParameter(
