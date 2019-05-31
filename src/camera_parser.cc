@@ -61,9 +61,10 @@ CameraConfig ParseCamera(Tokenizer& tokenizer, MatrixManager& matrix_manager) {
     }
 
     if (token == "Sampler") {
-      auto sampler = ParseDirective<PixelSampler, 1>(
+      auto sampler = ParseDirectiveOnce<PixelSampler, 1>(
           "Sampler", tokenizer, matrix_manager,
-          {std::make_pair("stratified", ParseStratifiedSampler)});
+          {std::make_pair("stratified", ParseStratifiedSampler)},
+          std::get<1>(result).get());
       std::get<1>(result) = std::move(sampler);
       continue;
     }

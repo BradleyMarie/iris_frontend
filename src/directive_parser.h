@@ -43,6 +43,26 @@ Result ParseDirective(
   exit(EXIT_FAILURE);
 }
 
+template <typename Result, size_t NumImplementations>
+Result ParseDirectiveOnce(
+    const char* base_type_name, Tokenizer& tokenizer,
+    MatrixManager& matrix_manager,
+    const std::array<std::pair<const char*, std::function<Result(
+                                                const char* base_type_name,
+                                                const char* type_name,
+                                                Tokenizer&, MatrixManager&)>>,
+                     NumImplementations>& callbacks,
+    bool already_set) {
+  if (already_set) {
+    std::cerr << "ERROR: Invalid " << base_type_name
+              << " specified more than once before WorldBegin" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  return ParseDirective<Result, NumImplementations>(base_type_name, tokenizer,
+                                                    matrix_manager, callbacks);
+}
+
 }  // namespace iris
 
 #endif  // _SRC_DIRECTIVE_PARSER_
