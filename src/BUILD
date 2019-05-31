@@ -13,6 +13,7 @@ cc_library(
         ":pointer_types",
         ":tokenizer",
         "@com_github_bradleymarie_iris//iris_camera_toolkit:grid_pixel_sampler",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:one_light_sampler",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:path_tracer",
         "@com_google_absl//absl/strings",
     ],

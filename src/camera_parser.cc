@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "iris_camera_toolkit/grid_pixel_sampler.h"
+#include "iris_physx_toolkit/one_light_sampler.h"
 #include "iris_physx_toolkit/path_tracer.h"
 #include "src/camera_parser.h"
 #include "src/directive_parser.h"
@@ -12,6 +13,35 @@ namespace {
 
 void ValidateResult(const CameraConfig& result) {
   std::cerr << "ERROR: ValidateResult not implemented" << std::endl;
+  exit(EXIT_FAILURE);
+}
+
+LightSampler CreateUniformLightSampler(std::vector<Light>& lights) {
+  std::vector<PLIGHT> raw_lights(lights.size());
+  for (auto& light : lights) {
+    raw_lights.push_back(light.get());
+  }
+
+  LightSampler result;
+  ISTATUS status = OneLightSamplerAllocate(raw_lights.data(), raw_lights.size(),
+                                           result.release_and_get_address());
+  switch (status) {
+    case ISTATUS_ALLOCATION_FAILED:
+      std::cerr << "ERROR: Allocation failed" << std::endl;
+      exit(EXIT_FAILURE);
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
+
+  return result;
+}
+
+LightSamplerFactory ParseLightSampleStrategy(absl::string_view strategy) {
+  if (strategy == "uniform") {
+    return CreateUniformLightSampler;
+  }
+
+  std::cerr << "ERROR: Unrecognized lightstrategy: " << strategy << std::endl;
   exit(EXIT_FAILURE);
 }
 
@@ -39,19 +69,22 @@ PixelSampler ParseStratifiedSampler(const char* base_type_name,
   return result;
 }
 
-Integrator ParsePathIntegrator(const char* base_type_name,
-                               const char* type_name, Tokenizer& tokenizer,
-                               MatrixManager& matrix_manager) {
+std::pair<Integrator, LightSamplerFactory> ParsePathIntegrator(
+    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
+    MatrixManager& matrix_manager) {
+  SingleStringMatcher lightsamplestrategy(
+      base_type_name, type_name, "lightsamplestrategy",
+      "uniform");  // TODO: Set deafault to spatial
   NonZeroSingleUInt8Matcher maxdepth(base_type_name, type_name, "maxdepth", 5);
   PositiveScalarSingleFloatTMatcher rrthreshold(base_type_name, type_name,
                                                 "rrthreshold", (float_t)1.0);
-  ParseAllParameter<2>(base_type_name, type_name, tokenizer,
-                       {&maxdepth, &rrthreshold});
+  ParseAllParameter<3>(base_type_name, type_name, tokenizer,
+                       {&lightsamplestrategy, &maxdepth, &rrthreshold});
 
-  Integrator result;
-  ISTATUS status =
-      PathTracerAllocate(std::min((uint8_t)3, maxdepth.Get()), maxdepth.Get(),
-                         rrthreshold.Get(), result.release_and_get_address());
+  Integrator integrator;
+  ISTATUS status = PathTracerAllocate(std::min((uint8_t)3, maxdepth.Get()),
+                                      maxdepth.Get(), rrthreshold.Get(),
+                                      integrator.release_and_get_address());
   switch (status) {
     case ISTATUS_ALLOCATION_FAILED:
       std::cerr << "ERROR: Allocation failed" << std::endl;
@@ -60,7 +93,8 @@ Integrator ParsePathIntegrator(const char* base_type_name,
       assert(status == ISTATUS_SUCCESS);
   }
 
-  return result;
+  return std::make_pair(std::move(integrator),
+                        ParseLightSampleStrategy(lightsamplestrategy.Get()));
 }
 
 std::pair<Framebuffer, OutputWriter> ParseImageFilm(
@@ -136,11 +170,13 @@ CameraConfig ParseCamera(Tokenizer& tokenizer, MatrixManager& matrix_manager) {
     }
 
     if (token == "Integrator") {
-      auto integrator = ParseDirectiveOnce<Integrator, 1>(
-          "Integrator", tokenizer, matrix_manager,
-          {std::make_pair("path", ParsePathIntegrator)},
-          std::get<1>(result).get());
-      std::get<3>(result) = std::move(integrator);
+      auto integrator =
+          ParseDirectiveOnce<std::pair<Integrator, LightSamplerFactory>, 1>(
+              "Integrator", tokenizer, matrix_manager,
+              {std::make_pair("path", ParsePathIntegrator)},
+              std::get<1>(result).get());
+      std::get<3>(result) = std::move(integrator.first);
+      std::get<4>(result) = std::move(integrator.second);
       continue;
     }
 

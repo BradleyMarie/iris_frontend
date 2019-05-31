@@ -14,8 +14,7 @@
 
 namespace iris {
 
-typedef std::function<LightSampler(const std::vector<Light>&)>
-    LightSamplerFactory;
+typedef std::function<LightSampler(std::vector<Light>&)> LightSamplerFactory;
 
 typedef std::tuple<Camera, PixelSampler, Framebuffer, Integrator,
                    LightSamplerFactory, ColorIntegrator, OutputWriter>
