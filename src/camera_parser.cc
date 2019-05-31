@@ -38,6 +38,33 @@ PixelSampler ParseStratifiedSampler(const char* base_type_name,
   return result;
 }
 
+std::pair<Framebuffer, OutputWriter> ParseImageFilm(
+    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
+    MatrixManager& matrix_manager) {
+  SingleStringMatcher filename(base_type_name, type_name, "yresolution",
+                               "iris.pfm");
+  NonZeroSingleSizeTMatcher xresolution(base_type_name, type_name,
+                                        "xresolution", 640);
+  NonZeroSingleSizeTMatcher yresolution(base_type_name, type_name,
+                                        "yresolution", 480);
+  ParseAllParameter<3>(base_type_name, type_name, tokenizer,
+                       {&filename, &xresolution, &yresolution});
+
+  Framebuffer framebuffer;
+  ISTATUS status = FramebufferAllocate(xresolution.Get(), yresolution.Get(),
+                                       framebuffer.release_and_get_address());
+  switch (status) {
+    case ISTATUS_ALLOCATION_FAILED:
+      std::cerr << "ERROR: Allocation failed" << std::endl;
+      exit(EXIT_FAILURE);
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
+
+  return std::make_pair(std::move(framebuffer),
+                        ParseOutputWriter(filename.Get()));
+}
+
 }  // namespace
 
 CameraConfig ParseCamera(Tokenizer& tokenizer, MatrixManager& matrix_manager) {
@@ -70,7 +97,11 @@ CameraConfig ParseCamera(Tokenizer& tokenizer, MatrixManager& matrix_manager) {
     }
 
     if (token == "Film") {
-      // TODO
+      auto film = ParseDirectiveOnce<std::pair<Framebuffer, OutputWriter>, 1>(
+          "Film", tokenizer, matrix_manager,
+          {std::make_pair("image", ParseImageFilm)}, std::get<2>(result).get());
+      std::get<2>(result) = std::move(film.first);
+      std::get<6>(result) = std::move(film.second);
       continue;
     }
 

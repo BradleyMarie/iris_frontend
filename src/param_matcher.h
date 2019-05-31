@@ -60,8 +60,35 @@ class SingleValueMatcher : public ParamMatcher {
   ValueType m_value;
 };
 
-template <typename VariantType, typename ValueType, ValueType Minimum,
-          ValueType Maximum>
+typedef SingleValueMatcher<IntParameter, bool> SingleBoolMatcher;
+
+template <typename VariantType, typename ValueType>
+class SingleValueMoveMatcher : public ParamMatcher {
+ public:
+  SingleValueMoveMatcher(const char* base_type_name, const char* type_name,
+                         const char* parameter_name, ValueType default_value)
+      : ParamMatcher(base_type_name, type_name, parameter_name,
+                     GetIndex<VariantType>()),
+        m_value(default_value) {}
+  const ValueType& Get() { return m_value; }
+
+ private:
+  void Match(const ParameterData& data) final {
+    if (absl::get<VariantType>(data).data.size() != 1) {
+      NumberOfElementsError();
+    }
+    m_value = std::move(absl::get<VariantType>(data).data[0]);
+  }
+
+ private:
+  ValueType m_value;
+};
+
+typedef SingleValueMoveMatcher<StringParameter, std::string>
+    SingleStringMatcher;
+
+template <typename VariantType, typename ValueType, typename ComparisonType,
+          ComparisonType Minimum, ComparisonType Maximum>
 class PreBoundedSingleValueMatcher : public ParamMatcher {
  public:
   PreBoundedSingleValueMatcher(const char* base_type_name,
@@ -89,10 +116,10 @@ class PreBoundedSingleValueMatcher : public ParamMatcher {
   ValueType m_value;
 };
 
-typedef SingleValueMatcher<IntParameter, bool> SingleBoolMatcher;
-
-typedef PreBoundedSingleValueMatcher<IntParameter, uint16_t, 1, UINT16_MAX>
+typedef PreBoundedSingleValueMatcher<IntParameter, uint16_t, int, 1, UINT16_MAX>
     NonZeroSingleUInt16Matcher;
+typedef PreBoundedSingleValueMatcher<IntParameter, size_t, int, 1, INT_MAX>
+    NonZeroSingleSizeTMatcher;
 
 template <size_t NumParams>
 void MatchParameter(
