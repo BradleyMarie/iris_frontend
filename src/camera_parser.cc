@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "iris_camera_toolkit/grid_pixel_sampler.h"
+#include "iris_physx_toolkit/cie_color_integrator.h"
 #include "iris_physx_toolkit/one_light_sampler.h"
 #include "iris_physx_toolkit/path_tracer.h"
 #include "src/camera_parser.h"
@@ -10,11 +11,6 @@
 
 namespace iris {
 namespace {
-
-void ValidateResult(const CameraConfig& result) {
-  std::cerr << "ERROR: ValidateResult not implemented" << std::endl;
-  exit(EXIT_FAILURE);
-}
 
 LightSampler CreateUniformLightSampler(std::vector<Light>& lights) {
   std::vector<PLIGHT> raw_lights(lights.size());
@@ -45,12 +41,19 @@ LightSamplerFactory ParseLightSampleStrategy(absl::string_view strategy) {
   exit(EXIT_FAILURE);
 }
 
+static const bool kStratifiedSamplerDefaultJitter = false;
+static const uint16_t kStratifiedSamplerDefaultXSamples = 2;
+static const uint16_t kStratifiedSamplerDefaultYSamples = 2;
+
 PixelSampler ParseStratifiedSampler(const char* base_type_name,
                                     const char* type_name, Tokenizer& tokenizer,
                                     MatrixManager& matrix_manager) {
-  SingleBoolMatcher jitter(base_type_name, type_name, "jitter", false);
-  NonZeroSingleUInt16Matcher xsamples(base_type_name, type_name, "xsamples", 2);
-  NonZeroSingleUInt16Matcher ysamples(base_type_name, type_name, "ysamples", 2);
+  SingleBoolMatcher jitter(base_type_name, type_name, "jitter",
+                           kStratifiedSamplerDefaultJitter);
+  NonZeroSingleUInt16Matcher xsamples(base_type_name, type_name, "xsamples",
+                                      kStratifiedSamplerDefaultXSamples);
+  NonZeroSingleUInt16Matcher ysamples(base_type_name, type_name, "ysamples",
+                                      kStratifiedSamplerDefaultXSamples);
   ParseAllParameter<3>(base_type_name, type_name, tokenizer,
                        {&jitter, &xsamples, &ysamples});
 
@@ -69,22 +72,27 @@ PixelSampler ParseStratifiedSampler(const char* base_type_name,
   return result;
 }
 
+static const uint8_t kPathTracerDefaultMinDepth = 3;
+static const uint8_t kPathTracerDefaultMaxDepth = 5;
+static const float_t kPathTracerDefaultRRThreshold = (float_t)1.0;
+
 std::pair<Integrator, LightSamplerFactory> ParsePathIntegrator(
     const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
     MatrixManager& matrix_manager) {
   SingleStringMatcher lightsamplestrategy(
       base_type_name, type_name, "lightsamplestrategy",
-      "uniform");  // TODO: Set deafault to spatial
-  NonZeroSingleUInt8Matcher maxdepth(base_type_name, type_name, "maxdepth", 5);
-  PositiveScalarSingleFloatTMatcher rrthreshold(base_type_name, type_name,
-                                                "rrthreshold", (float_t)1.0);
+      "uniform");  // TODO: Set default to spatial
+  NonZeroSingleUInt8Matcher maxdepth(base_type_name, type_name, "maxdepth",
+                                     kPathTracerDefaultMaxDepth);
+  PositiveScalarSingleFloatTMatcher rrthreshold(
+      base_type_name, type_name, "rrthreshold", kPathTracerDefaultRRThreshold);
   ParseAllParameter<3>(base_type_name, type_name, tokenizer,
                        {&lightsamplestrategy, &maxdepth, &rrthreshold});
 
   Integrator integrator;
-  ISTATUS status = PathTracerAllocate(std::min((uint8_t)3, maxdepth.Get()),
-                                      maxdepth.Get(), rrthreshold.Get(),
-                                      integrator.release_and_get_address());
+  ISTATUS status = PathTracerAllocate(
+      std::min(kPathTracerDefaultMinDepth, maxdepth.Get()), maxdepth.Get(),
+      rrthreshold.Get(), integrator.release_and_get_address());
   switch (status) {
     case ISTATUS_ALLOCATION_FAILED:
       std::cerr << "ERROR: Allocation failed" << std::endl;
@@ -97,15 +105,19 @@ std::pair<Integrator, LightSamplerFactory> ParsePathIntegrator(
                         ParseLightSampleStrategy(lightsamplestrategy.Get()));
 }
 
+static const char* kImageFilmDefaultFileName = "iris.pfm";
+static const size_t kImageFilmDefaultXResolution = 640;
+static const size_t kImageFilmDefaultYResolution = 480;
+
 std::pair<Framebuffer, OutputWriter> ParseImageFilm(
     const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
     MatrixManager& matrix_manager) {
   SingleStringMatcher filename(base_type_name, type_name, "yresolution",
-                               "iris.pfm");
-  NonZeroSingleSizeTMatcher xresolution(base_type_name, type_name,
-                                        "xresolution", 640);
-  NonZeroSingleSizeTMatcher yresolution(base_type_name, type_name,
-                                        "yresolution", 480);
+                               kImageFilmDefaultFileName);
+  NonZeroSingleSizeTMatcher xresolution(
+      base_type_name, type_name, "xresolution", kImageFilmDefaultXResolution);
+  NonZeroSingleSizeTMatcher yresolution(
+      base_type_name, type_name, "yresolution", kImageFilmDefaultYResolution);
   ParseAllParameter<3>(base_type_name, type_name, tokenizer,
                        {&filename, &xresolution, &yresolution});
 
@@ -124,16 +136,73 @@ std::pair<Framebuffer, OutputWriter> ParseImageFilm(
                         ParseOutputWriter(filename.Get()));
 }
 
+CameraConfig InitializeDefaultCameraConfig() {
+  CameraConfig result;
+
+  // Initialize Camera
+
+  ISTATUS status = GridPixelSamplerAllocate(
+      kStratifiedSamplerDefaultXSamples, kStratifiedSamplerDefaultYSamples,
+      kStratifiedSamplerDefaultJitter, 1, 1, false,
+      std::get<1>(result).release_and_get_address());
+  switch (status) {
+    case ISTATUS_ALLOCATION_FAILED:
+      std::cerr << "ERROR: Allocation failed" << std::endl;
+      exit(EXIT_FAILURE);
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
+
+  status = FramebufferAllocate(kImageFilmDefaultXResolution,
+                               kImageFilmDefaultYResolution,
+                               std::get<2>(result).release_and_get_address());
+  switch (status) {
+    case ISTATUS_ALLOCATION_FAILED:
+      std::cerr << "ERROR: Allocation failed" << std::endl;
+      exit(EXIT_FAILURE);
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
+
+  status =
+      PathTracerAllocate(kPathTracerDefaultMinDepth, kPathTracerDefaultMaxDepth,
+                         kPathTracerDefaultRRThreshold,
+                         std::get<3>(result).release_and_get_address());
+  switch (status) {
+    case ISTATUS_ALLOCATION_FAILED:
+      std::cerr << "ERROR: Allocation failed" << std::endl;
+      exit(EXIT_FAILURE);
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
+
+  // TODO: Set default to spatial
+  std::get<4>(result) = CreateUniformLightSampler;
+
+  status =
+      CieColorIntegratorAllocate(std::get<5>(result).release_and_get_address());
+  switch (status) {
+    case ISTATUS_ALLOCATION_FAILED:
+      std::cerr << "ERROR: Allocation failed" << std::endl;
+      exit(EXIT_FAILURE);
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
+
+  std::get<6>(result) = ParseOutputWriter(kImageFilmDefaultFileName);
+
+  return result;
+}
+
 }  // namespace
 
 CameraConfig ParseCamera(Tokenizer& tokenizer, MatrixManager& matrix_manager) {
   matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
   matrix_manager.Identity();
 
-  CameraConfig result;
+  CameraConfig result = InitializeDefaultCameraConfig();
   for (auto token = tokenizer.Next(); token; token = tokenizer.Next()) {
     if (token == "WorldBegin") {
-      ValidateResult(result);
       return result;
     }
 
