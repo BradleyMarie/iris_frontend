@@ -2,7 +2,6 @@
 #define _SRC_CAMERA_PARSER_
 
 #include <functional>
-#include <string>
 #include <tuple>
 #include <vector>
 

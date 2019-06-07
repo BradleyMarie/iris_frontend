@@ -13,15 +13,6 @@
 namespace iris {
 namespace {
 
-struct CameraParameters {
-  POINT3 camera_location;
-  VECTOR3 camera_direction;
-  VECTOR3 camera_up;
-  float_t image_distance;
-  float_t image_width;
-  float_t image_height;
-};
-
 std::pair<float_t, float_t> ComputeImageDimensions(float_t image_distance,
                                                    float_t aspect_ratio,
                                                    float_t half_fov_radians) {
@@ -38,6 +29,15 @@ std::pair<float_t, float_t> ComputeImageDimensions(float_t image_distance,
 
   return std::make_pair(xdim, ydim);
 }
+
+struct CameraParameters {
+  POINT3 camera_location;
+  VECTOR3 camera_direction;
+  VECTOR3 camera_up;
+  float_t image_distance;
+  float_t image_width;
+  float_t image_height;
+};
 
 static const float_t kImagePlaneDistance = (float_t)1.0;
 
@@ -84,34 +84,7 @@ CameraParameters ComputeCameraParameters(const Matrix& camera_to_world,
   return result;
 }
 
-LightSampler CreateUniformLightSampler(std::vector<Light>& lights) {
-  std::vector<PLIGHT> raw_lights(lights.size());
-  for (auto& light : lights) {
-    raw_lights.push_back(light.get());
-  }
-
-  LightSampler result;
-  ISTATUS status = OneLightSamplerAllocate(raw_lights.data(), raw_lights.size(),
-                                           result.release_and_get_address());
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
-
-  return result;
-}
-
-LightSamplerFactory ParseLightSampleStrategy(absl::string_view strategy) {
-  if (strategy == "uniform") {
-    return CreateUniformLightSampler;
-  }
-
-  std::cerr << "ERROR: Unrecognized lightstrategy: " << strategy << std::endl;
-  exit(EXIT_FAILURE);
-}
+typedef std::function<Camera(const Framebuffer& framebuffer)> CameraFactory;
 
 static const float_t kPi = (float_t)3.1415926535897932384626433832;
 static const float_t kDefaultHalfFov = (float_t)45.0;
@@ -120,10 +93,45 @@ static const float_t kDefaultFocalDistance = (float_t)1e31;
 static const float_t kDefaultAspectRatio =
     std::numeric_limits<float_t>::quiet_NaN();
 
-Camera ParsePerspectiveCamera(const char* base_type_name, const char* type_name,
-                              const Framebuffer& framebuffer,
-                              Tokenizer& tokenizer,
-                              MatrixManager& matrix_manager) {
+CameraFactory CreatePerspectiveCameraFactory(const Matrix& camera_to_world,
+                                             float_t frame_aspect_ratio,
+                                             float_t half_fov) {
+  return [=](const Framebuffer& framebuffer) {
+    float_t aspect_ratio;
+    if (std::isnan(frame_aspect_ratio)) {
+      size_t xdim, ydim;
+      FramebufferGetSize(framebuffer.get(), &xdim, &ydim);
+      aspect_ratio = (float_t)((double)xdim / (double)ydim);
+    } else {
+      aspect_ratio = frame_aspect_ratio;
+    }
+
+    auto camera_params = ComputeCameraParameters(
+        camera_to_world, aspect_ratio, half_fov * kPi / (float_t)180.0);
+
+    Camera result;
+    ISTATUS status = PinholeCameraAllocate(
+        camera_params.camera_location, camera_params.camera_direction,
+        camera_params.camera_up, camera_params.image_distance,
+        camera_params.image_width, camera_params.image_height,
+        result.release_and_get_address());
+
+    switch (status) {
+      case ISTATUS_ALLOCATION_FAILED:
+        std::cerr << "ERROR: Allocation failed" << std::endl;
+        exit(EXIT_FAILURE);
+      default:
+        assert(status == ISTATUS_SUCCESS);
+    }
+
+    return result;
+  };
+}
+
+CameraFactory ParsePerspectiveCamera(const char* base_type_name,
+                                     const char* type_name,
+                                     Tokenizer& tokenizer,
+                                     MatrixManager& matrix_manager) {
   PositiveBoundedSingleFloatTMatcher halffov(
       base_type_name, type_name, "halffov", (float_t)90.0,
       std::numeric_limits<float_t>::quiet_NaN());
@@ -155,32 +163,25 @@ Camera ParsePerspectiveCamera(const char* base_type_name, const char* type_name,
     half_fov = kDefaultHalfFov;
   }
 
-  float_t aspect_ratio;
-  if (std::isnan(frameaspectratio.Get())) {
-    size_t xdim, ydim;
-    FramebufferGetSize(framebuffer.get(), &xdim, &ydim);
-    aspect_ratio = (float_t)((double)xdim / (double)ydim);
-  } else {
-    aspect_ratio = frameaspectratio.Get();
-  }
-
   if (lensradius.Get() != (float_t)0.0) {
     std::cerr << "ERROR: Non-zero values for lensradius currently unsupported "
               << std::endl;
     exit(EXIT_FAILURE);
   }
 
-  auto camera_params =
-      ComputeCameraParameters(matrix_manager.GetCurrent().first, aspect_ratio,
-                              half_fov * kPi / (float_t)180.0);
+  return CreatePerspectiveCameraFactory(matrix_manager.GetCurrent().first,
+                                        frameaspectratio.Get(), half_fov);
+}
 
-  Camera result;
-  ISTATUS status = PinholeCameraAllocate(
-      camera_params.camera_location, camera_params.camera_direction,
-      camera_params.camera_up, camera_params.image_distance,
-      camera_params.image_width, camera_params.image_height,
-      result.release_and_get_address());
+LightSampler CreateUniformLightSampler(std::vector<Light>& lights) {
+  std::vector<PLIGHT> raw_lights(lights.size());
+  for (auto& light : lights) {
+    raw_lights.push_back(light.get());
+  }
 
+  LightSampler result;
+  ISTATUS status = OneLightSamplerAllocate(raw_lights.data(), raw_lights.size(),
+                                           result.release_and_get_address());
   switch (status) {
     case ISTATUS_ALLOCATION_FAILED:
       std::cerr << "ERROR: Allocation failed" << std::endl;
@@ -190,6 +191,15 @@ Camera ParsePerspectiveCamera(const char* base_type_name, const char* type_name,
   }
 
   return result;
+}
+
+LightSamplerFactory ParseLightSampleStrategy(absl::string_view strategy) {
+  if (strategy == "uniform") {
+    return CreateUniformLightSampler;
+  }
+
+  std::cerr << "ERROR: Unrecognized lightstrategy: " << strategy << std::endl;
+  exit(EXIT_FAILURE);
 }
 
 static const bool kStratifiedSamplerDefaultJitter = false;
@@ -287,50 +297,67 @@ std::pair<Framebuffer, OutputWriter> ParseImageFilm(
                         ParseOutputWriter(filename.Get()));
 }
 
-CameraConfig InitializeDefaultCameraConfig() {
-  CameraConfig result;
-
-  // Initialize Camera
-
-  ISTATUS status = GridPixelSamplerAllocate(
-      kStratifiedSamplerDefaultXSamples, kStratifiedSamplerDefaultYSamples,
-      kStratifiedSamplerDefaultJitter, 1, 1, false,
-      std::get<1>(result).release_and_get_address());
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
+void PopulateUninitialzedParameters(const Matrix& camera_to_world,
+                                    CameraFactory camera_factory,
+                                    CameraConfig& result) {
+  if (!std::get<1>(result).get()) {
+    ISTATUS status = GridPixelSamplerAllocate(
+        kStratifiedSamplerDefaultXSamples, kStratifiedSamplerDefaultYSamples,
+        kStratifiedSamplerDefaultJitter, 1, 1, false,
+        std::get<1>(result).release_and_get_address());
+    switch (status) {
+      case ISTATUS_ALLOCATION_FAILED:
+        std::cerr << "ERROR: Allocation failed" << std::endl;
+        exit(EXIT_FAILURE);
+      default:
+        assert(status == ISTATUS_SUCCESS);
+    }
   }
 
-  status = FramebufferAllocate(kImageFilmDefaultXResolution,
-                               kImageFilmDefaultYResolution,
-                               std::get<2>(result).release_and_get_address());
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
+  if (!std::get<2>(result).get()) {
+    ISTATUS status = FramebufferAllocate(
+        kImageFilmDefaultXResolution, kImageFilmDefaultYResolution,
+        std::get<2>(result).release_and_get_address());
+    switch (status) {
+      case ISTATUS_ALLOCATION_FAILED:
+        std::cerr << "ERROR: Allocation failed" << std::endl;
+        exit(EXIT_FAILURE);
+      default:
+        assert(status == ISTATUS_SUCCESS);
+    }
   }
 
-  status =
-      PathTracerAllocate(kPathTracerDefaultMinDepth, kPathTracerDefaultMaxDepth,
-                         kPathTracerDefaultRRThreshold,
-                         std::get<3>(result).release_and_get_address());
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
+  if (!camera_factory) {
+    camera_factory = CreatePerspectiveCameraFactory(
+        camera_to_world, kDefaultAspectRatio, kDefaultHalfFov);
   }
 
-  // TODO: Set default to spatial
-  std::get<4>(result) = CreateUniformLightSampler;
+  if (!std::get<3>(result).get()) {
+    ISTATUS status = PathTracerAllocate(
+        kPathTracerDefaultMinDepth, kPathTracerDefaultMaxDepth,
+        kPathTracerDefaultRRThreshold,
+        std::get<3>(result).release_and_get_address());
+    switch (status) {
+      case ISTATUS_ALLOCATION_FAILED:
+        std::cerr << "ERROR: Allocation failed" << std::endl;
+        exit(EXIT_FAILURE);
+      default:
+        assert(status == ISTATUS_SUCCESS);
+    }
+  }
 
-  status =
+  if (!std::get<4>(result)) {
+    // TODO: Set default to spatial
+    std::get<4>(result) = CreateUniformLightSampler;
+  }
+
+  if (!std::get<6>(result)) {
+    std::get<6>(result) = ParseOutputWriter(kImageFilmDefaultFileName);
+  }
+
+  std::get<0>(result) = camera_factory(std::get<2>(result));
+
+  ISTATUS status =
       CieColorIntegratorAllocate(std::get<5>(result).release_and_get_address());
   switch (status) {
     case ISTATUS_ALLOCATION_FAILED:
@@ -339,10 +366,6 @@ CameraConfig InitializeDefaultCameraConfig() {
     default:
       assert(status == ISTATUS_SUCCESS);
   }
-
-  std::get<6>(result) = ParseOutputWriter(kImageFilmDefaultFileName);
-
-  return result;
 }
 
 }  // namespace
@@ -351,9 +374,12 @@ CameraConfig ParseCamera(Tokenizer& tokenizer, MatrixManager& matrix_manager) {
   matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
   matrix_manager.Identity();
 
-  CameraConfig result = InitializeDefaultCameraConfig();
+  CameraFactory camera_factory;
+  CameraConfig result;
   for (auto token = tokenizer.Next(); token; token = tokenizer.Next()) {
     if (token == "WorldBegin") {
+      PopulateUninitialzedParameters(matrix_manager.GetCurrent().first,
+                                     camera_factory, result);
       return result;
     }
 
@@ -362,7 +388,10 @@ CameraConfig ParseCamera(Tokenizer& tokenizer, MatrixManager& matrix_manager) {
     }
 
     if (token == "Camera") {
-      // TODO
+      camera_factory = ParseDirectiveOnce<CameraFactory, 1>(
+          "Camera", tokenizer, matrix_manager,
+          {std::make_pair("perspective", ParsePerspectiveCamera)},
+          !!camera_factory);
       continue;
     }
 
