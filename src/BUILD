@@ -88,6 +88,7 @@ cc_library(
     hdrs = ["output_writer.h"],
     deps = [
         ":pointer_types",
+        "@com_github_bradleymarie_iris//iris_camera_toolkit:pfm_writer",
         "@com_google_absl//absl/strings",
     ],
 )
