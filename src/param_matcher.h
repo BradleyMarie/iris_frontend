@@ -60,7 +60,7 @@ class SingleValueMatcher : public ParamMatcher {
   ValueType m_value;
 };
 
-typedef SingleValueMatcher<IntParameter, bool> SingleBoolMatcher;
+typedef SingleValueMatcher<BoolParameter, bool> SingleBoolMatcher;
 
 template <typename VariantType, typename ValueType>
 class SingleValueMoveMatcher : public ParamMatcher {
@@ -158,6 +158,7 @@ class PositiveBoundedSingleFloatTMatcher : public ParamMatcher {
                                      float_t max_value, float_t default_value)
       : ParamMatcher(base_type_name, type_name, parameter_name,
                      GetIndex<FloatParameter>()),
+        m_max_value(max_value),
         m_value(default_value) {
     assert((float_t)0.0 < max_value && std::isfinite(max_value));
   }
@@ -176,8 +177,8 @@ class PositiveBoundedSingleFloatTMatcher : public ParamMatcher {
   }
 
  private:
-  float_t m_value;
   float_t m_max_value;
+  float_t m_value;
 };
 
 class PositiveScalarSingleFloatTMatcher
@@ -199,7 +200,7 @@ void MatchParameter(
     const std::array<ParamMatcher*, NumParams>& supported_parameters) {
   for (auto& matcher : supported_parameters) {
     if (matcher->Match(parameter)) {
-      break;
+      return;
     }
   }
 

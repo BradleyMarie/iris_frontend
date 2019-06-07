@@ -155,9 +155,9 @@ CameraFactory ParsePerspectiveCamera(const char* base_type_name,
   }
 
   float_t half_fov;
-  if (std::isnan(halffov.Get())) {
+  if (!std::isnan(halffov.Get())) {
     half_fov = halffov.Get();
-  } else if (std::isnan(fov.Get())) {
+  } else if (!std::isnan(fov.Get())) {
     half_fov = fov.Get() / (float_t)2.0;
   } else {
     half_fov = kDefaultHalfFov;
@@ -273,7 +273,7 @@ static const size_t kImageFilmDefaultYResolution = 480;
 std::pair<Framebuffer, OutputWriter> ParseImageFilm(
     const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
     MatrixManager& matrix_manager) {
-  SingleStringMatcher filename(base_type_name, type_name, "yresolution",
+  SingleStringMatcher filename(base_type_name, type_name, "filename",
                                kImageFilmDefaultFileName);
   NonZeroSingleSizeTMatcher xresolution(
       base_type_name, type_name, "xresolution", kImageFilmDefaultXResolution);
@@ -423,7 +423,7 @@ CameraConfig ParseCamera(Tokenizer& tokenizer, MatrixManager& matrix_manager) {
           ParseDirectiveOnce<std::pair<Integrator, LightSamplerFactory>, 1>(
               "Integrator", tokenizer, matrix_manager,
               {std::make_pair("path", ParsePathIntegrator)},
-              std::get<1>(result).get());
+              std::get<3>(result).get());
       std::get<3>(result) = std::move(integrator.first);
       std::get<4>(result) = std::move(integrator.second);
       continue;

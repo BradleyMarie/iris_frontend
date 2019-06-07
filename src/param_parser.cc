@@ -245,6 +245,8 @@ absl::optional<Parameter> ParseNextParam(Tokenizer& tokenizer) {
     exit(EXIT_FAILURE);
   }
 
+  tokenizer.Next();
+
   if (type_and_name[0] == "float") {
     result.second = ParseFloat(tokenizer);
   } else if (type_and_name[0] == "integer") {
