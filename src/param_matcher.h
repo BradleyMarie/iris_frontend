@@ -123,9 +123,9 @@ typedef PreBoundedSingleValueMatcher<IntParameter, uint16_t, int, 1, UINT16_MAX>
 typedef PreBoundedSingleValueMatcher<IntParameter, size_t, int, 1, INT_MAX>
     NonZeroSingleSizeTMatcher;
 
-class PositiveScalarSingleFloatTMatcher : public ParamMatcher {
+class PositiveFiniteSingleFloatTMatcher : public ParamMatcher {
  public:
-  PositiveScalarSingleFloatTMatcher(const char* base_type_name,
+  PositiveFiniteSingleFloatTMatcher(const char* base_type_name,
                                     const char* type_name,
                                     const char* parameter_name,
                                     float_t default_value)
@@ -140,7 +140,7 @@ class PositiveScalarSingleFloatTMatcher : public ParamMatcher {
       NumberOfElementsError();
     }
     auto value = absl::get<FloatParameter>(data).data[0];
-    if (value < (float_t)0.0 || (float_t)1.0 < value) {
+    if (value < (float_t)0.0 || !isfinite(value)) {
       ElementRangeError();
     }
     m_value = static_cast<float_t>(absl::get<FloatParameter>(data).data[0]);
@@ -148,6 +148,48 @@ class PositiveScalarSingleFloatTMatcher : public ParamMatcher {
 
  private:
   float_t m_value;
+};
+
+class PositiveBoundedSingleFloatTMatcher : public ParamMatcher {
+ public:
+  PositiveBoundedSingleFloatTMatcher(const char* base_type_name,
+                                     const char* type_name,
+                                     const char* parameter_name,
+                                     float_t max_value, float_t default_value)
+      : ParamMatcher(base_type_name, type_name, parameter_name,
+                     GetIndex<FloatParameter>()),
+        m_value(default_value) {
+    assert((float_t)0.0 < max_value && std::isfinite(max_value));
+  }
+  const float_t& Get() { return m_value; }
+
+ private:
+  void Match(const ParameterData& data) final {
+    if (absl::get<FloatParameter>(data).data.size() != 1) {
+      NumberOfElementsError();
+    }
+    auto value = absl::get<FloatParameter>(data).data[0];
+    if (value < (float_t)0.0 || m_max_value < value) {
+      ElementRangeError();
+    }
+    m_value = static_cast<float_t>(absl::get<FloatParameter>(data).data[0]);
+  }
+
+ private:
+  float_t m_value;
+  float_t m_max_value;
+};
+
+class PositiveScalarSingleFloatTMatcher
+    : public PositiveBoundedSingleFloatTMatcher {
+ public:
+  PositiveScalarSingleFloatTMatcher(const char* base_type_name,
+                                    const char* type_name,
+                                    const char* parameter_name,
+                                    float_t default_value)
+      : PositiveBoundedSingleFloatTMatcher(base_type_name, type_name,
+                                           parameter_name, (float_t)1.0,
+                                           default_value) {}
 };
 
 template <size_t NumParams>
