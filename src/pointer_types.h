@@ -25,6 +25,7 @@ typedef UniquePtr<RANDOM, RandomFree> Random;
 typedef SharedPtr<REFLECTOR, ReflectorRetain, ReflectorRelease> Reflector;
 typedef UniquePtr<SAMPLE_TRACER, SampleTracerFree> SampleTracer;
 typedef UniquePtr<SCENE, SceneFree> Scene;
+typedef SharedPtr<SHAPE, ShapeRetain, ShapeRelease> Shape;
 typedef SharedPtr<SPECTRUM, SpectrumRetain, SpectrumRelease> Spectrum;
 
 }  // namespace iris

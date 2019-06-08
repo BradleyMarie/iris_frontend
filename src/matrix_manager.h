@@ -35,6 +35,13 @@ class MatrixManager {
                        const std::array<std::string, 16> unparsed_params);
   void ActiveTransform(Active active);
 
+  Active GetActive() const { return m_active; }
+  void RestoreState(const std::pair<Matrix, Matrix>& transforms,
+                    Active active) {
+    m_current = transforms;
+    m_active = active;
+  }
+
  private:
   void Transform(Matrix m);
   void Set(Matrix m);
