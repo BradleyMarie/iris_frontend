@@ -26,6 +26,7 @@ struct FloatParameter {
 
 struct SpectrumParameter {
   std::vector<std::pair<Spectrum, Reflector>> data;
+  std::vector<std::vector<float_t>> values;
 };
 
 struct Point3Parameter {

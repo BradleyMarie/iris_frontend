@@ -1,12 +1,69 @@
 #include <iostream>
 #include <stack>
 
+#include "absl/strings/str_join.h"
 #include "iris_physx_toolkit/kd_tree_scene.h"
+#include "src/directive_parser.h"
 #include "src/matrix_parser.h"
+#include "src/param_matcher.h"
 #include "src/scene_parser.h"
 
 namespace iris {
 namespace {
+
+class SingleSpectrumMatcher : public ParamMatcher {
+ public:
+  SingleSpectrumMatcher(const char* base_type_name, const char* type_name,
+                        const char* parameter_name, Spectrum default_value)
+      : ParamMatcher(base_type_name, type_name, parameter_name,
+                     GetIndex<SpectrumParameter>()),
+        m_value(default_value) {}
+  const Spectrum& Get() { return m_value; }
+
+ private:
+  void Match(const ParameterData& data) final {
+    if (absl::get<SpectrumParameter>(data).data.size() != 1) {
+      NumberOfElementsError();
+    }
+    m_value = absl::get<SpectrumParameter>(data).data[0].first;
+  }
+
+ private:
+  Spectrum m_value;
+};
+
+class SingleReflectorMatcher : public ParamMatcher {
+ public:
+  SingleReflectorMatcher(const char* base_type_name, const char* type_name,
+                         const char* parameter_name, Reflector default_value)
+      : ParamMatcher(base_type_name, type_name, parameter_name,
+                     GetIndex<SpectrumParameter>()),
+        m_value(default_value) {}
+  const Reflector& Get() { return m_value; }
+
+ private:
+  void Match(const ParameterData& data) final {
+    if (absl::get<SpectrumParameter>(data).data.size() != 1) {
+      NumberOfElementsError();
+    }
+    if (!absl::get<SpectrumParameter>(data).data[0].second.get()) {
+      std::cerr
+          << "ERROR: Could not construct a reflection spectrum from values ("
+          << absl::StrJoin(absl::get<SpectrumParameter>(data).values[0], ", ")
+          << ")" << std::endl;
+      exit(EXIT_FAILURE);
+    }
+    m_value = absl::get<SpectrumParameter>(data).data[0].second;
+  }
+
+ private:
+  Reflector m_value;
+};
+
+struct AreaLightState {
+  Spectrum spectrum;
+  bool two_sided;
+};
 
 class GraphicsStateManager {
  public:
@@ -18,18 +75,15 @@ class GraphicsStateManager {
   void AttributeBegin(MatrixManager& matrix_manager);
   void AttributeEnd(MatrixManager& matrix_manager);
 
+  const absl::optional<AreaLightState>& GetAreaLightState() {
+    return m_shader_state.top().area_light;
+  }
+
+  void SetAreaLightState(const AreaLightState& area_light) {
+    m_shader_state.top().area_light = area_light;
+  }
+
  private:
-  enum Face {
-    FRONT = 1,
-    BACK = 2,
-    BOTH = 3,
-  };
-
-  struct AreaLightState {
-    Spectrum spectrum;
-    Face face;
-  };
-
   struct ShaderState {
     absl::optional<AreaLightState> area_light;
     absl::optional<Material> material;
@@ -93,6 +147,23 @@ void GraphicsStateManager::AttributeEnd(MatrixManager& matrix_manager) {
               << std::endl;
     exit(EXIT_FAILURE);
   }
+}
+
+static const bool kDiffuseAreaLightDefaultTwoSided = false;
+static const Spectrum kDiffuseAreaLightDefaultL;  // TODO: initialize
+
+AreaLightState ParseDiffuseAreaLightSampler(const char* base_type_name,
+                                            const char* type_name,
+                                            Tokenizer& tokenizer,
+                                            MatrixManager& matrix_manager) {
+  SingleBoolMatcher twosided(base_type_name, type_name, "twosided",
+                             kDiffuseAreaLightDefaultTwoSided);
+  SingleSpectrumMatcher spectrum(base_type_name, type_name, "L",
+                                 kDiffuseAreaLightDefaultL);
+  ParseAllParameter<2>(base_type_name, type_name, tokenizer,
+                       {&twosided, &spectrum});
+
+  return {spectrum.Get(), twosided.Get()};
 }
 
 Scene CreateScene(std::vector<Shape>& shapes, std::vector<Matrix>& transforms) {
@@ -160,6 +231,14 @@ std::pair<Scene, std::vector<Light>> ParseScene(
 
     if (token == "TransformEnd") {
       graphics_state.TransformEnd(matrix_manager);
+      continue;
+    }
+
+    if (token == "AreaLightSource") {
+      auto light_state = ParseDirective<AreaLightState, 1>(
+          "AreaLightSource", tokenizer, matrix_manager,
+          {std::make_pair("diffuse", ParseDiffuseAreaLightSampler)});
+      graphics_state.SetAreaLightState(light_state);
       continue;
     }
 

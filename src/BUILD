@@ -144,8 +144,10 @@ cc_library(
     srcs = ["scene_parser.cc"],
     hdrs = ["scene_parser.h"],
     deps = [
+        ":directive_parser",
         ":matrix_manager",
         ":matrix_parser",
+        ":param_matcher",
         ":pointer_types",
         ":tokenizer",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:kd_tree_scene",

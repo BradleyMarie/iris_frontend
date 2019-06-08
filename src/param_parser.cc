@@ -176,6 +176,7 @@ static ContainerType AllocateSpectrum(const std::vector<float_t>& data,
               << absl::StrJoin(data, ", ") << ")" << std::endl;
     exit(EXIT_FAILURE);
   }
+
   return result;
 }
 
@@ -195,23 +196,34 @@ static SpectrumParameter ParseSpectrum(Tokenizer& tokenizer) {
     exit(EXIT_FAILURE);
   }
 
+  bool allocate_reflector = true;
   std::vector<float_t> wavelengths;
   std::vector<float_t> intensities;
   for (size_t i = 0; i < data.size(); i += 2) {
     wavelengths.push_back(data[i]);
     intensities.push_back(data[i + 1]);
+
+    if ((float_t)1.0 < data[i + 1]) {
+      allocate_reflector = false;
+    }
   }
 
   Spectrum spectrum =
       AllocateSpectrum<Spectrum, PSPECTRUM, InterpolatedSpectrumAllocate>(
           data, wavelengths, intensities);
-  Reflector reflector =
-      AllocateSpectrum<Reflector, PREFLECTOR, InterpolatedReflectorAllocate>(
-          data, wavelengths, intensities);
+
+  Reflector reflector;
+  if (allocate_reflector) {
+    reflector =
+        AllocateSpectrum<Reflector, PREFLECTOR, InterpolatedReflectorAllocate>(
+            data, wavelengths, intensities);
+  }
 
   std::vector<std::pair<Spectrum, Reflector>> result;
   result.push_back(std::make_pair(spectrum, reflector));
-  return SpectrumParameter{std::move(result)};
+  std::vector<std::vector<float_t>> values;
+  values.push_back(std::move(data));
+  return SpectrumParameter{std::move(result), std::move(values)};
 }
 
 }  // namespace
