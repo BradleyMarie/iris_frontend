@@ -2,7 +2,10 @@
 #include <stack>
 
 #include "absl/strings/str_join.h"
+#include "iris_physx_toolkit/constant_material.h"
 #include "iris_physx_toolkit/kd_tree_scene.h"
+#include "iris_physx_toolkit/lambertian_bsdf.h"
+#include "iris_physx_toolkit/uniform_reflector.h"
 #include "src/directive_parser.h"
 #include "src/matrix_parser.h"
 #include "src/param_matcher.h"
@@ -83,6 +86,14 @@ class GraphicsStateManager {
     m_shader_state.top().area_light = area_light;
   }
 
+  const absl::optional<Material>& GetMaterial() {
+    return m_shader_state.top().material;
+  }
+
+  void SetMaterial(const Material& material) {
+    m_shader_state.top().material = material;
+  }
+
  private:
   struct ShaderState {
     absl::optional<AreaLightState> area_light;
@@ -152,10 +163,10 @@ void GraphicsStateManager::AttributeEnd(MatrixManager& matrix_manager) {
 static const bool kDiffuseAreaLightDefaultTwoSided = false;
 static const Spectrum kDiffuseAreaLightDefaultL;  // TODO: initialize
 
-AreaLightState ParseDiffuseAreaLightSampler(const char* base_type_name,
-                                            const char* type_name,
-                                            Tokenizer& tokenizer,
-                                            MatrixManager& matrix_manager) {
+AreaLightState ParseDiffuseAreaLight(const char* base_type_name,
+                                     const char* type_name,
+                                     Tokenizer& tokenizer,
+                                     MatrixManager& matrix_manager) {
   SingleBoolMatcher twosided(base_type_name, type_name, "twosided",
                              kDiffuseAreaLightDefaultTwoSided);
   SingleSpectrumMatcher spectrum(base_type_name, type_name, "L",
@@ -164,6 +175,50 @@ AreaLightState ParseDiffuseAreaLightSampler(const char* base_type_name,
                        {&twosided, &spectrum});
 
   return {spectrum.Get(), twosided.Get()};
+}
+
+static const float_t kMatteMaterialDefaultReflectance = (float_t)0.5;
+
+Material ParseMatteMaterial(const char* base_type_name, const char* type_name,
+                            Tokenizer& tokenizer,
+                            MatrixManager& matrix_manager) {
+  Reflector reflectance;
+  ISTATUS status = UniformReflectorAllocate(
+      kMatteMaterialDefaultReflectance, reflectance.release_and_get_address());
+  switch (status) {
+    case ISTATUS_ALLOCATION_FAILED:
+      std::cerr << "ERROR: Allocation failed" << std::endl;
+      exit(EXIT_FAILURE);
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
+
+  SingleReflectorMatcher kd(base_type_name, type_name, "Kd", reflectance);
+  ParseAllParameter<1>(base_type_name, type_name, tokenizer, {&kd});
+
+  Bsdf bsdf;
+  status = LambertianReflectorAllocate(reflectance.get(),
+                                       bsdf.release_and_get_address());
+  switch (status) {
+    case ISTATUS_ALLOCATION_FAILED:
+      std::cerr << "ERROR: Allocation failed" << std::endl;
+      exit(EXIT_FAILURE);
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
+
+  Material result;
+  status =
+      ConstantMaterialAllocate(bsdf.get(), result.release_and_get_address());
+  switch (status) {
+    case ISTATUS_ALLOCATION_FAILED:
+      std::cerr << "ERROR: Allocation failed" << std::endl;
+      exit(EXIT_FAILURE);
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
+
+  return result;
 }
 
 Scene CreateScene(std::vector<Shape>& shapes, std::vector<Matrix>& transforms) {
@@ -237,8 +292,16 @@ std::pair<Scene, std::vector<Light>> ParseScene(
     if (token == "AreaLightSource") {
       auto light_state = ParseDirective<AreaLightState, 1>(
           "AreaLightSource", tokenizer, matrix_manager,
-          {std::make_pair("diffuse", ParseDiffuseAreaLightSampler)});
+          {std::make_pair("diffuse", ParseDiffuseAreaLight)});
       graphics_state.SetAreaLightState(light_state);
+      continue;
+    }
+
+    if (token == "Material") {
+      auto light_state = ParseDirective<Material, 1>(
+          "Material", tokenizer, matrix_manager,
+          {std::make_pair("matte", ParseMatteMaterial)});
+      graphics_state.SetMaterial(light_state);
       continue;
     }
 

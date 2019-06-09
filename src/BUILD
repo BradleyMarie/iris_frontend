@@ -150,7 +150,10 @@ cc_library(
         ":param_matcher",
         ":pointer_types",
         ":tokenizer",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_material",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:kd_tree_scene",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:lambertian_bsdf",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:uniform_reflector",
         "@com_google_absl//absl/strings",
     ],
 )

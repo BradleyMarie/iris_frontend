@@ -1,7 +1,5 @@
 LookAt 278 273 -800  278 273 0   0 1 0
 Camera "perspective" "float fov" [37.5]
-# PixelFilter "mitchell" "float xwidth" [3] "float ywidth" [3]
-# Accelerator "kdtree"
 Sampler "stratified" "integer xsamples" [4] "integer ysamples" [4] "bool jitter" "false"
 Film "image"
    "string filename" ["cornell.pfm"]
@@ -18,8 +16,6 @@ WorldBegin
 
 AttributeBegin
    AreaLightSource "diffuse" "spectrum L" [
-      400.0 0.0 500.0 8.0 600.0 15.6 700.0 18.4]
-   Material "matte" "spectrum Kd" [
       400.0 0.0 500.0 8.0 600.0 15.6 700.0 18.4]
 
    Shape "trianglemesh"
