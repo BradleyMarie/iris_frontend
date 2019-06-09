@@ -76,7 +76,7 @@ struct AreaLightState {
 
 class GraphicsStateManager {
  public:
-  GraphicsStateManager() { m_shader_state.push(ShaderState()); }
+  GraphicsStateManager();
 
   void TransformBegin(MatrixManager& matrix_manager);
   void TransformEnd(MatrixManager& matrix_manager);
@@ -84,54 +84,15 @@ class GraphicsStateManager {
   void AttributeBegin(MatrixManager& matrix_manager);
   void AttributeEnd(MatrixManager& matrix_manager);
 
-  const absl::optional<AreaLightState>& GetAreaLightState() {
-    m_spectra_used.insert(m_shader_state.top().light_spectra.begin(),
-                          m_shader_state.top().light_spectra.end());
-    return m_shader_state.top().area_light;
-  }
-
+  const absl::optional<AreaLightState>& GetAreaLightState();
   void SetAreaLightState(const AreaLightState& area_light,
-                         const std::set<Spectrum> light_spectra) {
-    m_shader_state.top().area_light = area_light;
-    m_shader_state.top().light_spectra = light_spectra;
-  }
+                         const std::set<Spectrum> light_spectra);
 
-  const absl::optional<Material>& GetMaterial() {
-    m_reflectors_used.insert(m_shader_state.top().material_reflectors.begin(),
-                             m_shader_state.top().material_reflectors.end());
-    return m_shader_state.top().material;
-  }
-
+  const absl::optional<Material>& GetMaterial();
   void SetMaterial(const Material& material,
-                   const std::set<Reflector> material_reflectors) {
-    m_shader_state.top().material = material;
-    m_shader_state.top().material_reflectors = material_reflectors;
-  }
+                   const std::set<Reflector> material_reflectors);
 
-  void PrecomputeColors(ColorIntegrator& color_integrator) {
-    for (const auto& spectrum : m_spectra_used) {
-      ISTATUS status = ColorIntegratorPrecomputeSpectrumColor(
-          color_integrator.get(), spectrum.get());
-      switch (status) {
-        case ISTATUS_ALLOCATION_FAILED:
-          std::cerr << "ERROR: Allocation failed" << std::endl;
-          exit(EXIT_FAILURE);
-        default:
-          assert(status == ISTATUS_SUCCESS);
-      }
-    }
-    for (const auto& reflector : m_reflectors_used) {
-      ISTATUS status = ColorIntegratorPrecomputeReflectorColor(
-          color_integrator.get(), reflector.get());
-      switch (status) {
-        case ISTATUS_ALLOCATION_FAILED:
-          std::cerr << "ERROR: Allocation failed" << std::endl;
-          exit(EXIT_FAILURE);
-        default:
-          assert(status == ISTATUS_SUCCESS);
-      }
-    }
-  }
+  void PrecomputeColors(ColorIntegrator& color_integrator);
 
  private:
   struct ShaderState {
@@ -159,6 +120,10 @@ class GraphicsStateManager {
   std::map<std::string, Material> m_named_materials;
   std::map<std::string, std::vector<Shape>> m_named_objects;
 };
+
+GraphicsStateManager::GraphicsStateManager() {
+  m_shader_state.push({absl::nullopt, {}, absl::nullopt, {}});
+}
 
 void GraphicsStateManager::TransformBegin(MatrixManager& matrix_manager) {
   m_transform_state.push(
@@ -200,6 +165,56 @@ void GraphicsStateManager::AttributeEnd(MatrixManager& matrix_manager) {
     std::cerr << "ERROR: Mismatched AttributeBegin and AttributeEnd directives"
               << std::endl;
     exit(EXIT_FAILURE);
+  }
+}
+
+const absl::optional<AreaLightState>&
+GraphicsStateManager::GetAreaLightState() {
+  m_spectra_used.insert(m_shader_state.top().light_spectra.begin(),
+                        m_shader_state.top().light_spectra.end());
+  return m_shader_state.top().area_light;
+}
+
+void GraphicsStateManager::SetAreaLightState(
+    const AreaLightState& area_light, const std::set<Spectrum> light_spectra) {
+  m_shader_state.top().area_light = area_light;
+  m_shader_state.top().light_spectra = light_spectra;
+}
+
+const absl::optional<Material>& GraphicsStateManager::GetMaterial() {
+  m_reflectors_used.insert(m_shader_state.top().material_reflectors.begin(),
+                           m_shader_state.top().material_reflectors.end());
+  return m_shader_state.top().material;
+}
+
+void GraphicsStateManager::SetMaterial(
+    const Material& material, const std::set<Reflector> material_reflectors) {
+  m_shader_state.top().material = material;
+  m_shader_state.top().material_reflectors = material_reflectors;
+}
+
+void GraphicsStateManager::PrecomputeColors(ColorIntegrator& color_integrator) {
+  for (const auto& spectrum : m_spectra_used) {
+    ISTATUS status = ColorIntegratorPrecomputeSpectrumColor(
+        color_integrator.get(), spectrum.get());
+    switch (status) {
+      case ISTATUS_ALLOCATION_FAILED:
+        std::cerr << "ERROR: Allocation failed" << std::endl;
+        exit(EXIT_FAILURE);
+      default:
+        assert(status == ISTATUS_SUCCESS);
+    }
+  }
+  for (const auto& reflector : m_reflectors_used) {
+    ISTATUS status = ColorIntegratorPrecomputeReflectorColor(
+        color_integrator.get(), reflector.get());
+    switch (status) {
+      case ISTATUS_ALLOCATION_FAILED:
+        std::cerr << "ERROR: Allocation failed" << std::endl;
+        exit(EXIT_FAILURE);
+      default:
+        assert(status == ISTATUS_SUCCESS);
+    }
   }
 }
 
@@ -252,7 +267,7 @@ std::pair<Material, std::set<Reflector>> ParseMatteMaterial(
   ParseAllParameter<1>(base_type_name, type_name, tokenizer, {&kd});
 
   Bsdf bsdf;
-  status = LambertianReflectorAllocate(reflectance.get(),
+  status = LambertianReflectorAllocate(kd.Get().get(),
                                        bsdf.release_and_get_address());
   switch (status) {
     case ISTATUS_ALLOCATION_FAILED:
@@ -353,7 +368,6 @@ ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
   }
 
   EmissiveMaterial front, back;
-
   front = graphics_manager.GetAreaLightState()->emissive_material;
   if (graphics_manager.GetAreaLightState()->two_sided) {
     back = front;

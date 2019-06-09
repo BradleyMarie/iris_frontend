@@ -85,16 +85,15 @@ class MatrixManager {
         float_t r_contents[4][4];
         MatrixReadContents(rhs.get(), r_contents);
 
-        size_t i, j;
-        for (i = 0; i < 4; i++) {
-          for (j = 0; j < 4; j++) {
+        for (size_t i = 0; i < 4; i++) {
+          for (size_t j = 0; j < 4; j++) {
             if (l_contents[i][j] != r_contents[i][j]) {
-              break;
+              return l_contents[i][j] < r_contents[i][j];
             }
           }
         }
 
-        return l_contents[i][j] < r_contents[i][j];
+        return false;
       }
     };
 

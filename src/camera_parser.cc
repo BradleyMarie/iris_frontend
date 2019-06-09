@@ -16,7 +16,7 @@ namespace {
 std::pair<float_t, float_t> ComputeImageDimensions(float_t image_distance,
                                                    float_t aspect_ratio,
                                                    float_t half_fov_radians) {
-  float_t image_dimension = image_distance * std::atan(half_fov_radians);
+  float_t image_dimension = image_distance * std::tan(half_fov_radians);
 
   float_t xdim, ydim;
   if (aspect_ratio < (float_t)1.0) {
@@ -51,15 +51,15 @@ CameraParameters ComputeCameraParameters(const Matrix& camera_to_world,
   POINT3 camera_up = PointCreate((float_t)0.0, (float_t)1.0, (float_t)0.0);
   POINT3 image_center =
       PointCreate((float_t)0.0, (float_t)0.0, -kImagePlaneDistance);
-  POINT3 image_bottom_left = PointCreate(
-      (float_t)0.5 * -image_dimensions.first,
-      (float_t)0.5 * -image_dimensions.second, -kImagePlaneDistance);
-  POINT3 image_bottom_right = PointCreate(
-      (float_t)0.5 * image_dimensions.first,
-      (float_t)0.5 * -image_dimensions.second, -kImagePlaneDistance);
+  POINT3 image_bottom_left =
+      PointCreate((float_t)-image_dimensions.first,
+                  (float_t)-image_dimensions.second, -kImagePlaneDistance);
+  POINT3 image_bottom_right =
+      PointCreate((float_t)image_dimensions.first,
+                  (float_t)-image_dimensions.second, -kImagePlaneDistance);
   POINT3 image_top_left =
-      PointCreate((float_t)0.5 * -image_dimensions.first,
-                  (float_t)0.5 * image_dimensions.second, -kImagePlaneDistance);
+      PointCreate((float_t)-image_dimensions.first,
+                  (float_t)image_dimensions.second, -kImagePlaneDistance);
 
   camera_center = PointMatrixMultiply(camera_to_world.get(), camera_center);
   camera_up = PointMatrixMultiply(camera_to_world.get(), camera_up);
@@ -169,12 +169,16 @@ CameraFactory ParsePerspectiveCamera(const char* base_type_name,
     exit(EXIT_FAILURE);
   }
 
-  return CreatePerspectiveCameraFactory(matrix_manager.GetCurrent().first,
-                                        frameaspectratio.Get(), half_fov);
+  Matrix camera_to_world;
+  *camera_to_world.release_and_get_address() =
+      MatrixGetInverse(matrix_manager.GetCurrent().first.get());
+
+  return CreatePerspectiveCameraFactory(camera_to_world, frameaspectratio.Get(),
+                                        half_fov);
 }
 
 LightSampler CreateUniformLightSampler(std::vector<Light>& lights) {
-  std::vector<PLIGHT> raw_lights(lights.size());
+  std::vector<PLIGHT> raw_lights;
   for (auto& light : lights) {
     raw_lights.push_back(light.get());
   }
