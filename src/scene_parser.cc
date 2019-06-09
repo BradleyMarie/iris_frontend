@@ -85,25 +85,60 @@ class GraphicsStateManager {
   void AttributeEnd(MatrixManager& matrix_manager);
 
   const absl::optional<AreaLightState>& GetAreaLightState() {
+    m_spectra_used.insert(m_shader_state.top().light_spectra.begin(),
+                          m_shader_state.top().light_spectra.end());
     return m_shader_state.top().area_light;
   }
 
-  void SetAreaLightState(const AreaLightState& area_light) {
+  void SetAreaLightState(const AreaLightState& area_light,
+                         const std::set<Spectrum> light_spectra) {
     m_shader_state.top().area_light = area_light;
+    m_shader_state.top().light_spectra = light_spectra;
   }
 
   const absl::optional<Material>& GetMaterial() {
+    m_reflectors_used.insert(m_shader_state.top().material_reflectors.begin(),
+                             m_shader_state.top().material_reflectors.end());
     return m_shader_state.top().material;
   }
 
-  void SetMaterial(const Material& material) {
+  void SetMaterial(const Material& material,
+                   const std::set<Reflector> material_reflectors) {
     m_shader_state.top().material = material;
+    m_shader_state.top().material_reflectors = material_reflectors;
+  }
+
+  void PrecomputeColors(ColorIntegrator& color_integrator) {
+    for (const auto& spectrum : m_spectra_used) {
+      ISTATUS status = ColorIntegratorPrecomputeSpectrumColor(
+          color_integrator.get(), spectrum.get());
+      switch (status) {
+        case ISTATUS_ALLOCATION_FAILED:
+          std::cerr << "ERROR: Allocation failed" << std::endl;
+          exit(EXIT_FAILURE);
+        default:
+          assert(status == ISTATUS_SUCCESS);
+      }
+    }
+    for (const auto& reflector : m_reflectors_used) {
+      ISTATUS status = ColorIntegratorPrecomputeReflectorColor(
+          color_integrator.get(), reflector.get());
+      switch (status) {
+        case ISTATUS_ALLOCATION_FAILED:
+          std::cerr << "ERROR: Allocation failed" << std::endl;
+          exit(EXIT_FAILURE);
+        default:
+          assert(status == ISTATUS_SUCCESS);
+      }
+    }
   }
 
  private:
   struct ShaderState {
     absl::optional<AreaLightState> area_light;
+    std::set<Spectrum> light_spectra;
     absl::optional<Material> material;
+    std::set<Reflector> material_reflectors;
   };
 
   enum PushReason {
@@ -117,6 +152,8 @@ class GraphicsStateManager {
     PushReason push_reason;
   };
 
+  std::set<Spectrum> m_spectra_used;
+  std::set<Reflector> m_reflectors_used;
   std::stack<ShaderState> m_shader_state;
   std::stack<TransformState> m_transform_state;
   std::map<std::string, Material> m_named_materials;
@@ -169,10 +206,9 @@ void GraphicsStateManager::AttributeEnd(MatrixManager& matrix_manager) {
 static const bool kDiffuseAreaLightDefaultTwoSided = false;
 static const Spectrum kDiffuseAreaLightDefaultL;  // TODO: initialize
 
-AreaLightState ParseDiffuseAreaLight(const char* base_type_name,
-                                     const char* type_name,
-                                     Tokenizer& tokenizer,
-                                     MatrixManager& matrix_manager) {
+std::pair<AreaLightState, std::set<Spectrum>> ParseDiffuseAreaLight(
+    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
+    MatrixManager& matrix_manager) {
   SingleBoolMatcher twosided(base_type_name, type_name, "twosided",
                              kDiffuseAreaLightDefaultTwoSided);
   SingleSpectrumMatcher spectrum(base_type_name, type_name, "L",
@@ -192,14 +228,15 @@ AreaLightState ParseDiffuseAreaLight(const char* base_type_name,
       assert(status == ISTATUS_SUCCESS);
   }
 
-  return {emissive_material, twosided.Get()};
+  return std::make_pair(AreaLightState({emissive_material, twosided.Get()}),
+                        std::set<Spectrum>({spectrum.Get()}));
 }
 
 static const float_t kMatteMaterialDefaultReflectance = (float_t)0.5;
 
-Material ParseMatteMaterial(const char* base_type_name, const char* type_name,
-                            Tokenizer& tokenizer,
-                            MatrixManager& matrix_manager) {
+std::pair<Material, std::set<Reflector>> ParseMatteMaterial(
+    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
+    MatrixManager& matrix_manager) {
   Reflector reflectance;
   ISTATUS status = UniformReflectorAllocate(
       kMatteMaterialDefaultReflectance, reflectance.release_and_get_address());
@@ -236,7 +273,7 @@ Material ParseMatteMaterial(const char* base_type_name, const char* type_name,
       assert(status == ISTATUS_SUCCESS);
   }
 
-  return result;
+  return std::make_pair(result, std::set<Reflector>({kd.Get()}));
 }
 
 typedef std::pair<std::vector<Shape>, std::vector<Light>> ShapeResult;
@@ -454,6 +491,7 @@ std::pair<Scene, std::vector<Light>> ParseScene(
 
   for (auto token = tokenizer.Next(); token; token = tokenizer.Next()) {
     if (token == "WorldEnd") {
+      graphics_state.PrecomputeColors(color_integrator);
       return std::make_pair(CreateScene(shapes, transforms), std::move(lights));
     }
 
@@ -482,18 +520,20 @@ std::pair<Scene, std::vector<Light>> ParseScene(
     }
 
     if (token == "AreaLightSource") {
-      auto light_state = ParseDirective<AreaLightState, 1>(
-          "AreaLightSource", tokenizer, matrix_manager,
-          {std::make_pair("diffuse", ParseDiffuseAreaLight)});
-      graphics_state.SetAreaLightState(light_state);
+      auto light_state =
+          ParseDirective<std::pair<AreaLightState, std::set<Spectrum>>, 1>(
+              "AreaLightSource", tokenizer, matrix_manager,
+              {std::make_pair("diffuse", ParseDiffuseAreaLight)});
+      graphics_state.SetAreaLightState(light_state.first, light_state.second);
       continue;
     }
 
     if (token == "Material") {
-      auto light_state = ParseDirective<Material, 1>(
-          "Material", tokenizer, matrix_manager,
-          {std::make_pair("matte", ParseMatteMaterial)});
-      graphics_state.SetMaterial(light_state);
+      auto material_state =
+          ParseDirective<std::pair<Material, std::set<Reflector>>, 1>(
+              "Material", tokenizer, matrix_manager,
+              {std::make_pair("matte", ParseMatteMaterial)});
+      graphics_state.SetMaterial(material_state.first, material_state.second);
       continue;
     }
 

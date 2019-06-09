@@ -42,6 +42,12 @@ class SharedPtr {
   Type* m_ptr;
 };
 
+template <typename Type, void (*Retain)(Type*), void (*Release)(Type*)>
+bool operator<(const SharedPtr<Type, Retain, Release>& left,
+               const SharedPtr<Type, Retain, Release>& right) {
+  return left.get() < right.get();
+}
+
 }  // namespace iris
 
 #endif  // _SRC_SHARED_PTR_
