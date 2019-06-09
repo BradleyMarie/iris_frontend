@@ -38,6 +38,62 @@ class ParamMatcher {
   bool m_found;
 };
 
+template <typename VariantType, typename ValueType, size_t Min, size_t Mod>
+class ListValueMatcher : public ParamMatcher {
+ public:
+  ListValueMatcher(const char* base_type_name, const char* type_name,
+                   const char* parameter_name,
+                   std::vector<ValueType> default_value)
+      : ParamMatcher(base_type_name, type_name, parameter_name,
+                     GetIndex<VariantType>()),
+        m_value(default_value) {}
+  const std::vector<ValueType>& Get() { return m_value; }
+
+ private:
+  void Match(const ParameterData& data) final {
+    if (absl::get<VariantType>(data).data.size() < Min ||
+        absl::get<VariantType>(data).data.size() % Mod != 0) {
+      NumberOfElementsError();
+    }
+    m_value = absl::get<VariantType>(data).data;
+  }
+
+ private:
+  std::vector<ValueType> m_value;
+};
+
+template <typename VariantType, typename ValueType, typename ComparisonType,
+          ComparisonType Minimum, ComparisonType Maximum, size_t Min,
+          size_t Mod>
+class PreBoundedListValueMatcher : public ParamMatcher {
+ public:
+  PreBoundedListValueMatcher(const char* base_type_name, const char* type_name,
+                             const char* parameter_name,
+                             std::vector<ValueType> default_value)
+      : ParamMatcher(base_type_name, type_name, parameter_name,
+                     GetIndex<VariantType>()),
+        m_value(default_value) {}
+  const std::vector<ValueType>& Get() { return m_value; }
+
+ private:
+  void Match(const ParameterData& data) final {
+    if (absl::get<VariantType>(data).data.size() < Min ||
+        absl::get<VariantType>(data).data.size() % Mod != 0) {
+      NumberOfElementsError();
+    }
+    m_value.reserve(absl::get<VariantType>(data).data.size());
+    for (const auto& value : absl::get<VariantType>(data).data) {
+      if (value < Minimum || Maximum < value) {
+        ElementRangeError();
+      }
+      m_value.push_back(static_cast<ValueType>(value));
+    }
+  }
+
+ private:
+  std::vector<ValueType> m_value;
+};
+
 template <typename VariantType, typename ValueType>
 class SingleValueMatcher : public ParamMatcher {
  public:

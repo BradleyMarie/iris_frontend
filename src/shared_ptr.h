@@ -19,7 +19,7 @@ class SharedPtr {
   }
 
   Type* get() { return m_ptr; }
-  const Type* get() const { return m_ptr; }
+  Type* get() const { return m_ptr; }
 
   void reset() {
     Release(m_ptr);

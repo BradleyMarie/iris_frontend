@@ -2,9 +2,11 @@
 #include <stack>
 
 #include "absl/strings/str_join.h"
+#include "iris_physx_toolkit/constant_emissive_material.h"
 #include "iris_physx_toolkit/constant_material.h"
 #include "iris_physx_toolkit/kd_tree_scene.h"
 #include "iris_physx_toolkit/lambertian_bsdf.h"
+#include "iris_physx_toolkit/triangle.h"
 #include "iris_physx_toolkit/uniform_reflector.h"
 #include "src/directive_parser.h"
 #include "src/matrix_parser.h"
@@ -13,6 +15,10 @@
 
 namespace iris {
 namespace {
+
+std::ostream& operator<<(std::ostream& os, const POINT3& point) {
+  return os << "(" << point.x << ", " << point.y << ", " << point.z << ")";
+}
 
 class SingleSpectrumMatcher : public ParamMatcher {
  public:
@@ -64,7 +70,7 @@ class SingleReflectorMatcher : public ParamMatcher {
 };
 
 struct AreaLightState {
-  Spectrum spectrum;
+  EmissiveMaterial emissive_material;
   bool two_sided;
 };
 
@@ -174,7 +180,19 @@ AreaLightState ParseDiffuseAreaLight(const char* base_type_name,
   ParseAllParameter<2>(base_type_name, type_name, tokenizer,
                        {&twosided, &spectrum});
 
-  return {spectrum.Get(), twosided.Get()};
+  EmissiveMaterial emissive_material;
+  ISTATUS status = ConstantEmissiveMaterialAllocate(
+      (PSPECTRUM)spectrum.Get().get(),
+      emissive_material.release_and_get_address());
+  switch (status) {
+    case ISTATUS_ALLOCATION_FAILED:
+      std::cerr << "ERROR: Allocation failed" << std::endl;
+      exit(EXIT_FAILURE);
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
+
+  return {emissive_material, twosided.Get()};
 }
 
 static const float_t kMatteMaterialDefaultReflectance = (float_t)0.5;
@@ -223,10 +241,146 @@ Material ParseMatteMaterial(const char* base_type_name, const char* type_name,
 
 typedef std::pair<std::vector<Shape>, std::vector<Light>> ShapeResult;
 
+typedef ListValueMatcher<Point3Parameter, POINT3, 3, 1>
+    TriangleMeshPointListMatcher;
+
+typedef PreBoundedListValueMatcher<IntParameter, size_t, int, 0, INT_MAX, 3, 3>
+    TriangleMeshIndexListMatcher;
+
+static const std::vector<POINT3> kTriangleMeshDefaultPoints;
+static const std::vector<size_t> kTriangleMeshDefaultIndices;
+
 ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
-                              Tokenizer&, MatrixManager&,
-                              GraphicsStateManager&) {
-  return ShapeResult();
+                              Tokenizer& tokenizer,
+                              MatrixManager& matrix_manager,
+                              GraphicsStateManager& graphics_manager) {
+  TriangleMeshPointListMatcher points(base_type_name, type_name, "P",
+                                      kTriangleMeshDefaultPoints);
+  TriangleMeshIndexListMatcher indices(base_type_name, type_name, "indices",
+                                       kTriangleMeshDefaultIndices);
+  ParseAllParameter<2>(base_type_name, type_name, tokenizer,
+                       {&points, &indices});
+
+  if (points.Get().empty()) {
+    std::cerr << "ERROR: Missing required " << type_name << " "
+              << base_type_name << " parameter: P" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  if (indices.Get().empty()) {
+    std::cerr << "ERROR: Missing required " << type_name << " "
+              << base_type_name << " parameter: indices" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  for (const auto& entry : indices.Get()) {
+    if (points.Get().size() <= entry) {
+      std::cerr << "ERROR: Out of range value for " << type_name << " "
+                << base_type_name << " parameter: indices" << std::endl;
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  // TODO: Check for nonsensical indices
+
+  std::vector<Shape> shapes;
+  if (!graphics_manager.GetAreaLightState()) {
+    for (size_t i = 0; i < indices.Get().size(); i += 3) {
+      POINT3 p0 = points.Get()[indices.Get()[i]];
+      POINT3 p1 = points.Get()[indices.Get()[i + 1]];
+      POINT3 p2 = points.Get()[indices.Get()[i + 2]];
+
+      Shape triangle;
+      ISTATUS status = TriangleAllocate(
+          p0, p1, p2, graphics_manager.GetMaterial().value_or(Material()).get(),
+          graphics_manager.GetMaterial().value_or(Material()).get(),
+          triangle.release_and_get_address());
+      switch (status) {
+        case ISTATUS_ALLOCATION_FAILED:
+          std::cerr << "ERROR: Allocation failed" << std::endl;
+          exit(EXIT_FAILURE);
+        default:
+          assert(status == ISTATUS_SUCCESS);
+      }
+
+      if (!triangle.get()) {
+        std::cerr << "WARNING: Degenerate triangle skipped: " << p0 << ", "
+                  << p1 << ", " << p2 << std::endl;
+        continue;
+      }
+
+      shapes.push_back(triangle);
+    }
+
+    return std::make_pair(std::move(shapes), std::vector<Light>());
+  }
+
+  EmissiveMaterial front, back;
+
+  front = graphics_manager.GetAreaLightState()->emissive_material;
+  if (graphics_manager.GetAreaLightState()->two_sided) {
+    back = front;
+  }
+
+  std::vector<Light> lights;
+  for (size_t i = 0; i < indices.Get().size(); i += 3) {
+    POINT3 p0 = points.Get()[indices.Get()[i]];
+    POINT3 p1 = points.Get()[indices.Get()[i + 1]];
+    POINT3 p2 = points.Get()[indices.Get()[i + 2]];
+
+    Shape triangle;
+    ISTATUS status = EmissiveTriangleAllocate(
+        p0, p1, p2, graphics_manager.GetMaterial().value_or(Material()).get(),
+        graphics_manager.GetMaterial().value_or(Material()).get(), front.get(),
+        back.get(), triangle.release_and_get_address());
+    switch (status) {
+      case ISTATUS_ALLOCATION_FAILED:
+        std::cerr << "ERROR: Allocation failed" << std::endl;
+        exit(EXIT_FAILURE);
+      default:
+        assert(status == ISTATUS_SUCCESS);
+    }
+
+    if (!triangle.get()) {
+      std::cerr << "WARNING: Degenerate triangle skipped: " << p0 << ", " << p1
+                << ", " << p2 << std::endl;
+      continue;
+    }
+
+    if (front.get()) {
+      Light light;
+      status = AreaLightAllocate(triangle.get(), TRIANGLE_FRONT_FACE,
+                                 light.release_and_get_address());
+      switch (status) {
+        case ISTATUS_ALLOCATION_FAILED:
+          std::cerr << "ERROR: Allocation failed" << std::endl;
+          exit(EXIT_FAILURE);
+        default:
+          assert(status == ISTATUS_SUCCESS);
+      }
+
+      lights.push_back(light);
+    }
+
+    if (back.get()) {
+      Light light;
+      status = AreaLightAllocate(triangle.get(), TRIANGLE_FRONT_FACE,
+                                 light.release_and_get_address());
+      switch (status) {
+        case ISTATUS_ALLOCATION_FAILED:
+          std::cerr << "ERROR: Allocation failed" << std::endl;
+          exit(EXIT_FAILURE);
+        default:
+          assert(status == ISTATUS_SUCCESS);
+      }
+
+      lights.push_back(light);
+    }
+
+    shapes.push_back(triangle);
+  }
+
+  return std::make_pair(std::move(shapes), std::move(lights));
 }
 
 Scene CreateScene(std::vector<Shape>& shapes, std::vector<Matrix>& transforms) {
