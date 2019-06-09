@@ -62,7 +62,7 @@ void ParseAndRender(const std::string& search_dir, Tokenizer& tokenizer) {
 
   SampleTracer sample_tracer;
   status = PhysxSampleTracerAllocate(
-      std::get<3>(camera_params).get(), scene_params.first.get(),
+      std::get<3>(camera_params).detach(), scene_params.first.get(),
       light_sampler.get(), std::get<5>(camera_params).get(),
       sample_tracer.release_and_get_address());
 
