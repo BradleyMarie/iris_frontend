@@ -221,6 +221,14 @@ Material ParseMatteMaterial(const char* base_type_name, const char* type_name,
   return result;
 }
 
+typedef std::pair<std::vector<Shape>, std::vector<Light>> ShapeResult;
+
+ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
+                              Tokenizer&, MatrixManager&,
+                              GraphicsStateManager&) {
+  return ShapeResult();
+}
+
 Scene CreateScene(std::vector<Shape>& shapes, std::vector<Matrix>& transforms) {
   assert(shapes.size() == transforms.size());
   std::vector<PSHAPE> shape_pointers;
@@ -248,6 +256,31 @@ Scene CreateScene(std::vector<Shape>& shapes, std::vector<Matrix>& transforms) {
   return result;
 }
 
+template <typename Result>
+using GraphicsDirectiveCallback = std::function<ShapeResult(
+    const char* base_type_name, const char* type_name, Tokenizer&,
+    MatrixManager&, GraphicsStateManager&)>;
+
+template <typename Result>
+DirectiveCallback<Result> BindCallback(
+    GraphicsDirectiveCallback<Result> callback,
+    GraphicsStateManager& graphics_manager) {
+  return std::bind(callback, std::placeholders::_1, std::placeholders::_2,
+                   std::placeholders::_3, std::placeholders::_4,
+                   std::ref(graphics_manager));
+}
+
+template <typename Result>
+using CallbackEntry = std::pair<const char*, DirectiveCallback<Result>>;
+
+template <typename Result>
+CallbackEntry<Result> CreateCallback(const char* type_name,
+                                     GraphicsDirectiveCallback<Result> callback,
+                                     GraphicsStateManager& graphics_manager) {
+  return std::make_pair(type_name,
+                        BindCallback<Result>(callback, graphics_manager));
+}
+
 }  // namespace
 
 std::pair<Scene, std::vector<Light>> ParseScene(
@@ -260,6 +293,11 @@ std::pair<Scene, std::vector<Light>> ParseScene(
   std::vector<Matrix> transforms;
   std::vector<Light> lights;
   GraphicsStateManager graphics_state;
+
+  std::array<CallbackEntry<ShapeResult>, 1> shape_callbacks = {
+      CreateCallback<ShapeResult>("trianglemesh", ParseTriangleMesh,
+                                  graphics_state)};
+
   for (auto token = tokenizer.Next(); token; token = tokenizer.Next()) {
     if (token == "WorldEnd") {
       return std::make_pair(CreateScene(shapes, transforms), std::move(lights));
@@ -302,6 +340,19 @@ std::pair<Scene, std::vector<Light>> ParseScene(
           "Material", tokenizer, matrix_manager,
           {std::make_pair("matte", ParseMatteMaterial)});
       graphics_state.SetMaterial(light_state);
+      continue;
+    }
+
+    if (token == "Shape") {
+      auto shape_result = ParseDirective<ShapeResult, 1>(
+          "Shape", tokenizer, matrix_manager, shape_callbacks);
+      for (const auto& shape : shape_result.first) {
+        shapes.push_back(shape);
+        transforms.push_back(matrix_manager.GetCurrent().first);
+      }
+      for (const auto& light : shape_result.second) {
+        lights.push_back(light);
+      }
       continue;
     }
 

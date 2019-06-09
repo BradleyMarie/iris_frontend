@@ -12,14 +12,16 @@
 
 namespace iris {
 
+template <typename Result>
+using DirectiveCallback =
+    std::function<Result(const char* base_type_name, const char* type_name,
+                         Tokenizer&, MatrixManager&)>;
+
 template <typename Result, size_t NumImplementations>
 Result ParseDirective(
     const char* base_type_name, Tokenizer& tokenizer,
     MatrixManager& matrix_manager,
-    const std::array<std::pair<const char*, std::function<Result(
-                                                const char* base_type_name,
-                                                const char* type_name,
-                                                Tokenizer&, MatrixManager&)>>,
+    const std::array<std::pair<const char*, DirectiveCallback<Result>>,
                      NumImplementations>& callbacks) {
   auto token = tokenizer.Next();
   if (!token) {
@@ -47,10 +49,7 @@ template <typename Result, size_t NumImplementations>
 Result ParseDirectiveOnce(
     const char* base_type_name, Tokenizer& tokenizer,
     MatrixManager& matrix_manager,
-    const std::array<std::pair<const char*, std::function<Result(
-                                                const char* base_type_name,
-                                                const char* type_name,
-                                                Tokenizer&, MatrixManager&)>>,
+    const std::array<std::pair<const char*, DirectiveCallback<Result>>,
                      NumImplementations>& callbacks,
     bool already_set) {
   if (already_set) {
