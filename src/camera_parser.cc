@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "absl/flags/flag.h"
 #include "iris_camera_toolkit/grid_pixel_sampler.h"
 #include "iris_camera_toolkit/pinhole_camera.h"
 #include "iris_physx_toolkit/cie_color_integrator.h"
@@ -9,6 +10,9 @@
 #include "src/directive_parser.h"
 #include "src/matrix_parser.h"
 #include "src/param_matcher.h"
+
+ABSL_FLAG(std::string, default_output, "iris.pfm",
+          "The default output location if none is specified.");
 
 namespace iris {
 namespace {
@@ -270,7 +274,6 @@ std::pair<Integrator, LightSamplerFactory> ParsePathIntegrator(
                         ParseLightSampleStrategy(lightsamplestrategy.Get()));
 }
 
-static const char* kImageFilmDefaultFileName = "iris.pfm";
 static const size_t kImageFilmDefaultXResolution = 640;
 static const size_t kImageFilmDefaultYResolution = 480;
 
@@ -278,7 +281,7 @@ std::pair<Framebuffer, OutputWriter> ParseImageFilm(
     const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
     MatrixManager& matrix_manager) {
   SingleStringMatcher filename(base_type_name, type_name, "filename",
-                               kImageFilmDefaultFileName);
+                               absl::GetFlag(FLAGS_default_output));
   NonZeroSingleSizeTMatcher xresolution(
       base_type_name, type_name, "xresolution", kImageFilmDefaultXResolution);
   NonZeroSingleSizeTMatcher yresolution(
@@ -356,7 +359,8 @@ void PopulateUninitialzedParameters(const Matrix& camera_to_world,
   }
 
   if (!std::get<6>(result)) {
-    std::get<6>(result) = ParseOutputWriter(kImageFilmDefaultFileName);
+    std::get<6>(result) =
+        ParseOutputWriter(absl::GetFlag(FLAGS_default_output));
   }
 
   std::get<0>(result) = camera_factory(std::get<2>(result));

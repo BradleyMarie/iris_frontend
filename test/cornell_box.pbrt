@@ -1,10 +1,9 @@
 LookAt 278 273 -800  278 273 0   0 1 0
 Camera "perspective" "float fov" [37.5]
-Sampler "stratified" "integer xsamples" [4] "integer ysamples" [4] "bool jitter" "false"
+Sampler "stratified" "integer xsamples" [2] "integer ysamples" [2] "bool jitter" "false"
 Film "image"
-   "string filename" ["cornell.pfm"]
-   "integer xresolution" [512]
-   "integer yresolution" [512]
+   "integer xresolution" [128]
+   "integer yresolution" [128]
 
 Integrator "path"
 

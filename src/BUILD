@@ -17,6 +17,7 @@ cc_library(
         "@com_github_bradleymarie_iris//iris_physx_toolkit:cie_color_integrator",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:one_light_sampler",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:path_tracer",
+        "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -45,6 +46,7 @@ cc_library(
 cc_binary(
     name = "iris",
     srcs = ["iris.cc"],
+    visibility = ["//visibility:public"],
     deps = [
         ":camera_parser",
         ":output_writer",
