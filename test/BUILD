@@ -20,7 +20,7 @@ sh_test(
     name = "check_cornell_box",
     srcs = [":pfm_matches"],
     args = [
-        "exact",
+        "approximate",
         "$(location cornell_box.pfm)",
         "$(location :cornell_box_latest.pfm)",
     ],
