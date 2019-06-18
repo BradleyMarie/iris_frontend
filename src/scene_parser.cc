@@ -219,8 +219,7 @@ static const bool kDiffuseAreaLightDefaultTwoSided = false;
 static const Spectrum kDiffuseAreaLightDefaultL;  // TODO: initialize
 
 std::pair<AreaLightState, std::set<Spectrum>> ParseDiffuseAreaLight(
-    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
-    MatrixManager& matrix_manager) {
+    const char* base_type_name, const char* type_name, Tokenizer& tokenizer) {
   SingleBoolMatcher twosided(base_type_name, type_name, "twosided",
                              kDiffuseAreaLightDefaultTwoSided);
   SingleSpectrumMatcher spectrum(base_type_name, type_name, "L",
@@ -247,8 +246,7 @@ std::pair<AreaLightState, std::set<Spectrum>> ParseDiffuseAreaLight(
 static const float_t kMatteMaterialDefaultReflectance = (float_t)0.5;
 
 std::pair<Material, std::set<Reflector>> ParseMatteMaterial(
-    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
-    MatrixManager& matrix_manager) {
+    const char* base_type_name, const char* type_name, Tokenizer& tokenizer) {
   Reflector reflectance;
   ISTATUS status = UniformReflectorAllocate(
       kMatteMaterialDefaultReflectance, reflectance.release_and_get_address());
@@ -301,7 +299,6 @@ static const std::vector<size_t> kTriangleMeshDefaultIndices;
 
 ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
                               Tokenizer& tokenizer,
-                              MatrixManager& matrix_manager,
                               GraphicsStateManager& graphics_manager) {
   TriangleMeshPointListMatcher points(base_type_name, type_name, "P",
                                       kTriangleMeshDefaultPoints);
@@ -496,10 +493,6 @@ std::pair<Scene, std::vector<Light>> ParseScene(
   std::vector<Light> lights;
   GraphicsStateManager graphics_state;
 
-  std::array<CallbackEntry<ShapeResult>, 1> shape_callbacks = {
-      CreateCallback<ShapeResult>("trianglemesh", ParseTriangleMesh,
-                                  graphics_state)};
-
   for (auto token = tokenizer.Next(); token; token = tokenizer.Next()) {
     if (token == "WorldEnd") {
       graphics_state.PrecomputeColors(color_integrator);
@@ -533,7 +526,7 @@ std::pair<Scene, std::vector<Light>> ParseScene(
     if (token == "AreaLightSource") {
       auto light_state =
           ParseDirective<std::pair<AreaLightState, std::set<Spectrum>>, 1>(
-              "AreaLightSource", tokenizer, matrix_manager,
+              "AreaLightSource", tokenizer,
               {std::make_pair("diffuse", ParseDiffuseAreaLight)});
       graphics_state.SetAreaLightState(light_state.first, light_state.second);
       continue;
@@ -542,15 +535,16 @@ std::pair<Scene, std::vector<Light>> ParseScene(
     if (token == "Material") {
       auto material_state =
           ParseDirective<std::pair<Material, std::set<Reflector>>, 1>(
-              "Material", tokenizer, matrix_manager,
+              "Material", tokenizer,
               {std::make_pair("matte", ParseMatteMaterial)});
       graphics_state.SetMaterial(material_state.first, material_state.second);
       continue;
     }
 
     if (token == "Shape") {
-      auto shape_result = ParseDirective<ShapeResult, 1>(
-          "Shape", tokenizer, matrix_manager, shape_callbacks);
+      auto shape_result = ParseDirective<ShapeResult, 1, GraphicsStateManager&>(
+          "Shape", tokenizer,
+          {std::make_pair("trianglemesh", ParseTriangleMesh)}, graphics_state);
       for (const auto& shape : shape_result.first) {
         shapes.push_back(shape);
         transforms.push_back(matrix_manager.GetCurrent().first);

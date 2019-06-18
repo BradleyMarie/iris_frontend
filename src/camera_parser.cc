@@ -376,6 +376,24 @@ void PopulateUninitialzedParameters(const Matrix& camera_to_world,
   }
 }
 
+template <typename Result, size_t NumImplementations>
+Result ParseDirectiveOnce(
+    const char* base_type_name, Tokenizer& tokenizer,
+    MatrixManager& matrix_manager,
+    const std::array<
+        std::pair<const char*, DirectiveCallback<Result, MatrixManager&>>,
+        NumImplementations>& callbacks,
+    bool already_set) {
+  if (already_set) {
+    std::cerr << "ERROR: Invalid " << base_type_name
+              << " specified more than once before WorldBegin" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  return ParseDirective<Result, NumImplementations, MatrixManager&>(
+      base_type_name, tokenizer, callbacks, matrix_manager);
+}
+
 }  // namespace
 
 CameraConfig ParseCamera(Tokenizer& tokenizer, MatrixManager& matrix_manager) {

@@ -12,17 +12,17 @@
 
 namespace iris {
 
-template <typename Result>
+template <typename Result, typename... Args>
 using DirectiveCallback =
     std::function<Result(const char* base_type_name, const char* type_name,
-                         Tokenizer&, MatrixManager&)>;
+                         Tokenizer&, Args... args)>;
 
-template <typename Result, size_t NumImplementations>
+template <typename Result, size_t NumImplementations, typename... Args>
 Result ParseDirective(
     const char* base_type_name, Tokenizer& tokenizer,
-    MatrixManager& matrix_manager,
-    const std::array<std::pair<const char*, DirectiveCallback<Result>>,
-                     NumImplementations>& callbacks) {
+    const std::array<std::pair<const char*, DirectiveCallback<Result, Args...>>,
+                     NumImplementations>& callbacks,
+    Args... args) {
   auto token = tokenizer.Next();
   if (!token) {
     std::cerr << "ERROR: " << base_type_name << " type not specified"
@@ -34,8 +34,7 @@ Result ParseDirective(
   if (unquoted) {
     for (auto& entry : callbacks) {
       if (*unquoted == entry.first) {
-        return entry.second(base_type_name, entry.first, tokenizer,
-                            matrix_manager);
+        return entry.second(base_type_name, entry.first, tokenizer, args...);
       }
     }
   }
@@ -43,23 +42,6 @@ Result ParseDirective(
   std::cerr << "ERROR: Invalid " << base_type_name << " specified: " << *token
             << std::endl;
   exit(EXIT_FAILURE);
-}
-
-template <typename Result, size_t NumImplementations>
-Result ParseDirectiveOnce(
-    const char* base_type_name, Tokenizer& tokenizer,
-    MatrixManager& matrix_manager,
-    const std::array<std::pair<const char*, DirectiveCallback<Result>>,
-                     NumImplementations>& callbacks,
-    bool already_set) {
-  if (already_set) {
-    std::cerr << "ERROR: Invalid " << base_type_name
-              << " specified more than once before WorldBegin" << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  return ParseDirective<Result, NumImplementations>(base_type_name, tokenizer,
-                                                    matrix_manager, callbacks);
 }
 
 }  // namespace iris
