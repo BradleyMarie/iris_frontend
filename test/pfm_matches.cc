@@ -122,7 +122,7 @@ int main(int argc, char** argv) {
   }
 
   float epsilon;
-  if (std::strcmp(argv[1], "exact")) {
+  if (std::strcmp(argv[1], "exact") == 0) {
     epsilon = 0.000f;
   } else {
     epsilon = 0.001f;
