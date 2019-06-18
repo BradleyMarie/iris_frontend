@@ -4,8 +4,11 @@ cc_library(
     name = "parser",
     srcs = ["parser.cc"],
     hdrs = ["parser.h"],
+    visibility = ["//src:__subpackages__"],
     deps = [
         ":result",
+        ":trianglemesh",
+        "//src:directive_parser",
         "//src:tokenizer",
     ],
 )

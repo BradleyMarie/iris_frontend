@@ -25,6 +25,7 @@ cc_library(
 cc_library(
     name = "directive_parser",
     hdrs = ["directive_parser.h"],
+    visibility = ["//src:__subpackages__"],
     deps = [
         ":matrix_manager",
         ":quoted_string",
@@ -166,11 +167,11 @@ cc_library(
         ":param_matcher",
         ":pointer_types",
         ":tokenizer",
+        "//src/shapes:parser",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_emissive_material",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_material",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:kd_tree_scene",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:lambertian_bsdf",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:uniform_reflector",
         "@com_google_absl//absl/strings",
     ],
