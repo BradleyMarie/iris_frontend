@@ -10,15 +10,12 @@
 #include "iris_physx_toolkit/uniform_reflector.h"
 #include "src/directive_parser.h"
 #include "src/matrix_parser.h"
+#include "src/ostream.h"
 #include "src/param_matcher.h"
 #include "src/scene_parser.h"
 
 namespace iris {
 namespace {
-
-std::ostream& operator<<(std::ostream& os, const POINT3& point) {
-  return os << "(" << point.x << ", " << point.y << ", " << point.z << ")";
-}
 
 class SingleSpectrumMatcher : public ParamMatcher {
  public:

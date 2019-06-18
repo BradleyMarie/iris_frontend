@@ -49,6 +49,7 @@ cc_binary(
     visibility = ["//visibility:public"],
     deps = [
         ":camera_parser",
+        ":ostream",
         ":output_writer",
         ":scene_parser",
         ":tokenizer",
@@ -85,6 +86,16 @@ cc_library(
 )
 
 cc_library(
+    name = "ostream",
+    srcs = ["ostream.cc"],
+    hdrs = ["ostream.h"],
+    visibility = ["//src:__subpackages__"],
+    deps = [
+        "@com_github_bradleymarie_iris//iris",
+    ],
+)
+
+cc_library(
     name = "output_writer",
     srcs = ["output_writer.cc"],
     hdrs = ["output_writer.h"],
@@ -115,6 +126,7 @@ cc_library(
     name = "param_matcher",
     srcs = ["param_matcher.cc"],
     hdrs = ["param_matcher.h"],
+    visibility = ["//src:__subpackages__"],
     deps = [
         ":param_parser",
     ],
@@ -123,6 +135,7 @@ cc_library(
 cc_library(
     name = "pointer_types",
     hdrs = ["pointer_types.h"],
+    visibility = ["//src:__subpackages__"],
     deps = [
         ":shared_ptr",
         ":unique_ptr",
@@ -149,6 +162,7 @@ cc_library(
         ":directive_parser",
         ":matrix_manager",
         ":matrix_parser",
+        ":ostream",
         ":param_matcher",
         ":pointer_types",
         ":tokenizer",
@@ -171,6 +185,7 @@ cc_library(
     name = "tokenizer",
     srcs = ["tokenizer.cc"],
     hdrs = ["tokenizer.h"],
+    visibility = ["//src:__subpackages__"],
     deps = [
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",
