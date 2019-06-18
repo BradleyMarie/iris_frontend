@@ -6,12 +6,12 @@
 
 namespace iris {
 
-ShapeResult ParseTriangleMesh(
-    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
-    const absl::optional<Material>& front_material,
-    const absl::optional<Material>& back_material,
-    const absl::optional<EmissiveMaterial>& front_emissive_material,
-    const absl::optional<EmissiveMaterial>& back_emissive_material);
+ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
+                              Tokenizer& tokenizer,
+                              const Material& front_material,
+                              const Material& back_material,
+                              const EmissiveMaterial& front_emissive_material,
+                              const EmissiveMaterial& back_emissive_material);
 
 }  // namespace iris
 

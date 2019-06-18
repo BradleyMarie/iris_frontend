@@ -160,16 +160,13 @@ cc_library(
     srcs = ["scene_parser.cc"],
     hdrs = ["scene_parser.h"],
     deps = [
-        ":directive_parser",
         ":matrix_manager",
         ":matrix_parser",
-        ":ostream",
-        ":param_matcher",
         ":pointer_types",
         ":tokenizer",
+        "//src/area_lights:parser",
         "//src/materials:parser",
         "//src/shapes:parser",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_emissive_material",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:kd_tree_scene",
     ],
 )

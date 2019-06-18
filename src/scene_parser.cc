@@ -1,43 +1,20 @@
 #include <iostream>
 #include <stack>
 
-#include "iris_physx_toolkit/constant_emissive_material.h"
 #include "iris_physx_toolkit/kd_tree_scene.h"
-#include "src/directive_parser.h"
+#include "src/area_lights/parser.h"
 #include "src/materials/parser.h"
 #include "src/matrix_parser.h"
 #include "src/ostream.h"
-#include "src/param_matcher.h"
 #include "src/scene_parser.h"
 #include "src/shapes/parser.h"
 
 namespace iris {
 namespace {
 
-class SingleSpectrumMatcher : public ParamMatcher {
- public:
-  SingleSpectrumMatcher(const char* base_type_name, const char* type_name,
-                        const char* parameter_name, Spectrum default_value)
-      : ParamMatcher(base_type_name, type_name, parameter_name,
-                     GetIndex<SpectrumParameter>()),
-        m_value(default_value) {}
-  const Spectrum& Get() { return m_value; }
-
- private:
-  void Match(const ParameterData& data) final {
-    if (absl::get<SpectrumParameter>(data).data.size() != 1) {
-      NumberOfElementsError();
-    }
-    m_value = absl::get<SpectrumParameter>(data).data[0].first;
-  }
-
- private:
-  Spectrum m_value;
-};
-
 struct AreaLightState {
-  EmissiveMaterial emissive_material;
-  bool two_sided;
+  EmissiveMaterial front_emissive_material;
+  EmissiveMaterial back_emissive_material;
 };
 
 class GraphicsStateManager {
@@ -51,7 +28,8 @@ class GraphicsStateManager {
   void AttributeEnd(MatrixManager& matrix_manager);
 
   const absl::optional<AreaLightState>& GetAreaLightState();
-  void SetAreaLightState(const AreaLightState& area_light,
+  void SetAreaLightState(const EmissiveMaterial& front_emissive_material,
+                         const EmissiveMaterial& back_emissive_material,
                          const std::set<Spectrum> light_spectra);
 
   const absl::optional<Material>& GetMaterial();
@@ -142,8 +120,11 @@ GraphicsStateManager::GetAreaLightState() {
 }
 
 void GraphicsStateManager::SetAreaLightState(
-    const AreaLightState& area_light, const std::set<Spectrum> light_spectra) {
-  m_shader_state.top().area_light = area_light;
+    const EmissiveMaterial& front_emissive_material,
+    const EmissiveMaterial& back_emissive_material,
+    const std::set<Spectrum> light_spectra) {
+  m_shader_state.top().area_light = {front_emissive_material,
+                                     back_emissive_material};
   m_shader_state.top().light_spectra = light_spectra;
 }
 
@@ -184,34 +165,6 @@ void GraphicsStateManager::PrecomputeColors(ColorIntegrator& color_integrator) {
   }
 }
 
-static const bool kDiffuseAreaLightDefaultTwoSided = false;
-static const Spectrum kDiffuseAreaLightDefaultL;  // TODO: initialize
-
-std::pair<AreaLightState, std::set<Spectrum>> ParseDiffuseAreaLight(
-    const char* base_type_name, const char* type_name, Tokenizer& tokenizer) {
-  SingleBoolMatcher twosided(base_type_name, type_name, "twosided",
-                             kDiffuseAreaLightDefaultTwoSided);
-  SingleSpectrumMatcher spectrum(base_type_name, type_name, "L",
-                                 kDiffuseAreaLightDefaultL);
-  ParseAllParameter<2>(base_type_name, type_name, tokenizer,
-                       {&twosided, &spectrum});
-
-  EmissiveMaterial emissive_material;
-  ISTATUS status = ConstantEmissiveMaterialAllocate(
-      (PSPECTRUM)spectrum.Get().get(),
-      emissive_material.release_and_get_address());
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
-
-  return std::make_pair(AreaLightState({emissive_material, twosided.Get()}),
-                        std::set<Spectrum>({spectrum.Get()}));
-}
-
 Scene CreateScene(std::vector<Shape>& shapes, std::vector<Matrix>& transforms) {
   assert(shapes.size() == transforms.size());
   std::vector<PSHAPE> shape_pointers;
@@ -237,31 +190,6 @@ Scene CreateScene(std::vector<Shape>& shapes, std::vector<Matrix>& transforms) {
   }
 
   return result;
-}
-
-template <typename Result>
-using GraphicsDirectiveCallback = std::function<ShapeResult(
-    const char* base_type_name, const char* type_name, Tokenizer&,
-    MatrixManager&, GraphicsStateManager&)>;
-
-template <typename Result>
-DirectiveCallback<Result> BindCallback(
-    GraphicsDirectiveCallback<Result> callback,
-    GraphicsStateManager& graphics_manager) {
-  return std::bind(callback, std::placeholders::_1, std::placeholders::_2,
-                   std::placeholders::_3, std::placeholders::_4,
-                   std::ref(graphics_manager));
-}
-
-template <typename Result>
-using CallbackEntry = std::pair<const char*, DirectiveCallback<Result>>;
-
-template <typename Result>
-CallbackEntry<Result> CreateCallback(const char* type_name,
-                                     GraphicsDirectiveCallback<Result> callback,
-                                     GraphicsStateManager& graphics_manager) {
-  return std::make_pair(type_name,
-                        BindCallback<Result>(callback, graphics_manager));
 }
 
 }  // namespace
@@ -308,11 +236,10 @@ std::pair<Scene, std::vector<Light>> ParseScene(
     }
 
     if (token == "AreaLightSource") {
-      auto light_state =
-          ParseDirective<std::pair<AreaLightState, std::set<Spectrum>>, 1>(
-              "AreaLightSource", tokenizer,
-              {std::make_pair("diffuse", ParseDiffuseAreaLight)});
-      graphics_state.SetAreaLightState(light_state.first, light_state.second);
+      auto light_state = ParseAreaLight("AreaLightSource", tokenizer);
+      graphics_state.SetAreaLightState(std::get<0>(light_state),
+                                       std::get<1>(light_state),
+                                       std::get<2>(light_state));
       continue;
     }
 
@@ -323,17 +250,11 @@ std::pair<Scene, std::vector<Light>> ParseScene(
     }
 
     if (token == "Shape") {
-      absl::optional<EmissiveMaterial> front_emissive, back_emissive;
-      if (graphics_state.GetAreaLightState()) {
-        front_emissive = graphics_state.GetAreaLightState()->emissive_material;
-        if (graphics_state.GetAreaLightState()->two_sided) {
-          back_emissive = front_emissive;
-        }
-      }
-
       auto shape_result = ParseShape(
-          "Shape", tokenizer, graphics_state.GetMaterial(),
-          graphics_state.GetMaterial(), front_emissive, back_emissive);
+          "Shape", tokenizer, *graphics_state.GetMaterial(),
+          *graphics_state.GetMaterial(),
+          graphics_state.GetAreaLightState()->front_emissive_material,
+          graphics_state.GetAreaLightState()->back_emissive_material);
       for (const auto& shape : shape_result.first) {
         shapes.push_back(shape);
         transforms.push_back(matrix_manager.GetCurrent().first);
