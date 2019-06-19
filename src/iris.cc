@@ -54,7 +54,7 @@ void ParseAndRender(const std::string& search_dir, Tokenizer& tokenizer) {
   }
 
   MatrixManager matrix_manager;
-  auto camera_params = ParseCamera(tokenizer, matrix_manager);
+  auto camera_params = ParseCameraConfig(tokenizer, matrix_manager);
   auto scene_params =
       ParseScene(tokenizer, matrix_manager, std::get<5>(camera_params));
   auto light_sampler = std::get<4>(camera_params)(scene_params.second);

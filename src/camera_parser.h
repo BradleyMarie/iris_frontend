@@ -15,7 +15,8 @@ typedef std::tuple<Camera, PixelSampler, Framebuffer, Integrator,
                    LightSamplerFactory, ColorIntegrator, OutputWriter>
     CameraConfig;
 
-CameraConfig ParseCamera(Tokenizer& tokenizer, MatrixManager& matrix_manager);
+CameraConfig ParseCameraConfig(Tokenizer& tokenizer,
+                               MatrixManager& matrix_manager);
 
 }  // namespace iris
 
