@@ -1,9 +1,7 @@
 #ifndef _SRC_CAMERA_PARSER_
 #define _SRC_CAMERA_PARSER_
 
-#include <functional>
 #include <tuple>
-#include <vector>
 
 #include "src/films/output_writers/result.h"
 #include "src/integrators/lightstrategy/result.h"
