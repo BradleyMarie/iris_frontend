@@ -8,16 +8,14 @@ cc_library(
         ":directive_parser",
         ":matrix_manager",
         ":matrix_parser",
-        ":output_writer",
         ":param_matcher",
         ":pointer_types",
         ":tokenizer",
+        "//src/films:parser",
         "//src/integrators:parser",
         "//src/samplers:parser",
         "@com_github_bradleymarie_iris//iris_camera_toolkit:pinhole_camera",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:cie_color_integrator",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:one_light_sampler",
-        "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -51,7 +49,6 @@ cc_binary(
     deps = [
         ":camera_parser",
         ":ostream",
-        ":output_writer",
         ":scene_parser",
         ":tokenizer",
         "@com_github_bradleymarie_iris//iris_advanced_toolkit:pcg_random",
@@ -93,17 +90,6 @@ cc_library(
     visibility = ["//src:__subpackages__"],
     deps = [
         "@com_github_bradleymarie_iris//iris",
-    ],
-)
-
-cc_library(
-    name = "output_writer",
-    srcs = ["output_writer.cc"],
-    hdrs = ["output_writer.h"],
-    deps = [
-        ":pointer_types",
-        "@com_github_bradleymarie_iris//iris_camera_toolkit:pfm_writer",
-        "@com_google_absl//absl/strings",
     ],
 )
 

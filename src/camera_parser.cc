@@ -1,18 +1,14 @@
 #include <iostream>
 
-#include "absl/flags/flag.h"
 #include "iris_camera_toolkit/pinhole_camera.h"
 #include "iris_physx_toolkit/cie_color_integrator.h"
-#include "iris_physx_toolkit/one_light_sampler.h"
 #include "src/camera_parser.h"
 #include "src/directive_parser.h"
+#include "src/films/parser.h"
 #include "src/integrators/parser.h"
 #include "src/matrix_parser.h"
 #include "src/param_matcher.h"
 #include "src/samplers/parser.h"
-
-ABSL_FLAG(std::string, default_output, "iris.pfm",
-          "The default output location if none is specified.");
 
 namespace iris {
 namespace {
@@ -181,36 +177,6 @@ CameraFactory ParsePerspectiveCamera(const char* base_type_name,
                                         half_fov);
 }
 
-static const size_t kImageFilmDefaultXResolution = 640;
-static const size_t kImageFilmDefaultYResolution = 480;
-
-std::pair<Framebuffer, OutputWriter> ParseImageFilm(
-    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
-    MatrixManager& matrix_manager) {
-  SingleStringMatcher filename(base_type_name, type_name, "filename",
-                               absl::GetFlag(FLAGS_default_output));
-  NonZeroSingleSizeTMatcher xresolution(
-      base_type_name, type_name, "xresolution", kImageFilmDefaultXResolution);
-  NonZeroSingleSizeTMatcher yresolution(
-      base_type_name, type_name, "yresolution", kImageFilmDefaultYResolution);
-  ParseAllParameter<3>(base_type_name, type_name, tokenizer,
-                       {&filename, &xresolution, &yresolution});
-
-  Framebuffer framebuffer;
-  ISTATUS status = FramebufferAllocate(xresolution.Get(), yresolution.Get(),
-                                       framebuffer.release_and_get_address());
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
-
-  return std::make_pair(std::move(framebuffer),
-                        ParseOutputWriter(filename.Get()));
-}
-
 void PopulateUninitialzedParameters(const Matrix& camera_to_world,
                                     CameraFactory camera_factory,
                                     CameraConfig& result) {
@@ -219,16 +185,9 @@ void PopulateUninitialzedParameters(const Matrix& camera_to_world,
   }
 
   if (!std::get<2>(result).get()) {
-    ISTATUS status = FramebufferAllocate(
-        kImageFilmDefaultXResolution, kImageFilmDefaultYResolution,
-        std::get<2>(result).release_and_get_address());
-    switch (status) {
-      case ISTATUS_ALLOCATION_FAILED:
-        std::cerr << "ERROR: Allocation failed" << std::endl;
-        exit(EXIT_FAILURE);
-      default:
-        assert(status == ISTATUS_SUCCESS);
-    }
+    auto default_film = CreateDefaultFilm();
+    std::get<2>(result) = std::move(default_film.first);
+    std::get<6>(result) = std::move(default_film.second);
   }
 
   if (!camera_factory) {
@@ -243,11 +202,6 @@ void PopulateUninitialzedParameters(const Matrix& camera_to_world,
 
   if (!std::get<4>(result)) {
     std::get<4>(result) = default_integrator.second;
-  }
-
-  if (!std::get<6>(result)) {
-    std::get<6>(result) =
-        ParseOutputWriter(absl::GetFlag(FLAGS_default_output));
   }
 
   std::get<0>(result) = camera_factory(std::get<2>(result));
@@ -323,9 +277,8 @@ CameraConfig ParseCamera(Tokenizer& tokenizer, MatrixManager& matrix_manager) {
     }
 
     if (token == "Film") {
-      auto film = ParseDirectiveOnce<std::pair<Framebuffer, OutputWriter>, 1>(
-          "Film", tokenizer, matrix_manager,
-          {std::make_pair("image", ParseImageFilm)}, std::get<2>(result).get());
+      ErrorIfPresent("Sampler", std::get<2>(result).get());
+      auto film = ParseFilm("Film", tokenizer);
       std::get<2>(result) = std::move(film.first);
       std::get<6>(result) = std::move(film.second);
       continue;

@@ -12,7 +12,6 @@
 #include "src/camera_parser.h"
 #include "src/matrix_manager.h"
 #include "src/ostream.h"
-#include "src/output_writer.h"
 #include "src/scene_parser.h"
 #include "src/tokenizer.h"
 

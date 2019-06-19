@@ -1,21 +1,15 @@
-#include <cstdio>
+#include "src/films/output_writers/pfm.h"
+
 #include <iostream>
 #include <memory>
 
-#include "absl/strings/match.h"
 #include "iris_camera_toolkit/pfm_writer.h"
-#include "src/output_writer.h"
 
 namespace iris {
 
-OutputWriter ParseOutputWriter(absl::string_view path) {
-  if (!absl::EndsWith(path, ".pfm")) {
-    std::cerr << "ERROR: pfm is the only supported output format" << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  std::string file_name(path);
-  FILE* lock_file = fopen(file_name.c_str(), "w+");
+OutputWriter ParsePfm(absl::string_view file_name) {
+  std::string path(file_name);
+  FILE* lock_file = fopen(path.c_str(), "w+");
   if (!lock_file) {
     std::cerr << "ERROR: Failed to open output file: " << path << std::endl;
     exit(EXIT_FAILURE);
@@ -34,11 +28,11 @@ OutputWriter ParseOutputWriter(absl::string_view path) {
       *shared_lock_file = nullptr;
     }
 
-    ISTATUS status = WriteToPfmFile(framebuffer.get(), file_name.c_str(),
-                                    PFM_PIXEL_FORMAT_SRGB);
+    ISTATUS status =
+        WriteToPfmFile(framebuffer.get(), path.c_str(), PFM_PIXEL_FORMAT_SRGB);
     switch (status) {
       case ISTATUS_IO_ERROR:
-        std::cerr << "ERROR: Failed to write to output file: " << file_name
+        std::cerr << "ERROR: Failed to write to output file: " << path
                   << std::endl;
         exit(EXIT_FAILURE);
       default:
