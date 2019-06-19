@@ -12,36 +12,32 @@
 namespace iris {
 namespace {
 
-void PopulateUninitialzedParameters(const Matrix& camera_to_world,
-                                    CameraFactory camera_factory,
-                                    CameraConfig& result) {
-  if (!std::get<1>(result).get()) {
-    std::get<1>(result) = CreateDefaultSampler();
+CameraConfig CreateCameraConfig(
+    const Matrix& camera_to_world, absl::optional<PixelSampler>&& pixel_sampler,
+    absl::optional<FilmResult>&& film_result,
+    absl::optional<IntegratorResult>&& integrator_result,
+    absl::optional<CameraFactory>&& camera_factory) {
+  if (!pixel_sampler) {
+    pixel_sampler = CreateDefaultSampler();
   }
 
-  if (!std::get<2>(result).get()) {
-    auto default_film = CreateDefaultFilm();
-    std::get<2>(result) = std::move(default_film.first);
-    std::get<6>(result) = std::move(default_film.second);
+  if (!film_result) {
+    film_result = CreateDefaultFilm();
+  }
+
+  if (!integrator_result) {
+    integrator_result = CreateDefaultIntegrator();
   }
 
   if (!camera_factory) {
     camera_factory = CreateDefaultCamera();
   }
 
-  auto default_integrator = CreateDefaultIntegrator();
-  if (!std::get<3>(result).get()) {
-    std::get<3>(result) = std::move(default_integrator.first);
-  }
+  auto camera = (*camera_factory)(film_result->first);
 
-  if (!std::get<4>(result)) {
-    std::get<4>(result) = default_integrator.second;
-  }
-
-  std::get<0>(result) = camera_factory(std::get<2>(result));
-
+  ColorIntegrator color_integrator;
   ISTATUS status =
-      CieColorIntegratorAllocate(std::get<5>(result).release_and_get_address());
+      CieColorIntegratorAllocate(color_integrator.release_and_get_address());
   switch (status) {
     case ISTATUS_ALLOCATION_FAILED:
       std::cerr << "ERROR: Allocation failed" << std::endl;
@@ -49,6 +45,14 @@ void PopulateUninitialzedParameters(const Matrix& camera_to_world,
     default:
       assert(status == ISTATUS_SUCCESS);
   }
+
+  return {std::move(camera),
+          std::move(*pixel_sampler),
+          std::move(film_result->first),
+          std::move(integrator_result->first),
+          std::move(integrator_result->second),
+          std::move(color_integrator),
+          std::move(film_result->second)};
 }
 
 void ErrorIfPresent(const char* base_type_name, bool already_set) {
@@ -66,13 +70,16 @@ CameraConfig ParseCameraConfig(Tokenizer& tokenizer,
   matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
   matrix_manager.Identity();
 
-  CameraFactory camera_factory;
-  CameraConfig result;
+  absl::optional<PixelSampler> pixel_sampler;
+  absl::optional<FilmResult> film_result;
+  absl::optional<IntegratorResult> integrator_result;
+  absl::optional<CameraFactory> camera_factory;
   for (auto token = tokenizer.Next(); token; token = tokenizer.Next()) {
     if (token == "WorldBegin") {
-      PopulateUninitialzedParameters(matrix_manager.GetCurrent().first,
-                                     camera_factory, result);
-      return result;
+      return CreateCameraConfig(
+          matrix_manager.GetCurrent().first, std::move(pixel_sampler),
+          std::move(film_result), std::move(integrator_result),
+          std::move(camera_factory));
     }
 
     if (TryParseMatrix(*token, tokenizer, matrix_manager)) {
@@ -80,22 +87,20 @@ CameraConfig ParseCameraConfig(Tokenizer& tokenizer,
     }
 
     if (token == "Camera") {
-      ErrorIfPresent("Camera", !!camera_factory);
+      ErrorIfPresent("Camera", camera_factory.has_value());
       camera_factory = ParseCamera("Camera", tokenizer, matrix_manager);
       continue;
     }
 
     if (token == "Sampler") {
-      ErrorIfPresent("Sampler", std::get<1>(result).get());
-      std::get<1>(result) = ParseSampler("Sampler", tokenizer);
+      ErrorIfPresent("Sampler", pixel_sampler.has_value());
+      pixel_sampler = ParseSampler("Sampler", tokenizer);
       continue;
     }
 
     if (token == "Film") {
-      ErrorIfPresent("Sampler", std::get<2>(result).get());
-      auto film = ParseFilm("Film", tokenizer);
-      std::get<2>(result) = std::move(film.first);
-      std::get<6>(result) = std::move(film.second);
+      ErrorIfPresent("Sampler", film_result.has_value());
+      film_result = ParseFilm("Film", tokenizer);
       continue;
     }
 
@@ -105,10 +110,8 @@ CameraConfig ParseCameraConfig(Tokenizer& tokenizer,
     }
 
     if (token == "Integrator") {
-      ErrorIfPresent("Integrator", std::get<3>(result).get());
-      auto integrator = ParseIntegrator("Integrator", tokenizer);
-      std::get<3>(result) = std::move(integrator.first);
-      std::get<4>(result) = std::move(integrator.second);
+      ErrorIfPresent("Integrator", integrator_result.has_value());
+      integrator_result = ParseIntegrator("Integrator", tokenizer);
       continue;
     }
 
