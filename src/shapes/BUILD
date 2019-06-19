@@ -23,8 +23,8 @@ cc_library(
 
 cc_library(
     name = "trianglemesh",
-    hdrs = ["trianglemesh.h"],
     srcs = ["trianglemesh.cc"],
+    hdrs = ["trianglemesh.h"],
     deps = [
         ":result",
         "//src:ostream",

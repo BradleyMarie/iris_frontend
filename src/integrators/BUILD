@@ -15,8 +15,8 @@ cc_library(
 
 cc_library(
     name = "path",
-    hdrs = ["path.h"],
     srcs = ["path.cc"],
+    hdrs = ["path.h"],
     deps = [
         ":result",
         "//src:param_matcher",

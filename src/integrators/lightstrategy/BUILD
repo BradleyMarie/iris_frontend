@@ -23,8 +23,8 @@ cc_library(
 
 cc_library(
     name = "uniform",
-    hdrs = ["uniform.h"],
     srcs = ["uniform.cc"],
+    hdrs = ["uniform.h"],
     deps = [
         ":result",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:one_light_sampler",
