@@ -56,36 +56,6 @@ ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
   // TODO: Check for nonsensical indices
 
   std::vector<Shape> shapes;
-  if (!front_emissive_material.get() && !back_emissive_material.get()) {
-    for (size_t i = 0; i < indices.Get().size(); i += 3) {
-      POINT3 p0 = points.Get()[indices.Get()[i]];
-      POINT3 p1 = points.Get()[indices.Get()[i + 1]];
-      POINT3 p2 = points.Get()[indices.Get()[i + 2]];
-
-      Shape triangle;
-      ISTATUS status = TriangleAllocate(p0, p1, p2, front_material.get(),
-                                        back_material.get(),
-                                        triangle.release_and_get_address());
-      switch (status) {
-        case ISTATUS_ALLOCATION_FAILED:
-          std::cerr << "ERROR: Allocation failed" << std::endl;
-          exit(EXIT_FAILURE);
-        default:
-          assert(status == ISTATUS_SUCCESS);
-      }
-
-      if (!triangle.get()) {
-        std::cerr << "WARNING: Degenerate triangle skipped: " << p0 << ", "
-                  << p1 << ", " << p2 << std::endl;
-        continue;
-      }
-
-      shapes.push_back(triangle);
-    }
-
-    return std::make_pair(std::move(shapes), std::vector<Light>());
-  }
-
   std::vector<Light> lights;
   for (size_t i = 0; i < indices.Get().size(); i += 3) {
     POINT3 p0 = points.Get()[indices.Get()[i]];
@@ -128,7 +98,7 @@ ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
 
     if (back_emissive_material.get()) {
       Light light;
-      status = AreaLightAllocate(triangle.get(), TRIANGLE_FRONT_FACE,
+      status = AreaLightAllocate(triangle.get(), TRIANGLE_BACK_FACE,
                                  light.release_and_get_address());
       switch (status) {
         case ISTATUS_ALLOCATION_FAILED:
@@ -145,6 +115,6 @@ ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
   }
 
   return std::make_pair(std::move(shapes), std::move(lights));
-}  // namespace iris
+}
 
 }  // namespace iris

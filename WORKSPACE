@@ -8,6 +8,6 @@ git_repository(
 
 git_repository(
     name = "com_github_bradleymarie_iris",
-    commit = "a0e4be0c0e9de58659ee4315b161651878aa7a6f",
+    commit = "6ef65c84e927c65081f3b2c95700a75a45a4802c",
     remote = "https://github.com/BradleyMarie/iris",
 )
