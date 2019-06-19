@@ -1,5 +1,5 @@
-#ifndef _SRC_AREA_LIGHTS_MATTE_
-#define _SRC_AREA_LIGHTS_MATTE_
+#ifndef _SRC_AREA_LIGHTS_DIFFUSE_
+#define _SRC_AREA_LIGHTS_DIFFUSE_
 
 #include "src/area_lights/result.h"
 #include "src/tokenizer.h"
@@ -11,4 +11,4 @@ AreaLightResult ParseDiffuse(const char* base_type_name, const char* type_name,
 
 }  // namespace iris
 
-#endif  // _SRC_AREA_LIGHTS_MATTE_
+#endif  // _SRC_AREA_LIGHTS_DIFFUSE_
