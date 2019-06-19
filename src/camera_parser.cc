@@ -5,9 +5,9 @@
 #include "iris_camera_toolkit/pinhole_camera.h"
 #include "iris_physx_toolkit/cie_color_integrator.h"
 #include "iris_physx_toolkit/one_light_sampler.h"
-#include "iris_physx_toolkit/path_tracer.h"
 #include "src/camera_parser.h"
 #include "src/directive_parser.h"
+#include "src/integrators/parser.h"
 #include "src/matrix_parser.h"
 #include "src/param_matcher.h"
 
@@ -181,35 +181,6 @@ CameraFactory ParsePerspectiveCamera(const char* base_type_name,
                                         half_fov);
 }
 
-LightSampler CreateUniformLightSampler(std::vector<Light>& lights) {
-  std::vector<PLIGHT> raw_lights;
-  for (auto& light : lights) {
-    raw_lights.push_back(light.get());
-  }
-
-  LightSampler result;
-  ISTATUS status = OneLightSamplerAllocate(raw_lights.data(), raw_lights.size(),
-                                           result.release_and_get_address());
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
-
-  return result;
-}
-
-LightSamplerFactory ParseLightSampleStrategy(absl::string_view strategy) {
-  if (strategy == "uniform") {
-    return CreateUniformLightSampler;
-  }
-
-  std::cerr << "ERROR: Unrecognized lightstrategy: " << strategy << std::endl;
-  exit(EXIT_FAILURE);
-}
-
 static const bool kStratifiedSamplerDefaultJitter = false;
 static const uint16_t kStratifiedSamplerDefaultXSamples = 2;
 static const uint16_t kStratifiedSamplerDefaultYSamples = 2;
@@ -239,39 +210,6 @@ PixelSampler ParseStratifiedSampler(const char* base_type_name,
   }
 
   return result;
-}
-
-static const uint8_t kPathTracerDefaultMinDepth = 3;
-static const uint8_t kPathTracerDefaultMaxDepth = 5;
-static const float_t kPathTracerDefaultRRThreshold = (float_t)1.0;
-
-std::pair<Integrator, LightSamplerFactory> ParsePathIntegrator(
-    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
-    MatrixManager& matrix_manager) {
-  SingleStringMatcher lightsamplestrategy(
-      base_type_name, type_name, "lightsamplestrategy",
-      "uniform");  // TODO: Set default to spatial
-  NonZeroSingleUInt8Matcher maxdepth(base_type_name, type_name, "maxdepth",
-                                     kPathTracerDefaultMaxDepth);
-  PositiveScalarSingleFloatTMatcher rrthreshold(
-      base_type_name, type_name, "rrthreshold", kPathTracerDefaultRRThreshold);
-  ParseAllParameter<3>(base_type_name, type_name, tokenizer,
-                       {&lightsamplestrategy, &maxdepth, &rrthreshold});
-
-  Integrator integrator;
-  ISTATUS status = PathTracerAllocate(
-      std::min(kPathTracerDefaultMinDepth, maxdepth.Get()), maxdepth.Get(),
-      rrthreshold.Get(), integrator.release_and_get_address());
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
-
-  return std::make_pair(std::move(integrator),
-                        ParseLightSampleStrategy(lightsamplestrategy.Get()));
 }
 
 static const size_t kImageFilmDefaultXResolution = 640;
@@ -339,23 +277,13 @@ void PopulateUninitialzedParameters(const Matrix& camera_to_world,
         camera_to_world, kDefaultAspectRatio, kDefaultHalfFov);
   }
 
+  auto default_integrator = CreateDefaultIntegrator();
   if (!std::get<3>(result).get()) {
-    ISTATUS status = PathTracerAllocate(
-        kPathTracerDefaultMinDepth, kPathTracerDefaultMaxDepth,
-        kPathTracerDefaultRRThreshold,
-        std::get<3>(result).release_and_get_address());
-    switch (status) {
-      case ISTATUS_ALLOCATION_FAILED:
-        std::cerr << "ERROR: Allocation failed" << std::endl;
-        exit(EXIT_FAILURE);
-      default:
-        assert(status == ISTATUS_SUCCESS);
-    }
+    std::get<3>(result) = std::move(default_integrator.first);
   }
 
   if (!std::get<4>(result)) {
-    // TODO: Set default to spatial
-    std::get<4>(result) = CreateUniformLightSampler;
+    std::get<4>(result) = default_integrator.second;
   }
 
   if (!std::get<6>(result)) {
@@ -392,6 +320,14 @@ Result ParseDirectiveOnce(
 
   return ParseDirective<Result, NumImplementations, MatrixManager&>(
       base_type_name, tokenizer, callbacks, matrix_manager);
+}
+
+void ErrorIfPresent(const char* base_type_name, bool already_set) {
+  if (already_set) {
+    std::cerr << "ERROR: Invalid " << base_type_name
+              << " specified more than once before WorldBegin" << std::endl;
+    exit(EXIT_FAILURE);
+  }
 }
 
 }  // namespace
@@ -445,11 +381,8 @@ CameraConfig ParseCamera(Tokenizer& tokenizer, MatrixManager& matrix_manager) {
     }
 
     if (token == "Integrator") {
-      auto integrator =
-          ParseDirectiveOnce<std::pair<Integrator, LightSamplerFactory>, 1>(
-              "Integrator", tokenizer, matrix_manager,
-              {std::make_pair("path", ParsePathIntegrator)},
-              std::get<3>(result).get());
+      ErrorIfPresent("Integrator", std::get<3>(result).get());
+      auto integrator = ParseIntegrator("Integrator", tokenizer);
       std::get<3>(result) = std::move(integrator.first);
       std::get<4>(result) = std::move(integrator.second);
       continue;
