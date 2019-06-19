@@ -13,7 +13,7 @@ cc_library(
         ":pointer_types",
         ":tokenizer",
         "//src/integrators:parser",
-        "@com_github_bradleymarie_iris//iris_camera_toolkit:grid_pixel_sampler",
+        "//src/samplers:parser",
         "@com_github_bradleymarie_iris//iris_camera_toolkit:pinhole_camera",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:cie_color_integrator",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:one_light_sampler",

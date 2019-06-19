@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include "absl/flags/flag.h"
-#include "iris_camera_toolkit/grid_pixel_sampler.h"
 #include "iris_camera_toolkit/pinhole_camera.h"
 #include "iris_physx_toolkit/cie_color_integrator.h"
 #include "iris_physx_toolkit/one_light_sampler.h"
@@ -10,6 +9,7 @@
 #include "src/integrators/parser.h"
 #include "src/matrix_parser.h"
 #include "src/param_matcher.h"
+#include "src/samplers/parser.h"
 
 ABSL_FLAG(std::string, default_output, "iris.pfm",
           "The default output location if none is specified.");
@@ -181,37 +181,6 @@ CameraFactory ParsePerspectiveCamera(const char* base_type_name,
                                         half_fov);
 }
 
-static const bool kStratifiedSamplerDefaultJitter = false;
-static const uint16_t kStratifiedSamplerDefaultXSamples = 2;
-static const uint16_t kStratifiedSamplerDefaultYSamples = 2;
-
-PixelSampler ParseStratifiedSampler(const char* base_type_name,
-                                    const char* type_name, Tokenizer& tokenizer,
-                                    MatrixManager& matrix_manager) {
-  SingleBoolMatcher jitter(base_type_name, type_name, "jitter",
-                           kStratifiedSamplerDefaultJitter);
-  NonZeroSingleUInt16Matcher xsamples(base_type_name, type_name, "xsamples",
-                                      kStratifiedSamplerDefaultXSamples);
-  NonZeroSingleUInt16Matcher ysamples(base_type_name, type_name, "ysamples",
-                                      kStratifiedSamplerDefaultXSamples);
-  ParseAllParameter<3>(base_type_name, type_name, tokenizer,
-                       {&jitter, &xsamples, &ysamples});
-
-  PixelSampler result;
-  ISTATUS status =
-      GridPixelSamplerAllocate(xsamples.Get(), ysamples.Get(), jitter.Get(), 1,
-                               1, false, result.release_and_get_address());
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
-
-  return result;
-}
-
 static const size_t kImageFilmDefaultXResolution = 640;
 static const size_t kImageFilmDefaultYResolution = 480;
 
@@ -246,17 +215,7 @@ void PopulateUninitialzedParameters(const Matrix& camera_to_world,
                                     CameraFactory camera_factory,
                                     CameraConfig& result) {
   if (!std::get<1>(result).get()) {
-    ISTATUS status = GridPixelSamplerAllocate(
-        kStratifiedSamplerDefaultXSamples, kStratifiedSamplerDefaultYSamples,
-        kStratifiedSamplerDefaultJitter, 1, 1, false,
-        std::get<1>(result).release_and_get_address());
-    switch (status) {
-      case ISTATUS_ALLOCATION_FAILED:
-        std::cerr << "ERROR: Allocation failed" << std::endl;
-        exit(EXIT_FAILURE);
-      default:
-        assert(status == ISTATUS_SUCCESS);
-    }
+    std::get<1>(result) = CreateDefaultSampler();
   }
 
   if (!std::get<2>(result).get()) {
@@ -358,11 +317,8 @@ CameraConfig ParseCamera(Tokenizer& tokenizer, MatrixManager& matrix_manager) {
     }
 
     if (token == "Sampler") {
-      auto sampler = ParseDirectiveOnce<PixelSampler, 1>(
-          "Sampler", tokenizer, matrix_manager,
-          {std::make_pair("stratified", ParseStratifiedSampler)},
-          std::get<1>(result).get());
-      std::get<1>(result) = std::move(sampler);
+      ErrorIfPresent("Sampler", std::get<1>(result).get());
+      std::get<1>(result) = ParseSampler("Sampler", tokenizer);
       continue;
     }
 
