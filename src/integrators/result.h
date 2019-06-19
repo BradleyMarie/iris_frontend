@@ -1,8 +1,7 @@
 #ifndef _SRC_INTEGRATORS_RESULT_
 #define _SRC_INTEGRATORS_RESULT_
 
-#include <set>
-#include <tuple>
+#include <utility>
 
 #include "src/integrators/lightstrategy/result.h"
 #include "src/pointer_types.h"
