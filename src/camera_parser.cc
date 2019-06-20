@@ -49,12 +49,24 @@ CameraConfig CreateCameraConfig(
           std::move(film_result->second)};
 }
 
-void ErrorIfPresent(const char* base_type_name, bool already_set) {
-  if (already_set) {
+template <typename Result, typename... Args>
+bool ParseDirectiveOnce(const char* base_type_name, absl::string_view token,
+                        absl::optional<Result>& result,
+                        Result (*function)(const char*, Tokenizer&, Args...),
+                        Tokenizer& tokenizer, Args... args) {
+  if (token != base_type_name) {
+    return false;
+  }
+
+  if (result) {
     std::cerr << "ERROR: Invalid " << base_type_name
               << " specified more than once before WorldBegin" << std::endl;
     exit(EXIT_FAILURE);
   }
+
+  result = function(base_type_name, tokenizer, args...);
+
+  return true;
 }
 
 }  // namespace
@@ -81,27 +93,25 @@ CameraConfig ParseCameraConfig(Tokenizer& tokenizer,
       continue;
     }
 
-    if (token == "Camera") {
-      ErrorIfPresent("Camera", camera_factory.has_value());
-      camera_factory = ParseCamera("Camera", tokenizer, matrix_manager);
+    if (ParseDirectiveOnce<CameraFactory, MatrixManager&>(
+            "Camera", *token, camera_factory, ParseCamera, tokenizer,
+            matrix_manager)) {
       continue;
     }
 
-    if (token == "ColorIntegrator") {
-      ErrorIfPresent("ColorIntegrator", color_integrator.has_value());
-      color_integrator = ParseColorIntegrator("ColorIntegrator", tokenizer);
+    if (ParseDirectiveOnce<ColorIntegrator>("ColorIntegrator", *token,
+                                            color_integrator,
+                                            ParseColorIntegrator, tokenizer)) {
       continue;
     }
 
-    if (token == "Sampler") {
-      ErrorIfPresent("Sampler", pixel_sampler.has_value());
-      pixel_sampler = ParseSampler("Sampler", tokenizer);
+    if (ParseDirectiveOnce<PixelSampler>("Sampler", *token, pixel_sampler,
+                                         ParseSampler, tokenizer)) {
       continue;
     }
 
-    if (token == "Film") {
-      ErrorIfPresent("Sampler", film_result.has_value());
-      film_result = ParseFilm("Film", tokenizer);
+    if (ParseDirectiveOnce<FilmResult>("Film", *token, film_result, ParseFilm,
+                                       tokenizer)) {
       continue;
     }
 
@@ -110,9 +120,9 @@ CameraConfig ParseCameraConfig(Tokenizer& tokenizer,
       continue;
     }
 
-    if (token == "Integrator") {
-      ErrorIfPresent("Integrator", integrator_result.has_value());
-      integrator_result = ParseIntegrator("Integrator", tokenizer);
+    if (ParseDirectiveOnce<IntegratorResult>("Integrator", *token,
+                                             integrator_result, ParseIntegrator,
+                                             tokenizer)) {
       continue;
     }
 
