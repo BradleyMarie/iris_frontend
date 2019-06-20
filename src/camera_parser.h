@@ -12,7 +12,7 @@
 namespace iris {
 
 typedef std::tuple<Camera, PixelSampler, Framebuffer, Integrator,
-                   LightSamplerFactory, ColorIntegrator, OutputWriter>
+                   LightSamplerFactory, ColorIntegrator, OutputWriter, Random>
     CameraConfig;
 
 CameraConfig ParseCameraConfig(Tokenizer& tokenizer,

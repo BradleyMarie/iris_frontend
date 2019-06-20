@@ -7,6 +7,7 @@
 #include "src/films/parser.h"
 #include "src/integrators/parser.h"
 #include "src/matrix_parser.h"
+#include "src/randoms/parser.h"
 #include "src/samplers/parser.h"
 
 namespace iris {
@@ -17,7 +18,8 @@ CameraConfig CreateCameraConfig(
     absl::optional<FilmResult>&& film_result,
     absl::optional<IntegratorResult>&& integrator_result,
     absl::optional<CameraFactory>&& camera_factory,
-    absl::optional<ColorIntegrator>&& color_integrator) {
+    absl::optional<ColorIntegrator>&& color_integrator,
+    absl::optional<Random>&& random) {
   if (!pixel_sampler) {
     pixel_sampler = CreateDefaultSampler();
   }
@@ -38,6 +40,10 @@ CameraConfig CreateCameraConfig(
     color_integrator = CreateDefaultColorIntegrator();
   }
 
+  if (!random) {
+    random = CreateDefaultRandom();
+  }
+
   auto camera = (*camera_factory)(film_result->first);
 
   return {std::move(camera),
@@ -46,7 +52,8 @@ CameraConfig CreateCameraConfig(
           std::move(integrator_result->first),
           std::move(integrator_result->second),
           std::move(*color_integrator),
-          std::move(film_result->second)};
+          std::move(film_result->second),
+          std::move(*random)};
 }
 
 template <typename Result, typename... Args>
@@ -81,12 +88,14 @@ CameraConfig ParseCameraConfig(Tokenizer& tokenizer,
   absl::optional<IntegratorResult> integrator_result;
   absl::optional<CameraFactory> camera_factory;
   absl::optional<ColorIntegrator> color_integrator;
+  absl::optional<Random> random;
   for (auto token = tokenizer.Next(); token; token = tokenizer.Next()) {
     if (token == "WorldBegin") {
       return CreateCameraConfig(
           matrix_manager.GetCurrent().first, std::move(pixel_sampler),
           std::move(film_result), std::move(integrator_result),
-          std::move(camera_factory), std::move(color_integrator));
+          std::move(camera_factory), std::move(color_integrator),
+          std::move(random));
     }
 
     if (TryParseMatrix(*token, tokenizer, matrix_manager)) {
@@ -142,6 +151,11 @@ CameraConfig ParseCameraConfig(Tokenizer& tokenizer,
       std::cerr << "ERROR: Invalid directive before WorldBegin: " << *token
                 << std::endl;
       exit(EXIT_FAILURE);
+      continue;
+    }
+
+    if (ParseDirectiveOnce<Random>("Random", *token, random, ParseRandom,
+                                   tokenizer)) {
       continue;
     }
 

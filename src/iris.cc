@@ -7,7 +7,6 @@
 #include "absl/flags/flag.h"
 #include "absl/flags/internal/usage.h"
 #include "absl/flags/parse.h"
-#include "iris_advanced_toolkit/pcg_random.h"
 #include "iris_physx_toolkit/sample_tracer.h"
 #include "src/camera_parser.h"
 #include "src/matrix_manager.h"
@@ -40,19 +39,6 @@ void ParseAndRender(const std::string& search_dir, Tokenizer& tokenizer) {
     exit(EXIT_FAILURE);
   }
 
-  Random rng;
-  ISTATUS status = PermutedCongruentialRandomAllocate(
-      0x853c49e6748fea9bULL, 0xda3e39cb94b95bdbULL,
-      rng.release_and_get_address());
-
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
-
   MatrixManager matrix_manager;
   auto camera_params = ParseCameraConfig(tokenizer, matrix_manager);
   auto scene_params =
@@ -61,7 +47,7 @@ void ParseAndRender(const std::string& search_dir, Tokenizer& tokenizer) {
   tokenizer.GarbageCollect();
 
   SampleTracer sample_tracer;
-  status = PhysxSampleTracerAllocate(
+  ISTATUS status = PhysxSampleTracerAllocate(
       std::get<3>(camera_params).detach(), scene_params.first.get(),
       light_sampler.get(), std::get<5>(camera_params).get(),
       sample_tracer.release_and_get_address());
@@ -80,8 +66,9 @@ void ParseAndRender(const std::string& search_dir, Tokenizer& tokenizer) {
 
   status = IrisCameraRender(
       std::get<0>(camera_params).get(), std::get<1>(camera_params).get(),
-      sample_tracer.get(), rng.get(), std::get<2>(camera_params).get(),
-      absl::GetFlag(FLAGS_epsilon), absl::GetFlag(FLAGS_num_threads));
+      sample_tracer.get(), std::get<7>(camera_params).get(),
+      std::get<2>(camera_params).get(), absl::GetFlag(FLAGS_epsilon),
+      absl::GetFlag(FLAGS_num_threads));
 
   switch (status) {
     case ISTATUS_SUCCESS:
