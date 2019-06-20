@@ -1,7 +1,8 @@
 #include "src/tokenizer.h"
 
 #include <cctype>
-#include <iostream>
+#include <fstream>
+#include <sstream>
 
 namespace iris {
 namespace {
@@ -30,53 +31,37 @@ static char ReadEscapedCharacter(char ch) {
   exit(EXIT_FAILURE);
 }
 
-}  // namespace
+bool ParseNext(std::istream& stream, std::string& output) {
+  output.clear();
 
-absl::optional<absl::string_view> Tokenizer::Peek() {
-  if (!m_next) {
-    m_next = ParseNext();
-  }
-
-  return *m_next;
-}
-
-absl::optional<absl::string_view> Tokenizer::Next() {
-  if (m_next) {
-    auto result = *m_next;
-    m_next = absl::nullopt;
-    return result;
-  }
-
-  return ParseNext();
-}
-
-absl::optional<absl::string_view> Tokenizer::ParseNext() {
-  while (m_position != m_serialized.end()) {
-    const char* token_start = ToPointer(m_position++);
-    if (std::isspace(static_cast<unsigned char>(*token_start))) {
+  for (int read = stream.get(); read != EOF; read = stream.get()) {
+    if (std::isspace(read)) {
       continue;
     }
 
-    if (*token_start == '"') {
+    char ch = static_cast<char>(read);
+    if (ch == '"') {
+      output += ch;
       bool escaped = false;
       bool found = false;
-      while (m_position != m_serialized.end()) {
-        char current = *m_position++;
 
-        if (current == '"') {
+      for (read = stream.get(); read != EOF; read = stream.get()) {
+        ch = static_cast<char>(read);
+        output += ch;
+
+        if (ch == '"') {
           found = true;
           break;
         }
 
-        if (current == '\n') {
+        if (ch == '\n') {
           std::cerr << "ERROR: New line found before end of quoted text"
                     << std::endl;
           exit(EXIT_FAILURE);
         }
 
-        if (current == '\\') {
+        if (ch == '\\') {
           escaped = true;
-          m_position++;
         }
       }
 
@@ -85,32 +70,39 @@ absl::optional<absl::string_view> Tokenizer::ParseNext() {
         exit(EXIT_FAILURE);
       }
 
-      if (!escaped) {
-        return absl::string_view(token_start,
-                                 ToPointer(m_position) - token_start);
-      }
+      if (escaped) {
+        size_t end = 0;
+        for (size_t i = 0; i < output.size(); i++) {
+          if (output[i] == '\\') {
+            if (++i == output.size()) {
+              std::cerr
+                  << "ERROR: A token may not end with the escape character"
+                  << std::endl;
+              exit(EXIT_FAILURE);
+            }
+            output[end] += ReadEscapedCharacter(output[i]);
+          } else {
+            output[end] += output[i];
+          }
 
-      m_escaped.clear();
-      for (auto ptr = token_start; ptr != ToPointer(m_position); ptr++) {
-        if (*ptr != '\\') {
-          m_escaped += ReadEscapedCharacter(*(++ptr));
-        } else {
-          m_escaped += *ptr;
+          end++;
         }
+
+        output.resize(end);
       }
 
-      return absl::string_view(m_escaped);
+      return true;
     }
 
-    if (*token_start == '[' || *token_start == ']') {
-      return absl::string_view(token_start, 1);
+    if (ch == '[' || ch == ']') {
+      output += ch;
+      return true;
     }
 
-    if (*token_start == '#') {
-      while (m_position != m_serialized.end()) {
-        char current = *m_position++;
-
-        if (current == '\r' || current == '\n') {
+    if (ch == '#') {
+      for (read = stream.get(); read != EOF; read = stream.get()) {
+        ch = static_cast<char>(read);
+        if (ch == '\r' || ch == '\n') {
           break;
         }
       }
@@ -118,15 +110,61 @@ absl::optional<absl::string_view> Tokenizer::ParseNext() {
       continue;
     }
 
-    while (m_position != m_serialized.end()) {
-      if (std::isspace(static_cast<unsigned char>(*m_position)) ||
-          *m_position == '"' || *m_position == '[' || *m_position == ']') {
+    output += ch;
+    for (int peeked = stream.peek(); peeked != EOF; peeked = stream.peek()) {
+      if (std::isspace(peeked) || peeked == '"' || peeked == '[' ||
+          peeked == ']') {
         break;
       }
-      m_position++;
+
+      stream >> ch;
+      output += ch;
     }
 
-    return absl::string_view(token_start, ToPointer(m_position) - token_start);
+    return true;
+  }
+
+  return false;
+}
+
+}  // namespace
+
+Tokenizer::Tokenizer()
+    : m_allocated_stream(new std::stringstream()),
+      m_stream(*m_allocated_stream) {}
+
+Tokenizer::Tokenizer(const std::string& file)
+    : m_allocated_stream(new std::ifstream(file)),
+      m_stream(*m_allocated_stream) {
+  if (!m_stream) {
+    std::cerr << "ERROR: Error opening file " << file << std::endl;
+    exit(EXIT_FAILURE);
+  }
+}
+
+absl::optional<absl::string_view> Tokenizer::Peek() {
+  if (!m_peeked_valid.has_value()) {
+    m_peeked_valid = ParseNext(m_stream, m_peeked);
+  }
+
+  if (*m_peeked_valid) {
+    return m_peeked;
+  }
+
+  return absl::nullopt;
+}
+
+absl::optional<absl::string_view> Tokenizer::Next() {
+  if (m_peeked_valid.has_value()) {
+    std::swap(m_next, m_peeked);
+    m_next_valid = m_peeked_valid;
+    m_peeked_valid = absl::nullopt;
+  } else {
+    m_next_valid = ParseNext(m_stream, m_next);
+  }
+
+  if (*m_next_valid) {
+    return m_next;
   }
 
   return absl::nullopt;

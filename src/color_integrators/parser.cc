@@ -14,7 +14,7 @@ ColorIntegrator ParseColorIntegrator(const char* base_type_name,
 }
 
 ColorIntegrator CreateDefaultColorIntegrator() {
-  Tokenizer tokenizer("");
+  Tokenizer tokenizer;
   return ParseCie("Unused", "Unused", tokenizer);
 }
 

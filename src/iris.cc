@@ -1,5 +1,4 @@
 #include <cstdlib>
-#include <fstream>
 #include <iostream>
 #include <thread>
 #include <vector>
@@ -102,26 +101,18 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
 
-  std::string search_dir, scene;
+  std::unique_ptr<Tokenizer> tokenizer;
+  std::string search_dir;
   if (unparsed.size() == 1) {
     search_dir = GetWorkingDirectory();
-    scene.assign((std::istreambuf_iterator<char>(std::cin)),
-                 (std::istreambuf_iterator<char>()));
+    tokenizer = absl::make_unique<Tokenizer>(std::cin);
   } else {
     search_dir = GetParentDirectory(unparsed[1]);
-    std::ifstream file(unparsed[1]);
-    if (!file) {
-      std::cerr << "ERROR: Error opening file " << unparsed[1] << std::endl;
-      return EXIT_FAILURE;
-    }
-
-    scene.assign((std::istreambuf_iterator<char>(file)),
-                 (std::istreambuf_iterator<char>()));
+    tokenizer = absl::make_unique<Tokenizer>(unparsed[1]);
   }
 
-  Tokenizer tokenizer(std::move(scene));
-  while (tokenizer.Peek()) {
-    ParseAndRender(search_dir, tokenizer);
+  while (tokenizer->Peek()) {
+    ParseAndRender(search_dir, *tokenizer);
   }
 
   return EXIT_SUCCESS;

@@ -14,7 +14,7 @@ PixelSampler ParseSampler(const char* base_type_name, Tokenizer& tokenizer) {
 }
 
 PixelSampler CreateDefaultSampler() {
-  Tokenizer tokenizer("");
+  Tokenizer tokenizer;
   return ParseStratified("Unused", "Unused", tokenizer);
 }
 

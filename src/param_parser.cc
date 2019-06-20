@@ -229,22 +229,21 @@ static SpectrumParameter ParseSpectrum(Tokenizer& tokenizer) {
 }  // namespace
 
 absl::optional<Parameter> ParseNextParam(Tokenizer& tokenizer) {
-  auto quoted_token = tokenizer.Peek();
-  if (!quoted_token) {
+  auto peeked_token = tokenizer.Peek();
+  if (!peeked_token || !UnquoteToken(*peeked_token)) {
     return absl::nullopt;
   }
 
-  auto unquoted_token = UnquoteToken(*quoted_token);
-  if (!unquoted_token) {
-    return absl::nullopt;
-  }
+  std::string quoted_token(peeked_token->data(), peeked_token->size());
+  auto unquoted_token = *UnquoteToken(quoted_token);
+  tokenizer.Next();
 
   std::vector<absl::string_view> type_and_name =
-      absl::StrSplit(*unquoted_token, " ", absl::SkipEmpty());
+      absl::StrSplit(unquoted_token, " ", absl::SkipEmpty());
 
   if (type_and_name.size() != 2) {
     std::cerr << "ERROR: Failed to parse parameter type and name: "
-              << *quoted_token << std::endl;
+              << quoted_token << std::endl;
     exit(EXIT_FAILURE);
   }
 
@@ -252,12 +251,10 @@ absl::optional<Parameter> ParseNextParam(Tokenizer& tokenizer) {
   result.first = std::string(type_and_name[1].data(), type_and_name[1].size());
 
   if (!tokenizer.Peek()) {
-    std::cerr << "ERROR: No parameters found for parameter: " << *quoted_token
+    std::cerr << "ERROR: No parameters found for parameter: " << quoted_token
               << std::endl;
     exit(EXIT_FAILURE);
   }
-
-  tokenizer.Next();
 
   if (type_and_name[0] == "float") {
     result.second = ParseFloat(tokenizer);

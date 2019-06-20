@@ -22,13 +22,12 @@ class GraphicsStateManager {
   void AttributeBegin(MatrixManager& matrix_manager);
   void AttributeEnd(MatrixManager& matrix_manager);
 
-  std::pair<const EmissiveMaterial&, const EmissiveMaterial&>
-  GetEmissiveMaterials();
+  std::pair<EmissiveMaterial, EmissiveMaterial> GetEmissiveMaterials();
   void SetEmissiveMaterials(const EmissiveMaterial& front_emissive_material,
                             const EmissiveMaterial& back_emissive_material,
                             const std::set<Spectrum> light_spectra);
 
-  const Material& GetMaterial();
+  Material GetMaterial();
   void SetMaterial(const Material& material,
                    const std::set<Reflector> material_reflectors);
 
@@ -63,7 +62,8 @@ class GraphicsStateManager {
 };
 
 GraphicsStateManager::GraphicsStateManager() {
-  m_shader_state.push(ShaderState());
+  ShaderState state;
+  m_shader_state.push(state);
 }
 
 void GraphicsStateManager::TransformBegin(MatrixManager& matrix_manager) {
@@ -92,8 +92,11 @@ void GraphicsStateManager::AttributeBegin(MatrixManager& matrix_manager) {
 }
 
 void GraphicsStateManager::AttributeEnd(MatrixManager& matrix_manager) {
-  if (m_transform_state.empty() ||
+  if (m_shader_state.size() == 1 || m_transform_state.empty() ||
       m_transform_state.top().push_reason != ATTRIBUTE) {
+    std::cerr << "ERROR: Mismatched AttributeBegin and AttributeEnd directives"
+              << std::endl;
+    exit(EXIT_FAILURE);
   }
 
   matrix_manager.RestoreState(m_transform_state.top().transforms,
@@ -101,15 +104,9 @@ void GraphicsStateManager::AttributeEnd(MatrixManager& matrix_manager) {
 
   m_transform_state.pop();
   m_shader_state.pop();
-
-  if (m_shader_state.empty()) {
-    std::cerr << "ERROR: Mismatched AttributeBegin and AttributeEnd directives"
-              << std::endl;
-    exit(EXIT_FAILURE);
-  }
 }
 
-std::pair<const EmissiveMaterial&, const EmissiveMaterial&>
+std::pair<EmissiveMaterial, EmissiveMaterial>
 GraphicsStateManager::GetEmissiveMaterials() {
   m_spectra_used.insert(m_shader_state.top().light_spectra.begin(),
                         m_shader_state.top().light_spectra.end());
@@ -126,7 +123,7 @@ void GraphicsStateManager::SetEmissiveMaterials(
   m_shader_state.top().light_spectra = light_spectra;
 }
 
-const Material& GraphicsStateManager::GetMaterial() {
+Material GraphicsStateManager::GetMaterial() {
   m_reflectors_used.insert(m_shader_state.top().material_reflectors.begin(),
                            m_shader_state.top().material_reflectors.end());
   return m_shader_state.top().material;
