@@ -5,7 +5,6 @@
 #include "src/area_lights/parser.h"
 #include "src/materials/parser.h"
 #include "src/matrix_parser.h"
-#include "src/ostream.h"
 #include "src/scene_parser.h"
 #include "src/shapes/parser.h"
 
