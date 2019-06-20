@@ -132,13 +132,4 @@ absl::optional<absl::string_view> Tokenizer::ParseNext() {
   return absl::nullopt;
 }
 
-void Tokenizer::GarbageCollect() {
-  auto peek_result = Peek();
-  if (!peek_result) {
-    m_serialized.resize(0);
-    m_position = m_serialized.begin();
-    m_escaped.resize(0);
-  }
-}
-
 }  // namespace iris

@@ -44,7 +44,6 @@ void ParseAndRender(const std::string& search_dir, Tokenizer& tokenizer) {
   auto scene_params =
       ParseScene(tokenizer, matrix_manager, std::get<5>(camera_params));
   auto light_sampler = std::get<4>(camera_params)(scene_params.second);
-  tokenizer.GarbageCollect();
 
   SampleTracer sample_tracer;
   ISTATUS status = PhysxSampleTracerAllocate(

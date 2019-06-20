@@ -15,7 +15,6 @@ class Tokenizer {
 
   absl::optional<absl::string_view> Peek();
   absl::optional<absl::string_view> Next();
-  void GarbageCollect();
 
  private:
   absl::optional<absl::string_view> ParseNext();
