@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "iris_physx_toolkit/cie_color_integrator.h"
 #include "src/cameras/parser.h"
+#include "src/color_integrators/parser.h"
 #include "src/films/parser.h"
 #include "src/integrators/parser.h"
 #include "src/matrix_parser.h"
@@ -16,7 +16,8 @@ CameraConfig CreateCameraConfig(
     const Matrix& camera_to_world, absl::optional<PixelSampler>&& pixel_sampler,
     absl::optional<FilmResult>&& film_result,
     absl::optional<IntegratorResult>&& integrator_result,
-    absl::optional<CameraFactory>&& camera_factory) {
+    absl::optional<CameraFactory>&& camera_factory,
+    absl::optional<ColorIntegrator>&& color_integrator) {
   if (!pixel_sampler) {
     pixel_sampler = CreateDefaultSampler();
   }
@@ -33,25 +34,18 @@ CameraConfig CreateCameraConfig(
     camera_factory = CreateDefaultCamera();
   }
 
-  auto camera = (*camera_factory)(film_result->first);
-
-  ColorIntegrator color_integrator;
-  ISTATUS status =
-      CieColorIntegratorAllocate(color_integrator.release_and_get_address());
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
+  if (!color_integrator) {
+    color_integrator = CreateDefaultColorIntegrator();
   }
+
+  auto camera = (*camera_factory)(film_result->first);
 
   return {std::move(camera),
           std::move(*pixel_sampler),
           std::move(film_result->first),
           std::move(integrator_result->first),
           std::move(integrator_result->second),
-          std::move(color_integrator),
+          std::move(*color_integrator),
           std::move(film_result->second)};
 }
 
@@ -74,12 +68,13 @@ CameraConfig ParseCameraConfig(Tokenizer& tokenizer,
   absl::optional<FilmResult> film_result;
   absl::optional<IntegratorResult> integrator_result;
   absl::optional<CameraFactory> camera_factory;
+  absl::optional<ColorIntegrator> color_integrator;
   for (auto token = tokenizer.Next(); token; token = tokenizer.Next()) {
     if (token == "WorldBegin") {
       return CreateCameraConfig(
           matrix_manager.GetCurrent().first, std::move(pixel_sampler),
           std::move(film_result), std::move(integrator_result),
-          std::move(camera_factory));
+          std::move(camera_factory), std::move(color_integrator));
     }
 
     if (TryParseMatrix(*token, tokenizer, matrix_manager)) {
@@ -89,6 +84,12 @@ CameraConfig ParseCameraConfig(Tokenizer& tokenizer,
     if (token == "Camera") {
       ErrorIfPresent("Camera", camera_factory.has_value());
       camera_factory = ParseCamera("Camera", tokenizer, matrix_manager);
+      continue;
+    }
+
+    if (token == "ColorIntegrator") {
+      ErrorIfPresent("ColorIntegrator", color_integrator.has_value());
+      color_integrator = ParseColorIntegrator("ColorIntegrator", tokenizer);
       continue;
     }
 

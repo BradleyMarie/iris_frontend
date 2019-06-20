@@ -10,10 +10,10 @@ cc_library(
         ":pointer_types",
         ":tokenizer",
         "//src/cameras:parser",
+        "//src/color_integrators:parser",
         "//src/films:parser",
         "//src/integrators:parser",
         "//src/samplers:parser",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:cie_color_integrator",
         "@com_google_absl//absl/strings",
     ],
 )
