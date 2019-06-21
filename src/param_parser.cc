@@ -226,91 +226,72 @@ static SpectrumParameter ParseSpectrum(Tokenizer& tokenizer) {
   return SpectrumParameter{std::move(result), std::move(values)};
 }
 
+typedef std::function<ParameterData(Tokenizer&)> ParserCallback;
+
+template <typename Result>
+ParserCallback ToCallback(std::function<Result(Tokenizer&)> func) {
+  return [func](Tokenizer& tokenizer) -> Result { return func(tokenizer); };
+}
+
+static const std::map<absl::string_view, ParserCallback> kParsers = {
+    // blackbody
+    {"bool", ToCallback<BoolParameter>(ParseBool)},
+    // color
+    {"float", ToCallback<FloatParameter>(ParseFloat)},
+    {"integer", ToCallback<IntParameter>(ParseInt)},
+    {"normal", ToCallback<NormalParameter>(ParseNormal)},
+    {"point", ToCallback<Point3Parameter>(ParsePoint)},
+    // point2
+    {"point3", ToCallback<Point3Parameter>(ParsePoint3)},
+    // rgb
+    {"spectrum", ToCallback<SpectrumParameter>(ParseSpectrum)},
+    {"string", ToCallback<StringParameter>(ParseString)},
+    // texture
+    {"vector", ToCallback<Vector3Parameter>(ParseVector)},
+    // vector2
+    {"vector3", ToCallback<Vector3Parameter>(ParseVector3)},
+    // xyz
+};
+
 }  // namespace
 
 absl::optional<Parameter> ParseNextParam(Tokenizer& tokenizer) {
-  auto peeked_token = tokenizer.Peek();
-  if (!peeked_token || !UnquoteToken(*peeked_token)) {
+  auto quoted_token = tokenizer.Peek();
+  if (!quoted_token) {
     return absl::nullopt;
   }
 
-  std::string quoted_token(peeked_token->data(), peeked_token->size());
-  auto unquoted_token = *UnquoteToken(quoted_token);
-  tokenizer.Next();
+  auto unquoted_token = UnquoteToken(*quoted_token);
+  if (!unquoted_token) {
+    return absl::nullopt;
+  }
 
   std::vector<absl::string_view> type_and_name =
-      absl::StrSplit(unquoted_token, " ", absl::SkipEmpty());
+      absl::StrSplit(*unquoted_token, " ", absl::SkipEmpty());
 
   if (type_and_name.size() != 2) {
     std::cerr << "ERROR: Failed to parse parameter type and name: "
-              << quoted_token << std::endl;
+              << *quoted_token << std::endl;
     exit(EXIT_FAILURE);
   }
 
-  Parameter result;
-  result.first = std::string(type_and_name[1].data(), type_and_name[1].size());
+  auto parser = kParsers.find(type_and_name[0]);
+  if (parser == kParsers.end()) {
+    std::cerr << "ERROR: Illegal parameter type: " << type_and_name[0]
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
 
+  std::string name(type_and_name[1].data(), type_and_name[1].size());
+
+  quoted_token = tokenizer.Next();
   if (!tokenizer.Peek()) {
-    std::cerr << "ERROR: No parameters found for parameter: " << quoted_token
+    std::cerr << "ERROR: No parameters found for parameter: " << *quoted_token
               << std::endl;
     exit(EXIT_FAILURE);
   }
 
-  if (type_and_name[0] == "float") {
-    result.second = ParseFloat(tokenizer);
-  } else if (type_and_name[0] == "integer") {
-    result.second = ParseInt(tokenizer);
-  } else if (type_and_name[0] == "bool") {
-    result.second = ParseBool(tokenizer);
-  } else if (type_and_name[0] == "point2") {
-    std::cerr << "ERROR: Illegal parameter type: " << type_and_name[0]
-              << std::endl;
-    exit(EXIT_FAILURE);
-  } else if (type_and_name[0] == "vector2") {
-    std::cerr << "ERROR: Illegal parameter type: " << type_and_name[0]
-              << std::endl;
-    exit(EXIT_FAILURE);
-  } else if (type_and_name[0] == "point3") {
-    result.second = ParsePoint3(tokenizer);
-  } else if (type_and_name[0] == "vector3") {
-    result.second = ParseVector3(tokenizer);
-  } else if (type_and_name[0] == "point") {
-    result.second = ParsePoint(tokenizer);
-  } else if (type_and_name[0] == "vector") {
-    result.second = ParseVector(tokenizer);
-  } else if (type_and_name[0] == "normal") {
-    result.second = ParseNormal(tokenizer);
-  } else if (type_and_name[0] == "string") {
-    result.second = ParseString(tokenizer);
-  } else if (type_and_name[0] == "texture") {
-    std::cerr << "ERROR: Illegal parameter type: " << type_and_name[0]
-              << std::endl;
-    exit(EXIT_FAILURE);
-  } else if (type_and_name[0] == "color") {
-    std::cerr << "ERROR: Illegal parameter type: " << type_and_name[0]
-              << std::endl;
-    exit(EXIT_FAILURE);
-  } else if (type_and_name[0] == "rgb") {
-    std::cerr << "ERROR: Illegal parameter type: " << type_and_name[0]
-              << std::endl;
-    exit(EXIT_FAILURE);
-  } else if (type_and_name[0] == "xyz") {
-    std::cerr << "ERROR: Illegal parameter type: " << type_and_name[0]
-              << std::endl;
-    exit(EXIT_FAILURE);
-  } else if (type_and_name[0] == "blackbody") {
-    std::cerr << "ERROR: Illegal parameter type: " << type_and_name[0]
-              << std::endl;
-    exit(EXIT_FAILURE);
-  } else if (type_and_name[0] == "spectrum") {
-    result.second = ParseSpectrum(tokenizer);
-  } else {
-    std::cerr << "ERROR: Illegal parameter type: " << type_and_name[0]
-              << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  return result;
+  return Parameter(std::move(name), parser->second(tokenizer));
 }
 
 }  // namespace iris
