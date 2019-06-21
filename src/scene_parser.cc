@@ -21,22 +21,22 @@ class GraphicsStateManager {
   void AttributeBegin(MatrixManager& matrix_manager);
   void AttributeEnd(MatrixManager& matrix_manager);
 
-  std::pair<EmissiveMaterial, EmissiveMaterial> GetEmissiveMaterials();
+  const std::pair<EmissiveMaterial, EmissiveMaterial>& GetEmissiveMaterials();
   void SetEmissiveMaterials(const EmissiveMaterial& front_emissive_material,
                             const EmissiveMaterial& back_emissive_material,
                             const std::set<Spectrum> light_spectra);
 
-  Material GetMaterial();
-  void SetMaterial(const Material& material,
+  const std::pair<Material, Material>& GetMaterials();
+  void SetMaterial(const Material& front_material,
+                   const Material& back_material,
                    const std::set<Reflector> material_reflectors);
 
   void PrecomputeColors(ColorIntegrator& color_integrator);
 
  private:
   struct ShaderState {
-    EmissiveMaterial front_emissive_material;
-    EmissiveMaterial back_emissive_material;
-    Material material;
+    std::pair<EmissiveMaterial, EmissiveMaterial> emissive_materials;
+    std::pair<Material, Material> materials;
     std::set<Spectrum> light_spectra;
     std::set<Reflector> material_reflectors;
   };
@@ -61,8 +61,7 @@ class GraphicsStateManager {
 };
 
 GraphicsStateManager::GraphicsStateManager() {
-  ShaderState state;
-  m_shader_state.push(state);
+  m_shader_state.push(ShaderState());
 }
 
 void GraphicsStateManager::TransformBegin(MatrixManager& matrix_manager) {
@@ -105,32 +104,33 @@ void GraphicsStateManager::AttributeEnd(MatrixManager& matrix_manager) {
   m_shader_state.pop();
 }
 
-std::pair<EmissiveMaterial, EmissiveMaterial>
+const std::pair<EmissiveMaterial, EmissiveMaterial>&
 GraphicsStateManager::GetEmissiveMaterials() {
   m_spectra_used.insert(m_shader_state.top().light_spectra.begin(),
                         m_shader_state.top().light_spectra.end());
-  return std::make_pair(m_shader_state.top().front_emissive_material,
-                        m_shader_state.top().back_emissive_material);
+  return m_shader_state.top().emissive_materials;
 }
 
 void GraphicsStateManager::SetEmissiveMaterials(
     const EmissiveMaterial& front_emissive_material,
     const EmissiveMaterial& back_emissive_material,
     const std::set<Spectrum> light_spectra) {
-  m_shader_state.top().front_emissive_material = front_emissive_material;
-  m_shader_state.top().back_emissive_material = back_emissive_material;
+  m_shader_state.top().emissive_materials =
+      std::make_pair(front_emissive_material, back_emissive_material);
   m_shader_state.top().light_spectra = light_spectra;
 }
 
-Material GraphicsStateManager::GetMaterial() {
+const std::pair<Material, Material>& GraphicsStateManager::GetMaterials() {
   m_reflectors_used.insert(m_shader_state.top().material_reflectors.begin(),
                            m_shader_state.top().material_reflectors.end());
-  return m_shader_state.top().material;
+  return m_shader_state.top().materials;
 }
 
 void GraphicsStateManager::SetMaterial(
-    const Material& material, const std::set<Reflector> material_reflectors) {
-  m_shader_state.top().material = material;
+    const Material& front_material, const Material& back_material,
+    const std::set<Reflector> material_reflectors) {
+  m_shader_state.top().materials =
+      std::make_pair(front_material, back_material);
   m_shader_state.top().material_reflectors = material_reflectors;
 }
 
@@ -239,16 +239,17 @@ std::pair<Scene, std::vector<Light>> ParseScene(
 
     if (token == "Material") {
       auto material_state = ParseMaterial("Material", tokenizer);
-      graphics_state.SetMaterial(material_state.first, material_state.second);
+      graphics_state.SetMaterial(material_state.first, material_state.first,
+                                 material_state.second);
       continue;
     }
 
     if (token == "Shape") {
+      auto materials = graphics_state.GetMaterials();
       auto emissive_materials = graphics_state.GetEmissiveMaterials();
       auto shape_result =
-          ParseShape("Shape", tokenizer, graphics_state.GetMaterial(),
-                     graphics_state.GetMaterial(), emissive_materials.first,
-                     emissive_materials.second);
+          ParseShape("Shape", tokenizer, materials.first, materials.second,
+                     emissive_materials.first, emissive_materials.second);
       for (const auto& shape : shape_result.first) {
         shapes.push_back(shape);
         transforms.push_back(matrix_manager.GetCurrent().first);
