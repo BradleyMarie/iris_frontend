@@ -1,8 +1,8 @@
 #ifndef _SRC_MATERIALS_PARSER_
 #define _SRC_MATERIALS_PARSER_
 
+#include "src/common/tokenizer.h"
 #include "src/materials/result.h"
-#include "src/tokenizer.h"
 
 namespace iris {
 

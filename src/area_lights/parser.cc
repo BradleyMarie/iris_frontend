@@ -6,7 +6,8 @@
 
 namespace iris {
 
-AreaLightResult ParseAreaLight(const char* base_type_name, Tokenizer& tokenizer) {
+AreaLightResult ParseAreaLight(const char* base_type_name,
+                               Tokenizer& tokenizer) {
   return ParseDirective<AreaLightResult, 1>(
       base_type_name, tokenizer, {std::make_pair("diffuse", ParseDiffuse)});
 }

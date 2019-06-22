@@ -8,8 +8,8 @@ cc_library(
     deps = [
         ":stratified",
         "//src:directive_parser",
-        "//src:pointer_types",
-        "//src:tokenizer",
+        "//src/common:pointer_types",
+        "//src/common:tokenizer",
     ],
 )
 
@@ -19,8 +19,8 @@ cc_library(
     hdrs = ["stratified.h"],
     deps = [
         "//src:param_matcher",
-        "//src:pointer_types",
-        "//src:tokenizer",
+        "//src/common:pointer_types",
+        "//src/common:tokenizer",
         "@com_github_bradleymarie_iris//iris_camera_toolkit:grid_pixel_sampler",
     ],
 )

@@ -1,10 +1,10 @@
-#ifndef _SRC_POINTER_TYPES_
-#define _SRC_POINTER_TYPES_
+#ifndef _SRC_COMMON_POINTER_TYPES_
+#define _SRC_COMMON_POINTER_TYPES_
 
 #include "iris_camera/iris_camera.h"
 #include "iris_physx/iris_physx.h"
-#include "src/shared_ptr.h"
-#include "src/unique_ptr.h"
+#include "src/common/shared_ptr.h"
+#include "src/common/unique_ptr.h"
 
 namespace iris {
 
@@ -30,4 +30,4 @@ typedef SharedPtr<SPECTRUM, SpectrumRetain, SpectrumRelease> Spectrum;
 
 }  // namespace iris
 
-#endif  // _SRC_POINTER_TYPES_
+#endif  // _SRC_COMMON_POINTER_TYPES_

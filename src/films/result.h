@@ -3,8 +3,8 @@
 
 #include <utility>
 
+#include "src/common/pointer_types.h"
 #include "src/films/output_writers/result.h"
-#include "src/pointer_types.h"
 
 namespace iris {
 

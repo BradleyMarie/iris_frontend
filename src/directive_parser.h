@@ -6,9 +6,9 @@
 #include <iostream>
 #include <utility>
 
-#include "src/matrix_manager.h"
+#include "src/common/matrix_manager.h"
+#include "src/common/tokenizer.h"
 #include "src/quoted_string.h"
-#include "src/tokenizer.h"
 
 namespace iris {
 

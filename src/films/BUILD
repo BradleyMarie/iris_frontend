@@ -9,7 +9,7 @@ cc_library(
         ":image",
         ":result",
         "//src:directive_parser",
-        "//src:tokenizer",
+        "//src/common:tokenizer",
     ],
 )
 
@@ -20,7 +20,7 @@ cc_library(
     deps = [
         ":result",
         "//src:param_matcher",
-        "//src:tokenizer",
+        "//src/common:tokenizer",
         "//src/films/output_writers:parser",
     ],
 )
@@ -29,7 +29,7 @@ cc_library(
     name = "result",
     hdrs = ["result.h"],
     deps = [
-        "//src:pointer_types",
+        "//src/common:pointer_types",
         "//src/films/output_writers:result",
     ],
 )

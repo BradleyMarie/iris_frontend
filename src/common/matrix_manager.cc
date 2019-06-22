@@ -1,4 +1,4 @@
-#include "src/matrix_manager.h"
+#include "src/common/matrix_manager.h"
 
 #include <iostream>
 

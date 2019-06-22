@@ -8,8 +8,8 @@ cc_library(
     deps = [
         ":pcg",
         "//src:directive_parser",
-        "//src:pointer_types",
-        "//src:tokenizer",
+        "//src/common:pointer_types",
+        "//src/common:tokenizer",
     ],
 )
 
@@ -19,8 +19,8 @@ cc_library(
     hdrs = ["pcg.h"],
     deps = [
         "//src:param_matcher",
-        "//src:pointer_types",
-        "//src:tokenizer",
+        "//src/common:pointer_types",
+        "//src/common:tokenizer",
         "@com_github_bradleymarie_iris//iris_advanced_toolkit:pcg_random",
     ],
 )

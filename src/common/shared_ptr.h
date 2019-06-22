@@ -1,5 +1,5 @@
-#ifndef _SRC_SHARED_PTR_
-#define _SRC_SHARED_PTR_
+#ifndef _SRC_COMMON_SHARED_PTR_
+#define _SRC_COMMON_SHARED_PTR_
 
 namespace iris {
 
@@ -50,4 +50,4 @@ bool operator<(const SharedPtr<Type, Retain, Release>& left,
 
 }  // namespace iris
 
-#endif  // _SRC_SHARED_PTR_
+#endif  // _SRC_COMMON_SHARED_PTR_

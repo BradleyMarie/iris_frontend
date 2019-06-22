@@ -4,7 +4,7 @@
 #include <functional>
 #include <vector>
 
-#include "src/pointer_types.h"
+#include "src/common/pointer_types.h"
 
 namespace iris {
 

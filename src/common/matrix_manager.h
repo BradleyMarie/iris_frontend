@@ -1,5 +1,5 @@
-#ifndef _SRC_MATRIX_MANAGER_
-#define _SRC_MATRIX_MANAGER_
+#ifndef _SRC_COMMON_MATRIX_MANAGER_
+#define _SRC_COMMON_MATRIX_MANAGER_
 
 #include <array>
 #include <set>
@@ -7,8 +7,8 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/string_view.h"
-#include "src/finite_float_t.h"
-#include "src/pointer_types.h"
+#include "src/common/finite_float_t.h"
+#include "src/common/pointer_types.h"
 
 namespace iris {
 
@@ -109,4 +109,4 @@ class MatrixManager {
 
 }  // namespace iris
 
-#endif  // _SRC_MATRIX_MANAGER_
+#endif  // _SRC_COMMON_MATRIX_MANAGER_

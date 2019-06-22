@@ -1,8 +1,8 @@
 #ifndef _SRC_RANDOMS_PARSER_
 #define _SRC_RANDOMS_PARSER_
 
-#include "src/pointer_types.h"
-#include "src/tokenizer.h"
+#include "src/common/pointer_types.h"
+#include "src/common/tokenizer.h"
 
 namespace iris {
 

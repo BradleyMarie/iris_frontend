@@ -7,8 +7,8 @@
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
 #include "iris_physx/iris_physx.h"
-#include "src/pointer_types.h"
-#include "src/tokenizer.h"
+#include "src/common/pointer_types.h"
+#include "src/common/tokenizer.h"
 
 namespace iris {
 

@@ -3,9 +3,9 @@
 
 #include <vector>
 
-#include "src/matrix_manager.h"
-#include "src/pointer_types.h"
-#include "src/tokenizer.h"
+#include "src/common/matrix_manager.h"
+#include "src/common/pointer_types.h"
+#include "src/common/tokenizer.h"
 
 namespace iris {
 

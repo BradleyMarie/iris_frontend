@@ -9,7 +9,7 @@ cc_library(
         ":result",
         ":trianglemesh",
         "//src:directive_parser",
-        "//src:tokenizer",
+        "//src/common:tokenizer",
     ],
 )
 
@@ -17,7 +17,7 @@ cc_library(
     name = "result",
     hdrs = ["result.h"],
     deps = [
-        "//src:pointer_types",
+        "//src/common:pointer_types",
     ],
 )
 
@@ -27,9 +27,9 @@ cc_library(
     hdrs = ["trianglemesh.h"],
     deps = [
         ":result",
-        "//src:ostream",
         "//src:param_matcher",
-        "//src:tokenizer",
+        "//src/common:ostream",
+        "//src/common:tokenizer",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle",
     ],
 )

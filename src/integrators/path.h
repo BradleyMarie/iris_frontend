@@ -1,8 +1,8 @@
 #ifndef _SRC_INTEGRATORS_PATH_
 #define _SRC_INTEGRATORS_PATH_
 
+#include "src/common/tokenizer.h"
 #include "src/integrators/result.h"
-#include "src/tokenizer.h"
 
 namespace iris {
 

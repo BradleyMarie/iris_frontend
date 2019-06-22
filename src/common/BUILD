@@ -1,0 +1,64 @@
+package(default_visibility = ["//src:__subpackages__"])
+
+cc_library(
+    name = "finite_float_t",
+    srcs = ["finite_float_t.cc"],
+    hdrs = ["finite_float_t.h"],
+    deps = [
+        "@com_github_bradleymarie_iris//iris",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
+cc_library(
+    name = "matrix_manager",
+    srcs = ["matrix_manager.cc"],
+    hdrs = ["matrix_manager.h"],
+    deps = [
+        ":finite_float_t",
+        ":pointer_types",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "ostream",
+    srcs = ["ostream.cc"],
+    hdrs = ["ostream.h"],
+    deps = [
+        "@com_github_bradleymarie_iris//iris",
+    ],
+)
+
+cc_library(
+    name = "pointer_types",
+    hdrs = ["pointer_types.h"],
+    deps = [
+        ":shared_ptr",
+        ":unique_ptr",
+        "@com_github_bradleymarie_iris//iris_camera",
+        "@com_github_bradleymarie_iris//iris_physx",
+    ],
+)
+
+cc_library(
+    name = "shared_ptr",
+    hdrs = ["shared_ptr.h"],
+)
+
+cc_library(
+    name = "tokenizer",
+    srcs = ["tokenizer.cc"],
+    hdrs = ["tokenizer.h"],
+    deps = [
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
+cc_library(
+    name = "unique_ptr",
+    hdrs = ["unique_ptr.h"],
+)

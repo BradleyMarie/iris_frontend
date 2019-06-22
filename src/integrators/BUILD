@@ -9,7 +9,7 @@ cc_library(
         ":path",
         ":result",
         "//src:directive_parser",
-        "//src:tokenizer",
+        "//src/common:tokenizer",
     ],
 )
 
@@ -20,7 +20,7 @@ cc_library(
     deps = [
         ":result",
         "//src:param_matcher",
-        "//src:tokenizer",
+        "//src/common:tokenizer",
         "//src/integrators/lightstrategy:parser",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:path_tracer",
     ],
@@ -30,7 +30,7 @@ cc_library(
     name = "result",
     hdrs = ["result.h"],
     deps = [
-        "//src:pointer_types",
+        "//src/common:pointer_types",
         "//src/integrators/lightstrategy:result",
     ],
 )

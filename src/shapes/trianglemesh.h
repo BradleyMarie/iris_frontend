@@ -1,8 +1,8 @@
 #ifndef _SRC_SHAPES_TRIANGLEMESH_
 #define _SRC_SHAPES_TRIANGLEMESH_
 
+#include "src/common/tokenizer.h"
 #include "src/shapes/result.h"
-#include "src/tokenizer.h"
 
 namespace iris {
 

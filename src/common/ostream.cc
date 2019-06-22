@@ -1,4 +1,4 @@
-#include "src/ostream.h"
+#include "src/common/ostream.h"
 
 std::ostream& operator<<(std::ostream& os, const ISTATUS& status) {
   switch (status) {

@@ -1,4 +1,3 @@
-#include <cstdlib>
 #include <iostream>
 #include <thread>
 #include <vector>
@@ -8,10 +7,10 @@
 #include "absl/flags/parse.h"
 #include "iris_physx_toolkit/sample_tracer.h"
 #include "src/camera_parser.h"
-#include "src/matrix_manager.h"
-#include "src/ostream.h"
+#include "src/common/matrix_manager.h"
+#include "src/common/ostream.h"
+#include "src/common/tokenizer.h"
 #include "src/scene_parser.h"
-#include "src/tokenizer.h"
 
 using iris::MatrixManager;
 using iris::Random;

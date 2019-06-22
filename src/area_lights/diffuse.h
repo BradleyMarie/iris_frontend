@@ -2,7 +2,7 @@
 #define _SRC_AREA_LIGHTS_DIFFUSE_
 
 #include "src/area_lights/result.h"
-#include "src/tokenizer.h"
+#include "src/common/tokenizer.h"
 
 namespace iris {
 

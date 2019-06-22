@@ -1,8 +1,8 @@
 #ifndef _SRC_MATRIX_PARSER_
 #define _SRC_MATRIX_PARSER_
 
-#include "src/matrix_manager.h"
-#include "src/tokenizer.h"
+#include "src/common/matrix_manager.h"
+#include "src/common/tokenizer.h"
 
 namespace iris {
 

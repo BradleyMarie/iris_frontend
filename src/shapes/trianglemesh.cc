@@ -1,7 +1,7 @@
 #include "src/shapes/trianglemesh.h"
 
 #include "iris_physx_toolkit/triangle.h"
-#include "src/ostream.h"
+#include "src/common/ostream.h"
 #include "src/param_matcher.h"
 
 #include <iostream>

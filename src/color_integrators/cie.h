@@ -1,8 +1,8 @@
 #ifndef _SRC_COLOR_INTEGRATORS_CIE_
 #define _SRC_COLOR_INTEGRATORS_CIE_
 
-#include "src/pointer_types.h"
-#include "src/tokenizer.h"
+#include "src/common/pointer_types.h"
+#include "src/common/tokenizer.h"
 
 namespace iris {
 

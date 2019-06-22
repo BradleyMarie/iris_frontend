@@ -7,7 +7,7 @@ cc_library(
     deps = [
         ":result",
         "//src:param_matcher",
-        "//src:tokenizer",
+        "//src/common:tokenizer",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_emissive_material",
     ],
 )
@@ -21,7 +21,7 @@ cc_library(
         ":diffuse",
         ":result",
         "//src:directive_parser",
-        "//src:tokenizer",
+        "//src/common:tokenizer",
     ],
 )
 
@@ -29,6 +29,6 @@ cc_library(
     name = "result",
     hdrs = ["result.h"],
     deps = [
-        "//src:pointer_types",
+        "//src/common:pointer_types",
     ],
 )

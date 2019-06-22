@@ -1,7 +1,7 @@
 #ifndef _SRC_CAMERAS_MATH_
 #define _SRC_CAMERAS_MATH_
 
-#include "src/pointer_types.h"
+#include "src/common/pointer_types.h"
 
 namespace iris {
 

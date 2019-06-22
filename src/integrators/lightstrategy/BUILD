@@ -17,7 +17,7 @@ cc_library(
     hdrs = ["result.h"],
     visibility = ["//src/integrators:__subpackages__"],
     deps = [
-        "//src:pointer_types",
+        "//src/common:pointer_types",
     ],
 )
 

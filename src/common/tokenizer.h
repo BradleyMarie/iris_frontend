@@ -1,5 +1,5 @@
-#ifndef _SRC_TOKENIZER_
-#define _SRC_TOKENIZER_
+#ifndef _SRC_COMMON_TOKENIZER_
+#define _SRC_COMMON_TOKENIZER_
 
 #include <iostream>
 #include <memory>
@@ -31,4 +31,4 @@ class Tokenizer {
 
 }  // namespace iris
 
-#endif  // _SRC_TOKENIZER_
+#endif  // _SRC_COMMON_TOKENIZER_

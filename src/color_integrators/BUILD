@@ -6,8 +6,8 @@ cc_library(
     hdrs = ["cie.h"],
     deps = [
         "//src:param_matcher",
-        "//src:pointer_types",
-        "//src:tokenizer",
+        "//src/common:pointer_types",
+        "//src/common:tokenizer",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:cie_color_integrator",
     ],
 )
@@ -20,7 +20,7 @@ cc_library(
     deps = [
         ":cie",
         "//src:directive_parser",
-        "//src:pointer_types",
-        "//src:tokenizer",
+        "//src/common:pointer_types",
+        "//src/common:tokenizer",
     ],
 )

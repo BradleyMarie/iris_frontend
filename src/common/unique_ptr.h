@@ -1,5 +1,5 @@
-#ifndef _SRC_UNIQUE_PTR_
-#define _SRC_UNIQUE_PTR_
+#ifndef _SRC_COMMON_UNIQUE_PTR_
+#define _SRC_COMMON_UNIQUE_PTR_
 
 namespace iris {
 
@@ -46,4 +46,4 @@ class UniquePtr {
 
 }  // namespace iris
 
-#endif  // _SRC_UNIQUE_PTR_
+#endif  // _SRC_COMMON_UNIQUE_PTR_
