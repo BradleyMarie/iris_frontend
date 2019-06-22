@@ -4,7 +4,6 @@ cc_library(
     name = "float_single",
     srcs = ["float_single.cc"],
     hdrs = ["float_single.h"],
-    visibility = ["//src:__subpackages__"],
     deps = [
         ":matcher",
     ],
@@ -13,7 +12,6 @@ cc_library(
 cc_library(
     name = "integral_single",
     hdrs = ["integral_single.h"],
-    visibility = ["//src:__subpackages__"],
     deps = [
         ":matcher",
     ],
@@ -22,7 +20,6 @@ cc_library(
 cc_library(
     name = "list",
     hdrs = ["list.h"],
-    visibility = ["//src:__subpackages__"],
     deps = [
         ":matcher",
     ],
@@ -32,16 +29,30 @@ cc_library(
     name = "matcher",
     srcs = ["matcher.cc"],
     hdrs = ["matcher.h"],
-    visibility = ["//src:__subpackages__"],
     deps = [
-        "//src:param_parser",
+        ":parser",
+    ],
+)
+
+cc_library(
+    name = "parser",
+    srcs = ["parser.cc"],
+    hdrs = ["parser.h"],
+    deps = [
+        "//src:quoted_string",
+        "//src/common:pointer_types",
+        "//src/common:tokenizer",
+        "@com_github_bradleymarie_iris//iris_physx",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:interpolated_spectrum",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+        "@com_google_absl//absl/types:variant",
     ],
 )
 
 cc_library(
     name = "single",
     hdrs = ["single.h"],
-    visibility = ["//src:__subpackages__"],
     deps = [
         ":matcher",
     ],

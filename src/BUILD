@@ -59,26 +59,10 @@ cc_library(
 )
 
 cc_library(
-    name = "param_parser",
-    srcs = ["param_parser.cc"],
-    hdrs = ["param_parser.h"],
-    visibility = ["//src:__subpackages__"],
-    deps = [
-        ":quoted_string",
-        "//src/common:pointer_types",
-        "//src/common:tokenizer",
-        "@com_github_bradleymarie_iris//iris_physx",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:interpolated_spectrum",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/types:optional",
-        "@com_google_absl//absl/types:variant",
-    ],
-)
-
-cc_library(
     name = "quoted_string",
     srcs = ["quoted_string.cc"],
     hdrs = ["quoted_string.h"],
+    visibility = ["//src:__subpackages__"],
     deps = [
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",

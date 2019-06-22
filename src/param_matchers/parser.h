@@ -1,5 +1,5 @@
-#ifndef _SRC_PARAM_PARSER_
-#define _SRC_PARAM_PARSER_
+#ifndef _SRC_PARAM_MATCHERS_PARSER_
+#define _SRC_PARAM_MATCHERS_PARSER_
 
 #include <utility>
 #include <vector>
@@ -56,4 +56,4 @@ absl::optional<Parameter> ParseNextParam(Tokenizer& tokenizer);
 
 }  // namespace iris
 
-#endif  // _SRC_PARAM_PARSER_
+#endif  // _SRC_PARAM_MATCHERS_PARSER_
