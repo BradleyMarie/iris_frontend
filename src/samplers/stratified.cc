@@ -1,9 +1,11 @@
 #include "src/samplers/stratified.h"
 
-#include "iris_camera_toolkit/grid_pixel_sampler.h"
-#include "src/param_matcher.h"
-
 #include <iostream>
+
+#include "iris_camera_toolkit/grid_pixel_sampler.h"
+#include "src/param_matchers/integral_single.h"
+#include "src/param_matchers/matcher.h"
+#include "src/param_matchers/single.h"
 
 namespace iris {
 namespace {
@@ -16,14 +18,14 @@ static const uint16_t kStratifiedSamplerDefaultYSamples = 2;
 
 PixelSampler ParseStratified(const char* base_type_name, const char* type_name,
                              Tokenizer& tokenizer) {
-  SingleBoolMatcher jitter(base_type_name, type_name, "jitter",
+  SingleBoolMatcher jitter(base_type_name, type_name, "jitter", false,
                            kStratifiedSamplerDefaultJitter);
   NonZeroSingleUInt16Matcher xsamples(base_type_name, type_name, "xsamples",
-                                      kStratifiedSamplerDefaultXSamples);
+                                      false, kStratifiedSamplerDefaultXSamples);
   NonZeroSingleUInt16Matcher ysamples(base_type_name, type_name, "ysamples",
-                                      kStratifiedSamplerDefaultXSamples);
-  ParseAllParameter<3>(base_type_name, type_name, tokenizer,
-                       {&jitter, &xsamples, &ysamples});
+                                      false, kStratifiedSamplerDefaultXSamples);
+  MatchParameters<3>(base_type_name, type_name, tokenizer,
+                     {&jitter, &xsamples, &ysamples});
 
   PixelSampler result;
   ISTATUS status =

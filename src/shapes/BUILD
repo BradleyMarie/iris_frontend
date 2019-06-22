@@ -27,9 +27,10 @@ cc_library(
     hdrs = ["trianglemesh.h"],
     deps = [
         ":result",
-        "//src:param_matcher",
         "//src/common:ostream",
         "//src/common:tokenizer",
+        "//src/param_matchers:list",
+        "//src/param_matchers:matcher",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle",
     ],
 )

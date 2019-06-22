@@ -1,7 +1,8 @@
 #include "src/area_lights/diffuse.h"
 
 #include "iris_physx_toolkit/constant_emissive_material.h"
-#include "src/param_matcher.h"
+#include "src/param_matchers/matcher.h"
+#include "src/param_matchers/single.h"
 
 #include <iostream>
 
@@ -12,14 +13,15 @@ namespace {
 class SingleSpectrumMatcher : public ParamMatcher {
  public:
   SingleSpectrumMatcher(const char* base_type_name, const char* type_name,
-                        const char* parameter_name, Spectrum default_value)
-      : ParamMatcher(base_type_name, type_name, parameter_name,
-                     GetIndex<SpectrumParameter>()),
+                        const char* parameter_name, bool required,
+                        Spectrum default_value)
+      : ParamMatcher(base_type_name, type_name, parameter_name, required,
+                     &m_variant_index, 1),
         m_value(default_value) {}
   const Spectrum& Get() { return m_value; }
 
  private:
-  void Match(const ParameterData& data) final {
+  void Match(ParameterData& data) final {
     if (absl::get<SpectrumParameter>(data).data.size() != 1) {
       NumberOfElementsError();
     }
@@ -27,8 +29,12 @@ class SingleSpectrumMatcher : public ParamMatcher {
   }
 
  private:
+  static const size_t m_variant_index;
   Spectrum m_value;
 };
+
+const size_t SingleSpectrumMatcher::m_variant_index =
+    GetIndex<SpectrumParameter, ParameterData>();
 
 static const bool kDiffuseAreaLightDefaultTwoSided = false;
 static const Spectrum kDiffuseAreaLightDefaultL;  // TODO: initialize
@@ -37,12 +43,12 @@ static const Spectrum kDiffuseAreaLightDefaultL;  // TODO: initialize
 
 AreaLightResult ParseDiffuse(const char* base_type_name, const char* type_name,
                              Tokenizer& tokenizer) {
-  SingleBoolMatcher twosided(base_type_name, type_name, "twosided",
+  SingleBoolMatcher twosided(base_type_name, type_name, "twosided", false,
                              kDiffuseAreaLightDefaultTwoSided);
-  SingleSpectrumMatcher spectrum(base_type_name, type_name, "L",
+  SingleSpectrumMatcher spectrum(base_type_name, type_name, "L", false,
                                  kDiffuseAreaLightDefaultL);
-  ParseAllParameter<2>(base_type_name, type_name, tokenizer,
-                       {&twosided, &spectrum});
+  MatchParameters<2>(base_type_name, type_name, tokenizer,
+                     {&twosided, &spectrum});
 
   EmissiveMaterial front_emissive_material, back_emissive_material;
   ISTATUS status = ConstantEmissiveMaterialAllocate(

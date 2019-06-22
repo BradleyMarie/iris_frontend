@@ -1,9 +1,9 @@
 #include "src/randoms/pcg.h"
 
-#include "iris_advanced_toolkit/pcg_random.h"
-#include "src/param_matcher.h"
-
 #include <iostream>
+
+#include "iris_advanced_toolkit/pcg_random.h"
+#include "src/param_matchers/matcher.h"
 
 namespace iris {
 namespace {
@@ -15,7 +15,7 @@ static const uint64_t kPcgRandomDefaultOutputSequence = 0xda3e39cb94b95bdbULL;
 
 Random ParsePcg(const char* base_type_name, const char* type_name,
                 Tokenizer& tokenizer) {
-  ParseAllParameter<0>(base_type_name, type_name, tokenizer, {});
+  MatchParameters<0>(base_type_name, type_name, tokenizer, {});
 
   Random result;
   ISTATUS status = PermutedCongruentialRandomAllocate(

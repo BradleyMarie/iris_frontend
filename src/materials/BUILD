@@ -27,8 +27,8 @@ cc_library(
     hdrs = ["matte.h"],
     deps = [
         ":result",
-        "//src:param_matcher",
         "//src/common:tokenizer",
+        "//src/param_matchers:matcher",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_material",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:lambertian_bsdf",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:uniform_reflector",

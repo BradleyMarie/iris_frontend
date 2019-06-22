@@ -30,9 +30,10 @@ cc_library(
     deps = [
         ":math",
         ":result",
-        "//src:param_matcher",
         "//src/common:matrix_manager",
         "//src/common:tokenizer",
+        "//src/param_matchers:float_single",
+        "//src/param_matchers:matcher",
         "@com_github_bradleymarie_iris//iris_camera_toolkit:pinhole_camera",
     ],
 )

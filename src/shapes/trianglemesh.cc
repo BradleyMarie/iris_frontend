@@ -2,7 +2,8 @@
 
 #include "iris_physx_toolkit/triangle.h"
 #include "src/common/ostream.h"
-#include "src/param_matcher.h"
+#include "src/param_matchers/list.h"
+#include "src/param_matchers/matcher.h"
 
 #include <iostream>
 
@@ -12,11 +13,10 @@ namespace {
 typedef ListValueMatcher<Point3Parameter, POINT3, 3, 1>
     TriangleMeshPointListMatcher;
 
-typedef PreBoundedListValueMatcher<IntParameter, size_t, int, 0, INT_MAX, 3, 3>
-    TriangleMeshIndexListMatcher;
+typedef ListValueMatcher<IntParameter, int, 3, 3> TriangleMeshIndexListMatcher;
 
 static const std::vector<POINT3> kTriangleMeshDefaultPoints;
-static const std::vector<size_t> kTriangleMeshDefaultIndices;
+static const std::vector<int> kTriangleMeshDefaultIndices;
 
 }  // namespace
 
@@ -26,27 +26,15 @@ ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
                               const Material& back_material,
                               const EmissiveMaterial& front_emissive_material,
                               const EmissiveMaterial& back_emissive_material) {
-  TriangleMeshPointListMatcher points(base_type_name, type_name, "P",
+  TriangleMeshPointListMatcher points(base_type_name, type_name, "P", true,
                                       kTriangleMeshDefaultPoints);
   TriangleMeshIndexListMatcher indices(base_type_name, type_name, "indices",
-                                       kTriangleMeshDefaultIndices);
-  ParseAllParameter<2>(base_type_name, type_name, tokenizer,
-                       {&points, &indices});
-
-  if (points.Get().empty()) {
-    std::cerr << "ERROR: Missing required " << type_name << " "
-              << base_type_name << " parameter: P" << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  if (indices.Get().empty()) {
-    std::cerr << "ERROR: Missing required " << type_name << " "
-              << base_type_name << " parameter: indices" << std::endl;
-    exit(EXIT_FAILURE);
-  }
+                                       true, kTriangleMeshDefaultIndices);
+  MatchParameters<2>(base_type_name, type_name, tokenizer, {&points, &indices});
 
   for (const auto& entry : indices.Get()) {
-    if (points.Get().size() <= entry) {
+    static_assert(INT32_MAX < SIZE_MAX);
+    if (entry < 0 || points.Get().size() <= (size_t)entry) {
       std::cerr << "ERROR: Out of range value for " << type_name << " "
                 << base_type_name << " parameter: indices" << std::endl;
       exit(EXIT_FAILURE);

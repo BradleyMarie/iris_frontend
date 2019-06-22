@@ -2,7 +2,8 @@
 
 #include "iris_camera_toolkit/pinhole_camera.h"
 #include "src/cameras/math.h"
-#include "src/param_matcher.h"
+#include "src/param_matchers/float_single.h"
+#include "src/param_matchers/matcher.h"
 
 #include <iostream>
 
@@ -57,21 +58,18 @@ static const float_t kDefaultAspectRatio =
 CameraFactory ParsePerspective(const char* base_type_name,
                                const char* type_name, Tokenizer& tokenizer,
                                MatrixManager& matrix_manager) {
-  PositiveBoundedSingleFloatTMatcher halffov(
-      base_type_name, type_name, "halffov", (float_t)90.0,
-      std::numeric_limits<float_t>::quiet_NaN());
-  PositiveBoundedSingleFloatTMatcher fov(
-      base_type_name, type_name, "fov", (float_t)180.0,
-      std::numeric_limits<float_t>::quiet_NaN());
-  PositiveFiniteSingleFloatTMatcher lensradius(
-      base_type_name, type_name, "lensradius", kDefaultLensRadius);
-  PositiveFiniteSingleFloatTMatcher focaldistance(
-      base_type_name, type_name, "focaldistance", kDefaultFocalDistance);
-  PositiveFiniteSingleFloatTMatcher frameaspectratio(
-      base_type_name, type_name, "frameaspectratio", kDefaultAspectRatio);
-  ParseAllParameter<5>(
-      base_type_name, type_name, tokenizer,
-      {&halffov, &fov, &lensradius, &focaldistance, &frameaspectratio});
+  SingleFloatMatcher halffov(base_type_name, type_name, "halffov", false, false,
+                             (float_t)0.0, (float_t)90.0,
+                             std::numeric_limits<float_t>::quiet_NaN());
+  SingleFloatMatcher fov(base_type_name, type_name, "fov", false, false,
+                         (float_t)0.0, (float_t)180.0,
+                         std::numeric_limits<float_t>::quiet_NaN());
+  SingleFloatMatcher frameaspectratio(
+      base_type_name, type_name, "frameaspectratio", false, false, (float_t)0.0,
+      (float_t)INFINITY, kDefaultAspectRatio);
+
+  MatchParameters<3>(base_type_name, type_name, tokenizer,
+                     {&halffov, &fov, &frameaspectratio});
 
   if (!std::isnan(halffov.Get()) && !std::isnan(fov.Get())) {
     std::cerr << "ERROR: Only one of halffov or fov may be specified "
@@ -86,12 +84,6 @@ CameraFactory ParsePerspective(const char* base_type_name,
     half_fov = fov.Get() / (float_t)2.0;
   } else {
     half_fov = kDefaultHalfFov;
-  }
-
-  if (lensradius.Get() != (float_t)0.0) {
-    std::cerr << "ERROR: Non-zero values for lensradius currently unsupported "
-              << std::endl;
-    exit(EXIT_FAILURE);
   }
 
   Matrix camera_to_world;

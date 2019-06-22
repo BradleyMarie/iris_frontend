@@ -18,9 +18,11 @@ cc_library(
     srcs = ["stratified.cc"],
     hdrs = ["stratified.h"],
     deps = [
-        "//src:param_matcher",
         "//src/common:pointer_types",
         "//src/common:tokenizer",
+        "//src/param_matchers:integral_single",
+        "//src/param_matchers:matcher",
+        "//src/param_matchers:single",
         "@com_github_bradleymarie_iris//iris_camera_toolkit:grid_pixel_sampler",
     ],
 )

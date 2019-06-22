@@ -6,8 +6,9 @@ cc_library(
     hdrs = ["diffuse.h"],
     deps = [
         ":result",
-        "//src:param_matcher",
         "//src/common:tokenizer",
+        "//src/param_matchers:matcher",
+        "//src/param_matchers:single",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_emissive_material",
     ],
 )

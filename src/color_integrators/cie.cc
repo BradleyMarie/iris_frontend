@@ -1,7 +1,7 @@
 #include "src/color_integrators/cie.h"
 
 #include "iris_physx_toolkit/cie_color_integrator.h"
-#include "src/param_matcher.h"
+#include "src/param_matchers/matcher.h"
 
 #include <iostream>
 
@@ -9,7 +9,7 @@ namespace iris {
 
 ColorIntegrator ParseCie(const char* base_type_name, const char* type_name,
                          Tokenizer& tokenizer) {
-  ParseAllParameter<0>(base_type_name, type_name, tokenizer, {});
+  MatchParameters<0>(base_type_name, type_name, tokenizer, {});
 
   ColorIntegrator result;
   ISTATUS status = CieColorIntegratorAllocate(result.release_and_get_address());

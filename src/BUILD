@@ -62,6 +62,7 @@ cc_library(
     name = "param_parser",
     srcs = ["param_parser.cc"],
     hdrs = ["param_parser.h"],
+    visibility = ["//src:__subpackages__"],
     deps = [
         ":quoted_string",
         "//src/common:pointer_types",
@@ -71,16 +72,6 @@ cc_library(
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:variant",
-    ],
-)
-
-cc_library(
-    name = "param_matcher",
-    srcs = ["param_matcher.cc"],
-    hdrs = ["param_matcher.h"],
-    visibility = ["//src:__subpackages__"],
-    deps = [
-        ":param_parser",
     ],
 )
 

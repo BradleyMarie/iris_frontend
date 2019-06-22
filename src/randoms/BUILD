@@ -18,9 +18,9 @@ cc_library(
     srcs = ["pcg.cc"],
     hdrs = ["pcg.h"],
     deps = [
-        "//src:param_matcher",
         "//src/common:pointer_types",
         "//src/common:tokenizer",
+        "//src/param_matchers:matcher",
         "@com_github_bradleymarie_iris//iris_advanced_toolkit:pcg_random",
     ],
 )
