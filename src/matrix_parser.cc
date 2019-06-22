@@ -2,8 +2,8 @@
 #include <iostream>
 
 #include "absl/strings/numbers.h"
+#include "src/common/quoted_string.h"
 #include "src/matrix_parser.h"
-#include "src/quoted_string.h"
 
 namespace iris {
 namespace {

@@ -7,8 +7,8 @@
 #include <utility>
 
 #include "src/common/matrix_manager.h"
+#include "src/common/quoted_string.h"
 #include "src/common/tokenizer.h"
-#include "src/quoted_string.h"
 
 namespace iris {
 

@@ -1,5 +1,5 @@
-#ifndef _SRC_QUOTED_STRING_
-#define _SRC_QUOTED_STRING_
+#ifndef _SRC_COMMON_QUOTED_STRING_
+#define _SRC_COMMON_QUOTED_STRING_
 
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
@@ -11,4 +11,4 @@ bool ParseQuotedTokenToString(absl::string_view token, std::string* result);
 
 }  // namespace iris
 
-#endif  // _SRC_QUOTED_STRING_
+#endif  // _SRC_COMMON_QUOTED_STRING_

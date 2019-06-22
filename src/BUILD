@@ -24,8 +24,8 @@ cc_library(
     hdrs = ["directive_parser.h"],
     visibility = ["//src:__subpackages__"],
     deps = [
-        ":quoted_string",
         "//src/common:matrix_manager",
+        "//src/common:quoted_string",
         "//src/common:tokenizer",
     ],
 )
@@ -52,20 +52,9 @@ cc_library(
     srcs = ["matrix_parser.cc"],
     hdrs = ["matrix_parser.h"],
     deps = [
-        ":quoted_string",
         "//src/common:matrix_manager",
+        "//src/common:quoted_string",
         "//src/common:tokenizer",
-    ],
-)
-
-cc_library(
-    name = "quoted_string",
-    srcs = ["quoted_string.cc"],
-    hdrs = ["quoted_string.h"],
-    visibility = ["//src:__subpackages__"],
-    deps = [
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/types:optional",
     ],
 )
 

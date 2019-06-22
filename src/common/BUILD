@@ -44,6 +44,16 @@ cc_library(
 )
 
 cc_library(
+    name = "quoted_string",
+    srcs = ["quoted_string.cc"],
+    hdrs = ["quoted_string.h"],
+    deps = [
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
+cc_library(
     name = "shared_ptr",
     hdrs = ["shared_ptr.h"],
 )

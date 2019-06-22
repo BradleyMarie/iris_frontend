@@ -7,7 +7,7 @@
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
 #include "iris_physx_toolkit/interpolated_spectrum.h"
-#include "src/quoted_string.h"
+#include "src/common/quoted_string.h"
 
 namespace iris {
 namespace {
