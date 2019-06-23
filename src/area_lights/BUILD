@@ -6,6 +6,7 @@ cc_library(
     hdrs = ["diffuse.h"],
     deps = [
         ":result",
+        "//src/common:error",
         "//src/common:tokenizer",
         "//src/param_matchers:matcher",
         "//src/param_matchers:single",

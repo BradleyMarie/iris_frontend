@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "absl/strings/str_join.h"
+#include "src/common/error.h"
 
 namespace iris {
 
@@ -21,14 +22,7 @@ void MatrixManager::Translate(const std::array<FiniteFloatT, 3>& params) {
   ISTATUS status = MatrixAllocateTranslation(
       params[0].Get(), params[1].Get(), params[2].Get(),
       translation.release_and_get_address());
-
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
+  SuccessOrOOM(status);
 
   Transform(translation);
 }
@@ -38,14 +32,7 @@ void MatrixManager::Scale(const std::array<FiniteNonZeroFloatT, 3>& params) {
   ISTATUS status =
       MatrixAllocateScalar(params[0].Get(), params[1].Get(), params[2].Get(),
                            scalar.release_and_get_address());
-
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
+  SuccessOrOOM(status);
 
   Transform(scalar);
 }
@@ -63,8 +50,7 @@ void MatrixManager::Rotate(const std::array<FiniteFloatT, 4>& params) {
                 << std::endl;
       exit(EXIT_FAILURE);
     case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
+      ReportOOM();
     default:
       assert(status == ISTATUS_SUCCESS);
   }
@@ -117,8 +103,7 @@ void MatrixManager::LookAt(const std::array<FiniteFloatT, 9>& params) {
       std::cerr << "ERROR: Non-invertible matrix" << std::endl;
       exit(EXIT_FAILURE);
     case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
+      ReportOOM();
     default:
       assert(status == ISTATUS_SUCCESS);
   }
@@ -160,8 +145,7 @@ void MatrixManager::Transform(
                 << absl::StrJoin(unparsed_params, ", ") << " ]" << std::endl;
       exit(EXIT_FAILURE);
     case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
+      ReportOOM();
     default:
       assert(status == ISTATUS_SUCCESS);
   }
@@ -186,8 +170,7 @@ void MatrixManager::ConcatTransform(
                 << absl::StrJoin(unparsed_params, ", ") << " ]" << std::endl;
       exit(EXIT_FAILURE);
     case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
+      ReportOOM();
     default:
       assert(status == ISTATUS_SUCCESS);
   }
@@ -212,8 +195,7 @@ void MatrixManager::Transform(Matrix m) {
         std::cerr << "ERROR: Non-invertible matrix product" << std::endl;
         exit(EXIT_FAILURE);
       case ISTATUS_ALLOCATION_FAILED:
-        std::cerr << "ERROR: Allocation failed" << std::endl;
-        exit(EXIT_FAILURE);
+        ReportOOM();
       default:
         assert(status == ISTATUS_SUCCESS);
     }
@@ -229,8 +211,7 @@ void MatrixManager::Transform(Matrix m) {
         std::cerr << "ERROR: Non-invertible matrix product" << std::endl;
         exit(EXIT_FAILURE);
       case ISTATUS_ALLOCATION_FAILED:
-        std::cerr << "ERROR: Allocation failed" << std::endl;
-        exit(EXIT_FAILURE);
+        ReportOOM();
       default:
         assert(status == ISTATUS_SUCCESS);
     }

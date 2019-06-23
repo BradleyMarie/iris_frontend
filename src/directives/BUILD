@@ -26,6 +26,7 @@ cc_library(
     deps = [
         ":transform",
         "//src/area_lights:parser",
+        "//src/common:error",
         "//src/common:matrix_manager",
         "//src/common:pointer_types",
         "//src/common:tokenizer",

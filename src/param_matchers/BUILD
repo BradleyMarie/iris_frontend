@@ -39,6 +39,7 @@ cc_library(
     srcs = ["parser.cc"],
     hdrs = ["parser.h"],
     deps = [
+        "//src/common:error",
         "//src/common:pointer_types",
         "//src/common:quoted_string",
         "//src/common:tokenizer",

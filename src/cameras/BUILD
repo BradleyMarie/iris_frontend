@@ -30,6 +30,7 @@ cc_library(
     deps = [
         ":math",
         ":result",
+        "//src/common:error",
         "//src/common:matrix_manager",
         "//src/common:tokenizer",
         "//src/param_matchers:float_single",

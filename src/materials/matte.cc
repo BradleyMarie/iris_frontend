@@ -1,12 +1,13 @@
 #include "src/materials/matte.h"
 
+#include <iostream>
+
 #include "absl/strings/str_join.h"  // TODO: Move
 #include "iris_physx_toolkit/constant_material.h"
 #include "iris_physx_toolkit/lambertian_bsdf.h"
 #include "iris_physx_toolkit/uniform_reflector.h"
+#include "src/common/error.h"
 #include "src/param_matchers/matcher.h"
-
-#include <iostream>
 
 namespace iris {
 namespace {
@@ -53,13 +54,7 @@ MaterialResult ParseMatte(const char* base_type_name, const char* type_name,
   Reflector reflectance;
   ISTATUS status = UniformReflectorAllocate(
       kMatteMaterialDefaultReflectance, reflectance.release_and_get_address());
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
+  SuccessOrOOM(status);
 
   SingleReflectorMatcher kd(base_type_name, type_name, "Kd", false,
                             reflectance);
@@ -68,24 +63,12 @@ MaterialResult ParseMatte(const char* base_type_name, const char* type_name,
   Bsdf bsdf;
   status = LambertianReflectorAllocate(kd.Get().get(),
                                        bsdf.release_and_get_address());
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
+  SuccessOrOOM(status);
 
   Material result;
   status =
       ConstantMaterialAllocate(bsdf.get(), result.release_and_get_address());
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
+  SuccessOrOOM(status);
 
   return std::make_pair(result, std::set<Reflector>({kd.Get()}));
 }

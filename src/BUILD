@@ -19,6 +19,7 @@ cc_library(
     hdrs = ["render.h"],
     visibility = ["//test:__subpackages__"],
     deps = [
+        "//src/common:error",
         "//src/common:ostream",
         "//src/common:tokenizer",
         "//src/directives:parse",

@@ -1,11 +1,12 @@
 #include "src/films/image.h"
 
+#include <iostream>
+
+#include "src/common/error.h"
 #include "src/films/output_writers/parser.h"
 #include "src/param_matchers/integral_single.h"
 #include "src/param_matchers/matcher.h"
 #include "src/param_matchers/single.h"
-
-#include <iostream>
 
 namespace iris {
 namespace {
@@ -31,13 +32,7 @@ FilmResult ParseImage(const char* base_type_name, const char* type_name,
   Framebuffer framebuffer;
   ISTATUS status = FramebufferAllocate(xresolution.Get(), yresolution.Get(),
                                        framebuffer.release_and_get_address());
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
+  SuccessOrOOM(status);
 
   return std::make_pair(std::move(framebuffer),
                         ParseOutputWriter(filename.Get()));

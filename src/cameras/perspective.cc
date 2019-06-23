@@ -1,11 +1,12 @@
 #include "src/cameras/perspective.h"
 
+#include <iostream>
+
 #include "iris_camera_toolkit/pinhole_camera.h"
 #include "src/cameras/math.h"
+#include "src/common/error.h"
 #include "src/param_matchers/float_single.h"
 #include "src/param_matchers/matcher.h"
-
-#include <iostream>
 
 namespace iris {
 namespace {
@@ -34,14 +35,7 @@ CameraFactory CreatePerspectiveCameraFactory(const Matrix& camera_to_world,
         camera_params.camera_up, camera_params.image_distance,
         camera_params.image_width, camera_params.image_height,
         result.release_and_get_address());
-
-    switch (status) {
-      case ISTATUS_ALLOCATION_FAILED:
-        std::cerr << "ERROR: Allocation failed" << std::endl;
-        exit(EXIT_FAILURE);
-      default:
-        assert(status == ISTATUS_SUCCESS);
-    }
+    SuccessOrOOM(status);
 
     return result;
   };

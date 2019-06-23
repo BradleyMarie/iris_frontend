@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "iris_camera_toolkit/grid_pixel_sampler.h"
+#include "src/common/error.h"
 #include "src/param_matchers/integral_single.h"
 #include "src/param_matchers/matcher.h"
 #include "src/param_matchers/single.h"
@@ -31,13 +32,7 @@ PixelSampler ParseStratified(const char* base_type_name, const char* type_name,
   ISTATUS status =
       GridPixelSamplerAllocate(xsamples.Get(), ysamples.Get(), jitter.Get(), 1,
                                1, false, result.release_and_get_address());
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
+  SuccessOrOOM(status);
 
   return result;
 }

@@ -1,11 +1,12 @@
 #include "src/shapes/trianglemesh.h"
 
+#include <iostream>
+
 #include "iris_physx_toolkit/triangle.h"
+#include "src/common/error.h"
 #include "src/common/ostream.h"
 #include "src/param_matchers/list.h"
 #include "src/param_matchers/matcher.h"
-
-#include <iostream>
 
 namespace iris {
 namespace {
@@ -55,13 +56,7 @@ ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
         p0, p1, p2, front_material.get(), back_material.get(),
         front_emissive_material.get(), back_emissive_material.get(),
         triangle.release_and_get_address());
-    switch (status) {
-      case ISTATUS_ALLOCATION_FAILED:
-        std::cerr << "ERROR: Allocation failed" << std::endl;
-        exit(EXIT_FAILURE);
-      default:
-        assert(status == ISTATUS_SUCCESS);
-    }
+    SuccessOrOOM(status);
 
     if (!triangle.get()) {
       std::cerr << "WARNING: Degenerate triangle skipped: " << p0 << ", " << p1
@@ -73,13 +68,7 @@ ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
       Light light;
       status = AreaLightAllocate(triangle.get(), TRIANGLE_FRONT_FACE,
                                  light.release_and_get_address());
-      switch (status) {
-        case ISTATUS_ALLOCATION_FAILED:
-          std::cerr << "ERROR: Allocation failed" << std::endl;
-          exit(EXIT_FAILURE);
-        default:
-          assert(status == ISTATUS_SUCCESS);
-      }
+      SuccessOrOOM(status);
 
       lights.push_back(light);
     }
@@ -88,13 +77,7 @@ ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
       Light light;
       status = AreaLightAllocate(triangle.get(), TRIANGLE_BACK_FACE,
                                  light.release_and_get_address());
-      switch (status) {
-        case ISTATUS_ALLOCATION_FAILED:
-          std::cerr << "ERROR: Allocation failed" << std::endl;
-          exit(EXIT_FAILURE);
-        default:
-          assert(status == ISTATUS_SUCCESS);
-      }
+      SuccessOrOOM(status);
 
       lights.push_back(light);
     }

@@ -1,10 +1,11 @@
 #include "src/area_lights/diffuse.h"
 
+#include <iostream>
+
 #include "iris_physx_toolkit/constant_emissive_material.h"
+#include "src/common/error.h"
 #include "src/param_matchers/matcher.h"
 #include "src/param_matchers/single.h"
-
-#include <iostream>
 
 namespace iris {
 namespace {
@@ -54,13 +55,7 @@ AreaLightResult ParseDiffuse(const char* base_type_name, const char* type_name,
   ISTATUS status = ConstantEmissiveMaterialAllocate(
       (PSPECTRUM)spectrum.Get().get(),
       front_emissive_material.release_and_get_address());
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
+  SuccessOrOOM(status);
 
   if (twosided.Get()) {
     back_emissive_material = front_emissive_material;

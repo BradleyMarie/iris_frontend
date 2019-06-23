@@ -7,6 +7,7 @@
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
 #include "iris_physx_toolkit/interpolated_spectrum.h"
+#include "src/common/error.h"
 #include "src/common/quoted_string.h"
 
 namespace iris {
@@ -168,8 +169,7 @@ static ContainerType AllocateSpectrum(const std::vector<float_t>& data,
       Allocate(wavelengths.data(), intensities.data(), wavelengths.size(),
                result.release_and_get_address());
   if (status == ISTATUS_ALLOCATION_FAILED) {
-    std::cerr << "ERROR: Allocation failed" << std::endl;
-    exit(EXIT_FAILURE);
+    ReportOOM();
   }
   if (status != ISTATUS_SUCCESS) {
     std::cerr << "ERROR: Could not construct a spectrum from values ("

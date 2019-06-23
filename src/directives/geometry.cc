@@ -5,6 +5,7 @@
 
 #include "iris_physx_toolkit/kd_tree_scene.h"
 #include "src/area_lights/parser.h"
+#include "src/common/error.h"
 #include "src/directives/transform.h"
 #include "src/materials/parser.h"
 #include "src/shapes/parser.h"
@@ -139,24 +140,12 @@ void GraphicsStateManager::PrecomputeColors(ColorIntegrator& color_integrator) {
   for (const auto& spectrum : m_spectra_used) {
     ISTATUS status = ColorIntegratorPrecomputeSpectrumColor(
         color_integrator.get(), spectrum.get());
-    switch (status) {
-      case ISTATUS_ALLOCATION_FAILED:
-        std::cerr << "ERROR: Allocation failed" << std::endl;
-        exit(EXIT_FAILURE);
-      default:
-        assert(status == ISTATUS_SUCCESS);
-    }
+    SuccessOrOOM(status);
   }
   for (const auto& reflector : m_reflectors_used) {
     ISTATUS status = ColorIntegratorPrecomputeReflectorColor(
         color_integrator.get(), reflector.get());
-    switch (status) {
-      case ISTATUS_ALLOCATION_FAILED:
-        std::cerr << "ERROR: Allocation failed" << std::endl;
-        exit(EXIT_FAILURE);
-      default:
-        assert(status == ISTATUS_SUCCESS);
-    }
+    SuccessOrOOM(status);
   }
 }
 
@@ -176,13 +165,7 @@ Scene CreateScene(std::vector<Shape>& shapes, std::vector<Matrix>& transforms) {
   ISTATUS status = KdTreeSceneAllocate(
       shape_pointers.data(), matrix_pointers.data(), premultiplied.get(),
       shapes.size(), result.release_and_get_address());
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
+  SuccessOrOOM(status);
 
   return result;
 }

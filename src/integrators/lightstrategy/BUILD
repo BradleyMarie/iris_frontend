@@ -27,6 +27,7 @@ cc_library(
     hdrs = ["uniform.h"],
     deps = [
         ":result",
+        "//src/common:error",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:one_light_sampler",
     ],
 )

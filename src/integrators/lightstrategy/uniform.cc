@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "iris_physx_toolkit/one_light_sampler.h"
+#include "src/common/error.h"
 
 namespace iris {
 namespace {
@@ -16,13 +17,7 @@ LightSampler CreateUniformLightSampler(std::vector<Light>& lights) {
   LightSampler result;
   ISTATUS status = OneLightSamplerAllocate(raw_lights.data(), raw_lights.size(),
                                            result.release_and_get_address());
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
+  SuccessOrOOM(status);
 
   return result;
 }

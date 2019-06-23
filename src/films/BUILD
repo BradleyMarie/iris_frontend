@@ -19,6 +19,7 @@ cc_library(
     hdrs = ["image.h"],
     deps = [
         ":result",
+        "//src/common:error",
         "//src/common:tokenizer",
         "//src/param_matchers:integral_single",
         "//src/param_matchers:matcher",

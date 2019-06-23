@@ -27,6 +27,7 @@ cc_library(
     hdrs = ["trianglemesh.h"],
     deps = [
         ":result",
+        "//src/common:error",
         "//src/common:ostream",
         "//src/common:tokenizer",
         "//src/param_matchers:list",

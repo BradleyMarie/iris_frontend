@@ -20,6 +20,7 @@ cc_library(
     deps = [
         ":cie",
         "//src/common:call_directive",
+        "//src/common:error",
         "//src/common:pointer_types",
         "//src/common:tokenizer",
     ],

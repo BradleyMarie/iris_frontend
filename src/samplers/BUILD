@@ -18,6 +18,7 @@ cc_library(
     srcs = ["stratified.cc"],
     hdrs = ["stratified.h"],
     deps = [
+        "//src/common:error",
         "//src/common:pointer_types",
         "//src/common:tokenizer",
         "//src/param_matchers:integral_single",

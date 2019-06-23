@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "iris_advanced_toolkit/pcg_random.h"
+#include "src/common/error.h"
 #include "src/param_matchers/matcher.h"
 
 namespace iris {
@@ -21,13 +22,7 @@ Random ParsePcg(const char* base_type_name, const char* type_name,
   ISTATUS status = PermutedCongruentialRandomAllocate(
       kPcgRandomDefaultState, kPcgRandomDefaultOutputSequence,
       result.release_and_get_address());
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
+  SuccessOrOOM(status);
 
   return result;
 }

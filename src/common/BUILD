@@ -11,6 +11,15 @@ cc_library(
 )
 
 cc_library(
+    name = "error",
+    srcs = ["error.cc"],
+    hdrs = ["error.h"],
+    deps = [
+        "@com_github_bradleymarie_iris//iris:iris",
+    ],
+)
+
+cc_library(
     name = "finite_float_t",
     srcs = ["finite_float_t.cc"],
     hdrs = ["finite_float_t.h"],
@@ -26,6 +35,7 @@ cc_library(
     srcs = ["matrix_manager.cc"],
     hdrs = ["matrix_manager.h"],
     deps = [
+        ":error",
         ":finite_float_t",
         ":pointer_types",
         "@com_google_absl//absl/container:flat_hash_map",

@@ -1,13 +1,14 @@
 #include "src/integrators/path.h"
 
+#include <iostream>
+
 #include "iris_physx_toolkit/path_tracer.h"
+#include "src/common/error.h"
 #include "src/integrators/lightstrategy/parser.h"
 #include "src/param_matchers/float_single.h"
 #include "src/param_matchers/integral_single.h"
 #include "src/param_matchers/matcher.h"
 #include "src/param_matchers/single.h"
-
-#include <iostream>
 
 namespace iris {
 namespace {
@@ -35,13 +36,7 @@ IntegratorResult ParsePath(const char* base_type_name, const char* type_name,
   ISTATUS status = PathTracerAllocate(
       std::min(kPathTracerDefaultMinDepth, maxdepth.Get()), maxdepth.Get(),
       rrthreshold.Get(), integrator.release_and_get_address());
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
+  SuccessOrOOM(status);
 
   return std::make_pair(std::move(integrator),
                         ParseLightStrategy(lightsamplestrategy.Get()));

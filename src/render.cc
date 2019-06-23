@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "iris_physx_toolkit/sample_tracer.h"
+#include "src/common/error.h"
 #include "src/common/ostream.h"
 #include "src/directives/parse.h"
 
@@ -21,14 +22,7 @@ std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(
       std::get<4>(render_config).detach(), std::get<0>(render_config).get(),
       std::get<1>(render_config).get(), std::get<5>(render_config).get(),
       sample_tracer.release_and_get_address());
-
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
+  SuccessOrOOM(status);
 
   status = IrisCameraRender(
       std::get<2>(render_config).get(), std::get<3>(render_config).get(),
@@ -39,8 +33,7 @@ std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(
     case ISTATUS_SUCCESS:
       break;
     case ISTATUS_ALLOCATION_FAILED:
-      std::cerr << "ERROR: Allocation failed" << std::endl;
-      exit(EXIT_FAILURE);
+      ReportOOM();
     default:
       std::cerr << "ERROR: " << status << " returned from rendering"
                 << std::endl;
