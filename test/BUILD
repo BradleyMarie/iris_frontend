@@ -1,31 +1,14 @@
 package(default_visibility = ["//visibility:private"])
 
-cc_binary(
-    name = "pfm_matches",
-    testonly = 1,
-    srcs = ["pfm_matches.cc"],
-)
-
-genrule(
-    name = "cornell_box",
-    srcs = [
-        "cornell_box.pbrt",
-    ],
-    outs = ["cornell_box_latest.pfm"],
-    cmd = "$(location //src:iris) --default_output=$@ $(location cornell_box.pbrt)",
-    tools = ["//src:iris"],
-)
-
-sh_test(
-    name = "check_cornell_box",
-    srcs = [":pfm_matches"],
-    args = [
-        "approximate",
-        "$(location cornell_box.pfm)",
-        "$(location :cornell_box_latest.pfm)",
-    ],
+cc_test(
+    name = "render_tests",
+    srcs = ["render_tests.cc"],
     data = [
+        "cornell_box.pbrt",
         "cornell_box.pfm",
-        ":cornell_box_latest.pfm",
+    ],
+    deps = [
+        "//src:render",
+        "@com_google_googletest//:gtest_main",
     ],
 )

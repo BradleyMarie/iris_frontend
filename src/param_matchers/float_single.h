@@ -18,8 +18,8 @@ class SingleFloatMatcher : public ParamMatcher {
         m_maximum(maximum),
         m_value(default_value),
         m_inclusive(inclusive) {
-    assert(std::isfinite(minimum));
-    assert(std::isfinite(maximum));
+    assert(!inclusive || std::isfinite(minimum));
+    assert(!inclusive || std::isfinite(maximum));
     assert(inclusive || minimum < maximum);
   }
   const float_t& Get() { return m_value; }
