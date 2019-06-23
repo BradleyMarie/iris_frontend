@@ -56,12 +56,15 @@ ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
         p0, p1, p2, front_material.get(), back_material.get(),
         front_emissive_material.get(), back_emissive_material.get(),
         triangle.release_and_get_address());
-    SuccessOrOOM(status);
-
-    if (!triangle.get()) {
-      std::cerr << "WARNING: Degenerate triangle skipped: " << p0 << ", " << p1
-                << ", " << p2 << std::endl;
-      continue;
+    switch (status) {
+      case ISTATUS_INVALID_ARGUMENT_COMBINATION_00:
+        std::cerr << "WARNING: Degenerate triangle skipped: " << p0 << ", "
+                  << p1 << ", " << p2 << std::endl;
+        continue;
+      case ISTATUS_ALLOCATION_FAILED:
+        ReportOOM();
+      default:
+        assert(status == ISTATUS_SUCCESS);
     }
 
     if (front_emissive_material.get()) {
