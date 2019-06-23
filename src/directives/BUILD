@@ -5,6 +5,7 @@ cc_library(
     srcs = ["global.cc"],
     hdrs = ["global.h"],
     deps = [
+        ":include",
         ":transform",
         "//src/cameras:parser",
         "//src/color_integrators:parser",
@@ -24,6 +25,7 @@ cc_library(
     srcs = ["geometry.cc"],
     hdrs = ["geometry.h"],
     deps = [
+        ":include",
         ":transform",
         "//src/area_lights:parser",
         "//src/common:error",
@@ -32,6 +34,17 @@ cc_library(
         "//src/common:tokenizer",
         "//src/materials:parser",
         "//src/shapes:parser",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:kd_tree_scene",
+    ],
+)
+
+cc_library(
+    name = "include",
+    srcs = ["include.cc"],
+    hdrs = ["include.h"],
+    deps = [
+        "//src/common:quoted_string",
+        "//src/common:tokenizer",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:kd_tree_scene",
     ],
 )

@@ -4,6 +4,7 @@
 
 #include "src/cameras/parser.h"
 #include "src/color_integrators/parser.h"
+#include "src/directives/include.h"
 #include "src/directives/transform.h"
 #include "src/films/parser.h"
 #include "src/integrators/parser.h"
@@ -79,6 +80,7 @@ bool CallOnce(const char* base_type_name, absl::string_view token,
 }  // namespace
 
 GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
+                                   const std::string& search_dir,
                                    MatrixManager& matrix_manager) {
   matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
   matrix_manager.Identity();
@@ -99,6 +101,10 @@ GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
     }
 
     if (TryParseTransformDirectives(*token, tokenizer, matrix_manager)) {
+      continue;
+    }
+
+    if (TryParseInclude(*token, tokenizer, search_dir)) {
       continue;
     }
 

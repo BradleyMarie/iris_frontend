@@ -15,7 +15,7 @@ std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(
   assert(isfinite(epsilon) && (float_t)0.0 <= epsilon);
   assert(num_threads != 0);
 
-  auto render_config = ParseDirectives(tokenizer);
+  auto render_config = ParseDirectives(tokenizer, search_dir);
 
   SampleTracer sample_tracer;
   ISTATUS status = PhysxSampleTracerAllocate(

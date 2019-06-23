@@ -129,42 +129,71 @@ bool ParseNext(std::istream& stream, std::string& output) {
 
 }  // namespace
 
-Tokenizer::Tokenizer()
-    : m_allocated_stream(new std::stringstream()),
-      m_stream(*m_allocated_stream) {}
+Tokenizer::Tokenizer() {
+  auto buffer = absl::make_unique<std::stringstream>();
+  m_streams.push(std::make_pair(std::ref(*buffer), std::move(buffer)));
+}
 
-Tokenizer::Tokenizer(const std::string& file)
-    : m_allocated_stream(new std::ifstream(file)),
-      m_stream(*m_allocated_stream) {
-  if (!m_stream) {
+Tokenizer::Tokenizer(const std::string& file) { Include(file); }
+
+Tokenizer::Tokenizer(std::istream& stream) {
+  m_streams.push(std::make_pair(std::ref(stream), nullptr));
+}
+
+void Tokenizer::Include(const std::string& file) {
+  auto buffer = absl::make_unique<std::ifstream>(file);
+  if (buffer->fail()) {
     std::cerr << "ERROR: Error opening file " << file << std::endl;
     exit(EXIT_FAILURE);
   }
+
+  m_streams.push(std::make_pair(std::ref(*buffer), std::move(buffer)));
 }
 
 absl::optional<absl::string_view> Tokenizer::Peek() {
-  if (!m_peeked_valid.has_value()) {
-    m_peeked_valid = ParseNext(m_stream, m_peeked);
+  if (m_peeked_valid.has_value()) {
+    if (*m_peeked_valid) {
+      return m_peeked;
+    } else {
+      return absl::nullopt;
+    }
   }
 
-  if (*m_peeked_valid) {
-    return m_peeked;
+  for (;;) {
+    bool found = ParseNext(m_streams.top().first, m_peeked);
+    if (found) {
+      m_peeked_valid = found;
+      return m_peeked;
+    }
+
+    m_streams.pop();
+
+    if (m_streams.empty()) {
+      break;
+    }
   }
 
   return absl::nullopt;
 }
 
 absl::optional<absl::string_view> Tokenizer::Next() {
-  if (m_peeked_valid.has_value()) {
-    std::swap(m_next, m_peeked);
-    m_next_valid = m_peeked_valid;
-    m_peeked_valid = absl::nullopt;
-  } else {
-    m_next_valid = ParseNext(m_stream, m_next);
-  }
+  for (;;) {
+    bool next_valid;
+    if (m_peeked_valid.has_value()) {
+      std::swap(m_next, m_peeked);
+      next_valid = *m_peeked_valid;
+      m_peeked_valid = absl::nullopt;
+    } else if (!m_streams.empty()) {
+      next_valid = ParseNext(m_streams.top().first, m_next);
+    } else {
+      break;
+    }
 
-  if (*m_next_valid) {
-    return m_next;
+    if (next_valid) {
+      return m_next;
+    } else {
+      m_streams.pop();
+    }
   }
 
   return absl::nullopt;

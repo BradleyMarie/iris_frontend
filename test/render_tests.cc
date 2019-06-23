@@ -117,3 +117,11 @@ TEST(RenderTests, CornellBox) {
       RenderToFramebuffer(tokenizer, kSearchDir, kEpsilon, kNumThreads);
   CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.001);
 }
+
+TEST(RenderTests, IncludeCornellBox) {
+  std::stringstream stream("Include \"test/cornell_box.pbrt\"");
+  iris::Tokenizer tokenizer(stream);
+  auto render_result =
+      RenderToFramebuffer(tokenizer, kSearchDir, kEpsilon, kNumThreads);
+  CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.001);
+}

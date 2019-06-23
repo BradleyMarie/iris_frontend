@@ -6,6 +6,7 @@
 #include "iris_physx_toolkit/kd_tree_scene.h"
 #include "src/area_lights/parser.h"
 #include "src/common/error.h"
+#include "src/directives/include.h"
 #include "src/directives/transform.h"
 #include "src/materials/parser.h"
 #include "src/shapes/parser.h"
@@ -173,8 +174,8 @@ Scene CreateScene(std::vector<Shape>& shapes, std::vector<Matrix>& transforms) {
 }  // namespace
 
 std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
-    Tokenizer& tokenizer, MatrixManager& matrix_manager,
-    ColorIntegrator& color_integrator) {
+    Tokenizer& tokenizer, const std::string& search_dir,
+    MatrixManager& matrix_manager, ColorIntegrator& color_integrator) {
   matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
   matrix_manager.Identity();
 
@@ -190,6 +191,10 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     }
 
     if (TryParseTransformDirectives(*token, tokenizer, matrix_manager)) {
+      continue;
+    }
+
+    if (TryParseInclude(*token, tokenizer, search_dir)) {
       continue;
     }
 
