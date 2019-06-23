@@ -1,6 +1,16 @@
 package(default_visibility = ["//src:__subpackages__"])
 
 cc_library(
+    name = "call_directive",
+    hdrs = ["call_directive.h"],
+    deps = [
+        ":matrix_manager",
+        ":quoted_string",
+        ":tokenizer",
+    ],
+)
+
+cc_library(
     name = "finite_float_t",
     srcs = ["finite_float_t.cc"],
     hdrs = ["finite_float_t.h"],

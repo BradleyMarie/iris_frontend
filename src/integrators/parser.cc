@@ -1,15 +1,15 @@
 #include "src/integrators/parser.h"
 
-#include "src/directive_parser.h"
-#include "src/integrators/path.h"
-
 #include <iostream>
+
+#include "src/common/call_directive.h"
+#include "src/integrators/path.h"
 
 namespace iris {
 
 IntegratorResult ParseIntegrator(const char* base_type_name,
                                  Tokenizer& tokenizer) {
-  return ParseDirective<IntegratorResult, 1>(
+  return CallDirective<IntegratorResult, 1>(
       base_type_name, tokenizer, {std::make_pair("path", ParsePath)});
 }
 

@@ -1,5 +1,5 @@
-#ifndef _SRC_DIRECTIVE_PARSER_
-#define _SRC_DIRECTIVE_PARSER_
+#ifndef _SRC_COMMON_CALL_DIRECTIVE_
+#define _SRC_COMMON_CALL_DIRECTIVE_
 
 #include <array>
 #include <functional>
@@ -13,14 +13,14 @@
 namespace iris {
 
 template <typename Result, typename... Args>
-using DirectiveCallback =
+using DirectiveImpl =
     std::function<Result(const char* base_type_name, const char* type_name,
                          Tokenizer&, Args... args)>;
 
 template <typename Result, size_t NumImplementations, typename... Args>
-Result ParseDirective(
+Result CallDirective(
     const char* base_type_name, Tokenizer& tokenizer,
-    const std::array<std::pair<const char*, DirectiveCallback<Result, Args...>>,
+    const std::array<std::pair<const char*, DirectiveImpl<Result, Args...>>,
                      NumImplementations>& callbacks,
     Args... args) {
   auto token = tokenizer.Next();
@@ -46,4 +46,4 @@ Result ParseDirective(
 
 }  // namespace iris
 
-#endif  // _SRC_DIRECTIVE_PARSER_
+#endif  // _SRC_COMMON_CALL_DIRECTIVE_

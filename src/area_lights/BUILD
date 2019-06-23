@@ -21,7 +21,7 @@ cc_library(
     deps = [
         ":diffuse",
         ":result",
-        "//src:directive_parser",
+        "//src/common:call_directive",
         "//src/common:tokenizer",
     ],
 )

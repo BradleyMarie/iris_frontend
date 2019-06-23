@@ -8,7 +8,7 @@ cc_library(
     deps = [
         ":path",
         ":result",
-        "//src:directive_parser",
+        "//src/common:call_directive",
         "//src/common:tokenizer",
     ],
 )

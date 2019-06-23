@@ -7,7 +7,7 @@ cc_library(
     visibility = ["//src:__subpackages__"],
     deps = [
         ":stratified",
-        "//src:directive_parser",
+        "//src/common:call_directive",
         "//src/common:pointer_types",
         "//src/common:tokenizer",
     ],

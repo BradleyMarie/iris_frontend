@@ -19,7 +19,7 @@ cc_library(
     visibility = ["//src:__subpackages__"],
     deps = [
         ":cie",
-        "//src:directive_parser",
+        "//src/common:call_directive",
         "//src/common:pointer_types",
         "//src/common:tokenizer",
     ],

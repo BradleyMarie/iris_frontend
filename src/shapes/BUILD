@@ -8,7 +8,7 @@ cc_library(
     deps = [
         ":result",
         ":trianglemesh",
-        "//src:directive_parser",
+        "//src/common:call_directive",
         "//src/common:tokenizer",
     ],
 )

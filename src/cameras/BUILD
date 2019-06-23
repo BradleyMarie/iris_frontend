@@ -17,7 +17,7 @@ cc_library(
     deps = [
         ":perspective",
         ":result",
-        "//src:directive_parser",
+        "//src/common:call_directive",
         "//src/common:matrix_manager",
         "//src/common:tokenizer",
     ],

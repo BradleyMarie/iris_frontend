@@ -19,17 +19,6 @@ cc_library(
     ],
 )
 
-cc_library(
-    name = "directive_parser",
-    hdrs = ["directive_parser.h"],
-    visibility = ["//src:__subpackages__"],
-    deps = [
-        "//src/common:matrix_manager",
-        "//src/common:quoted_string",
-        "//src/common:tokenizer",
-    ],
-)
-
 cc_binary(
     name = "iris",
     srcs = ["iris.cc"],

@@ -57,10 +57,10 @@ CameraConfig CreateCameraConfig(
 }
 
 template <typename Result, typename... Args>
-bool ParseDirectiveOnce(const char* base_type_name, absl::string_view token,
-                        absl::optional<Result>& result,
-                        Result (*function)(const char*, Tokenizer&, Args...),
-                        Tokenizer& tokenizer, Args... args) {
+bool CallOnce(const char* base_type_name, absl::string_view token,
+              absl::optional<Result>& result,
+              Result (*function)(const char*, Tokenizer&, Args...),
+              Tokenizer& tokenizer, Args... args) {
   if (token != base_type_name) {
     return false;
   }
@@ -102,25 +102,24 @@ CameraConfig ParseCameraConfig(Tokenizer& tokenizer,
       continue;
     }
 
-    if (ParseDirectiveOnce<CameraFactory, MatrixManager&>(
-            "Camera", *token, camera_factory, ParseCamera, tokenizer,
-            matrix_manager)) {
+    if (CallOnce<CameraFactory, MatrixManager&>("Camera", *token,
+                                                camera_factory, ParseCamera,
+                                                tokenizer, matrix_manager)) {
       continue;
     }
 
-    if (ParseDirectiveOnce<ColorIntegrator>("ColorIntegrator", *token,
-                                            color_integrator,
-                                            ParseColorIntegrator, tokenizer)) {
+    if (CallOnce<ColorIntegrator>("ColorIntegrator", *token, color_integrator,
+                                  ParseColorIntegrator, tokenizer)) {
       continue;
     }
 
-    if (ParseDirectiveOnce<PixelSampler>("Sampler", *token, pixel_sampler,
-                                         ParseSampler, tokenizer)) {
+    if (CallOnce<PixelSampler>("Sampler", *token, pixel_sampler, ParseSampler,
+                               tokenizer)) {
       continue;
     }
 
-    if (ParseDirectiveOnce<FilmResult>("Film", *token, film_result, ParseFilm,
-                                       tokenizer)) {
+    if (CallOnce<FilmResult>("Film", *token, film_result, ParseFilm,
+                             tokenizer)) {
       continue;
     }
 
@@ -129,9 +128,8 @@ CameraConfig ParseCameraConfig(Tokenizer& tokenizer,
       continue;
     }
 
-    if (ParseDirectiveOnce<IntegratorResult>("Integrator", *token,
-                                             integrator_result, ParseIntegrator,
-                                             tokenizer)) {
+    if (CallOnce<IntegratorResult>("Integrator", *token, integrator_result,
+                                   ParseIntegrator, tokenizer)) {
       continue;
     }
 
@@ -154,8 +152,7 @@ CameraConfig ParseCameraConfig(Tokenizer& tokenizer,
       continue;
     }
 
-    if (ParseDirectiveOnce<Random>("Random", *token, random, ParseRandom,
-                                   tokenizer)) {
+    if (CallOnce<Random>("Random", *token, random, ParseRandom, tokenizer)) {
       continue;
     }
 
