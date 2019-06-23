@@ -1,9 +1,10 @@
+#include "src/directives/transform.h"
+
 #include <array>
 #include <iostream>
 
 #include "absl/strings/numbers.h"
 #include "src/common/quoted_string.h"
-#include "src/matrix_parser.h"
 
 namespace iris {
 namespace {
@@ -160,8 +161,9 @@ static void ParseActiveTransform(Tokenizer& tokenizer,
 
 }  // namespace
 
-bool TryParseMatrix(absl::string_view directive, Tokenizer& tokenizer,
-                    MatrixManager& matrix_manager) {
+bool TryParseTransformDirectives(absl::string_view directive,
+                                 Tokenizer& tokenizer,
+                                 MatrixManager& matrix_manager) {
   if (directive == "Identity") {
     matrix_manager.Identity();
     return true;

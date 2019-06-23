@@ -16,7 +16,7 @@ cc_library(
 cc_library(
     name = "result",
     hdrs = ["result.h"],
-    visibility = ["//src/films:__subpackages__"],
+    visibility = ["//src:__subpackages__"],
     deps = [
         "//src/common:pointer_types",
     ],

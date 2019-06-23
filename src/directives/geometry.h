@@ -1,5 +1,5 @@
-#ifndef _SRC_SCENE_PARSER_
-#define _SRC_SCENE_PARSER_
+#ifndef _SRC_DIRECTIVES_GEOMETRY_
+#define _SRC_DIRECTIVES_GEOMETRY_
 
 #include <vector>
 
@@ -9,7 +9,7 @@
 
 namespace iris {
 
-std::pair<Scene, std::vector<Light>> ParseScene(
+std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     Tokenizer& tokenizer, MatrixManager& matrix_manager,
     ColorIntegrator& color_integrator);
 

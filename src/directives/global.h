@@ -1,5 +1,5 @@
-#ifndef _SRC_CAMERA_PARSER_
-#define _SRC_CAMERA_PARSER_
+#ifndef _SRC_DIRECTIVES_GLOBAL_
+#define _SRC_DIRECTIVES_GLOBAL_
 
 #include <tuple>
 
@@ -13,11 +13,11 @@ namespace iris {
 
 typedef std::tuple<Camera, PixelSampler, Framebuffer, Integrator,
                    LightSamplerFactory, ColorIntegrator, OutputWriter, Random>
-    CameraConfig;
+    GlobalConfig;
 
-CameraConfig ParseCameraConfig(Tokenizer& tokenizer,
-                               MatrixManager& matrix_manager);
+GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
+                                   MatrixManager& matrix_manager);
 
 }  // namespace iris
 
-#endif  // _SRC_CAMERA_PARSER_
+#endif  // _SRC_DIRECTIVES_GLOBAL_

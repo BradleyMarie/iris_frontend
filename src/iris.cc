@@ -6,14 +6,10 @@
 #include "absl/flags/internal/usage.h"
 #include "absl/flags/parse.h"
 #include "iris_physx_toolkit/sample_tracer.h"
-#include "src/camera_parser.h"
-#include "src/common/matrix_manager.h"
 #include "src/common/ostream.h"
 #include "src/common/tokenizer.h"
-#include "src/scene_parser.h"
+#include "src/directives/parse.h"
 
-using iris::MatrixManager;
-using iris::Random;
 using iris::SampleTracer;
 using iris::Tokenizer;
 
@@ -37,16 +33,12 @@ void ParseAndRender(const std::string& search_dir, Tokenizer& tokenizer) {
     exit(EXIT_FAILURE);
   }
 
-  MatrixManager matrix_manager;
-  auto camera_params = ParseCameraConfig(tokenizer, matrix_manager);
-  auto scene_params =
-      ParseScene(tokenizer, matrix_manager, std::get<5>(camera_params));
-  auto light_sampler = std::get<4>(camera_params)(scene_params.second);
+  auto render_config = ParseDirectives(tokenizer);
 
   SampleTracer sample_tracer;
   ISTATUS status = PhysxSampleTracerAllocate(
-      std::get<3>(camera_params).detach(), scene_params.first.get(),
-      light_sampler.get(), std::get<5>(camera_params).get(),
+      std::get<4>(render_config).detach(), std::get<0>(render_config).get(),
+      std::get<1>(render_config).get(), std::get<5>(render_config).get(),
       sample_tracer.release_and_get_address());
 
   switch (status) {
@@ -62,9 +54,9 @@ void ParseAndRender(const std::string& search_dir, Tokenizer& tokenizer) {
   }
 
   status = IrisCameraRender(
-      std::get<0>(camera_params).get(), std::get<1>(camera_params).get(),
-      sample_tracer.get(), std::get<7>(camera_params).get(),
-      std::get<2>(camera_params).get(), absl::GetFlag(FLAGS_epsilon),
+      std::get<2>(render_config).get(), std::get<3>(render_config).get(),
+      sample_tracer.get(), std::get<6>(render_config).get(),
+      std::get<7>(render_config).get(), absl::GetFlag(FLAGS_epsilon),
       absl::GetFlag(FLAGS_num_threads));
 
   switch (status) {
@@ -79,7 +71,7 @@ void ParseAndRender(const std::string& search_dir, Tokenizer& tokenizer) {
       exit(EXIT_FAILURE);
   }
 
-  std::get<6>(camera_params)(std::get<2>(camera_params));
+  std::get<8>(render_config)(std::get<7>(render_config));
 }
 
 std::string GetWorkingDirectory() { return ""; }

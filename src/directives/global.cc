@@ -1,19 +1,19 @@
-#include "src/camera_parser.h"
+#include "src/directives/global.h"
 
 #include <iostream>
 
 #include "src/cameras/parser.h"
 #include "src/color_integrators/parser.h"
+#include "src/directives/transform.h"
 #include "src/films/parser.h"
 #include "src/integrators/parser.h"
-#include "src/matrix_parser.h"
 #include "src/randoms/parser.h"
 #include "src/samplers/parser.h"
 
 namespace iris {
 namespace {
 
-CameraConfig CreateCameraConfig(
+GlobalConfig CreateGlobalConfig(
     const Matrix& camera_to_world, absl::optional<PixelSampler>&& pixel_sampler,
     absl::optional<FilmResult>&& film_result,
     absl::optional<IntegratorResult>&& integrator_result,
@@ -78,8 +78,8 @@ bool CallOnce(const char* base_type_name, absl::string_view token,
 
 }  // namespace
 
-CameraConfig ParseCameraConfig(Tokenizer& tokenizer,
-                               MatrixManager& matrix_manager) {
+GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
+                                   MatrixManager& matrix_manager) {
   matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
   matrix_manager.Identity();
 
@@ -91,14 +91,14 @@ CameraConfig ParseCameraConfig(Tokenizer& tokenizer,
   absl::optional<Random> random;
   for (auto token = tokenizer.Next(); token; token = tokenizer.Next()) {
     if (token == "WorldBegin") {
-      return CreateCameraConfig(
+      return CreateGlobalConfig(
           matrix_manager.GetCurrent().first, std::move(pixel_sampler),
           std::move(film_result), std::move(integrator_result),
           std::move(camera_factory), std::move(color_integrator),
           std::move(random));
     }
 
-    if (TryParseMatrix(*token, tokenizer, matrix_manager)) {
+    if (TryParseTransformDirectives(*token, tokenizer, matrix_manager)) {
       continue;
     }
 
