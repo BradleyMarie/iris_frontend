@@ -52,10 +52,10 @@ int main(int argc, char** argv) {
   std::string search_dir;
   if (unparsed.size() == 1) {
     search_dir = GetWorkingDirectory();
-    tokenizer = absl::make_unique<iris::Tokenizer>(std::cin);
+    tokenizer = iris::Tokenizer::CreateFromStream(std::cin);
   } else {
     search_dir = GetParentDirectory(unparsed[1]);
-    tokenizer = absl::make_unique<iris::Tokenizer>(unparsed[1]);
+    tokenizer = iris::Tokenizer::CreateFromFile(unparsed[1]);
   }
 
   while (tokenizer->Peek()) {

@@ -7,6 +7,8 @@
 #include "googletest/include/gtest/gtest.h"
 #include "src/render.h"
 
+using iris::Tokenizer;
+
 namespace {
 
 bool IsLittleEndian() {
@@ -105,6 +107,13 @@ void CheckEquals(const char* expected, const iris::Framebuffer& actual,
   fclose(left);
 }
 
+std::pair<std::unique_ptr<Tokenizer>, std::unique_ptr<std::stringstream>>
+CreateTokenizerFromString(const std::string& string_to_parse) {
+  auto buffer = absl::make_unique<std::stringstream>(string_to_parse);
+  auto tokenizer = Tokenizer::CreateFromStream(*buffer);
+  return std::make_pair(std::move(tokenizer), std::move(buffer));
+}
+
 static const float_t kEpsilon = (float_t)0.001;
 static const std::string kSearchDir(".");
 static const size_t kNumThreads = 1;
@@ -112,16 +121,16 @@ static const size_t kNumThreads = 1;
 }  // namespace
 
 TEST(RenderTests, CornellBox) {
-  iris::Tokenizer tokenizer("test/cornell_box.pbrt");
+  auto tokenizer = Tokenizer::CreateFromFile("test/cornell_box.pbrt");
   auto render_result =
-      RenderToFramebuffer(tokenizer, kSearchDir, kEpsilon, kNumThreads);
+      RenderToFramebuffer(*tokenizer, kSearchDir, kEpsilon, kNumThreads);
   CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.001);
 }
 
 TEST(RenderTests, IncludeCornellBox) {
-  std::stringstream stream("Include \"test/cornell_box.pbrt\"");
-  iris::Tokenizer tokenizer(stream);
+  auto tokenizer =
+      CreateTokenizerFromString("Include \"test/cornell_box.pbrt\"");
   auto render_result =
-      RenderToFramebuffer(tokenizer, kSearchDir, kEpsilon, kNumThreads);
+      RenderToFramebuffer(*tokenizer.first, kSearchDir, kEpsilon, kNumThreads);
   CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.001);
 }

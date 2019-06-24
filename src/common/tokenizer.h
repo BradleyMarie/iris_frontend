@@ -12,11 +12,12 @@ namespace iris {
 
 class Tokenizer {
  public:
-  Tokenizer();
+  Tokenizer() = default;
   Tokenizer(const Tokenizer&) = delete;
   Tokenizer& operator=(const Tokenizer&) = delete;
-  Tokenizer(const std::string& file);
-  Tokenizer(std::istream& stream);
+
+  static std::unique_ptr<Tokenizer> CreateFromFile(const std::string& file);
+  static std::unique_ptr<Tokenizer> CreateFromStream(std::istream& stream);
 
   void Include(const std::string& file);
 

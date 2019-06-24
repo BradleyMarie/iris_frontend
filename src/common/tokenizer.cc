@@ -129,15 +129,16 @@ bool ParseNext(std::istream& stream, std::string& output) {
 
 }  // namespace
 
-Tokenizer::Tokenizer() {
-  auto buffer = absl::make_unique<std::stringstream>();
-  m_streams.push(std::make_pair(std::ref(*buffer), std::move(buffer)));
+std::unique_ptr<Tokenizer> Tokenizer::CreateFromFile(const std::string& file) {
+  auto result = absl::make_unique<Tokenizer>();
+  result->Include(file);
+  return result;
 }
 
-Tokenizer::Tokenizer(const std::string& file) { Include(file); }
-
-Tokenizer::Tokenizer(std::istream& stream) {
-  m_streams.push(std::make_pair(std::ref(stream), nullptr));
+std::unique_ptr<Tokenizer> Tokenizer::CreateFromStream(std::istream& stream) {
+  auto result = absl::make_unique<Tokenizer>();
+  result->m_streams.push(std::make_pair(std::ref(stream), nullptr));
+  return result;
 }
 
 void Tokenizer::Include(const std::string& file) {
@@ -160,6 +161,10 @@ absl::optional<absl::string_view> Tokenizer::Peek() {
   }
 
   for (;;) {
+    if (m_streams.empty()) {
+      break;
+    }
+
     bool found = ParseNext(m_streams.top().first, m_peeked);
     if (found) {
       m_peeked_valid = found;
@@ -167,10 +172,6 @@ absl::optional<absl::string_view> Tokenizer::Peek() {
     }
 
     m_streams.pop();
-
-    if (m_streams.empty()) {
-      break;
-    }
   }
 
   return absl::nullopt;
