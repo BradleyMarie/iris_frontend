@@ -1,13 +1,18 @@
 #ifndef _SRC_FILMS_OUTPUT_WRITER_RESULT_
 #define _SRC_FILMS_OUTPUT_WRITER_RESULT_
 
-#include <functional>
+#include <memory>
 
 #include "src/common/pointer_types.h"
 
 namespace iris {
 
-typedef std::function<void(const Framebuffer& framebuffer)> OutputWriter;
+class OutputWriterBase {
+ public:
+  virtual void Write(const Framebuffer& framebuffer) = 0;
+};
+
+typedef std::unique_ptr<OutputWriterBase> OutputWriter;
 
 }  // namespace iris
 

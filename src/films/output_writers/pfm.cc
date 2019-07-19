@@ -7,38 +7,69 @@
 
 namespace iris {
 
-OutputWriter ParsePfm(absl::string_view file_name) {
-  std::string path(file_name);
-  FILE* lock_file = fopen(path.c_str(), "w+");
+class PfmWriter final : public OutputWriterBase {
+ public:
+  static OutputWriter Create(absl::string_view file_name);
+  void Write(const Framebuffer& framebuffer);
+
+ private:
+  PfmWriter(std::string path, FILE* lock_file);
+  void ReleaseLock(bool report_errors);
+  ~PfmWriter();
+
+  std::string m_path;
+  FILE* m_lock_file;
+};
+
+PfmWriter::PfmWriter(std::string path, FILE* lock_file)
+    : m_path(path), m_lock_file(lock_file) {}
+
+OutputWriter PfmWriter::Create(absl::string_view path) {
+  std::string path_copy(path);
+  FILE* lock_file = fopen(path_copy.c_str(), "w+");
   if (!lock_file) {
     std::cerr << "ERROR: Failed to open output file: " << path << std::endl;
     exit(EXIT_FAILURE);
   }
 
-  auto shared_lock_file = std::make_shared<FILE*>(lock_file);
+  return std::unique_ptr<OutputWriterBase>(
+      new PfmWriter(std::move(path_copy), lock_file));
+}
 
-  return [=](const Framebuffer& framebuffer) {
-    if (*shared_lock_file) {
-      if (fclose(*shared_lock_file) != 0) {
-        std::cerr << "ERROR: Failed to release lock on output file"
-                  << std::endl;
-        exit(EXIT_FAILURE);
-      }
+void PfmWriter::Write(const Framebuffer& framebuffer) {
+  ReleaseLock(true);
 
-      *shared_lock_file = nullptr;
-    }
+  ISTATUS status =
+      WriteToPfmFile(framebuffer.get(), m_path.c_str(), PFM_PIXEL_FORMAT_SRGB);
+  switch (status) {
+    case ISTATUS_IO_ERROR:
+      std::cerr << "ERROR: Failed to write to output file: " << m_path
+                << std::endl;
+      exit(EXIT_FAILURE);
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
+}
 
-    ISTATUS status =
-        WriteToPfmFile(framebuffer.get(), path.c_str(), PFM_PIXEL_FORMAT_SRGB);
-    switch (status) {
-      case ISTATUS_IO_ERROR:
-        std::cerr << "ERROR: Failed to write to output file: " << path
-                  << std::endl;
-        exit(EXIT_FAILURE);
-      default:
-        assert(status == ISTATUS_SUCCESS);
-    }
-  };
+void PfmWriter::ReleaseLock(bool report_errors) {
+  assert(m_lock_file != NULL);
+
+  if (fclose(m_lock_file) != 0 && report_errors) {
+    std::cerr << "ERROR: Failed to release lock on output file" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  m_lock_file = NULL;
+}
+
+PfmWriter::~PfmWriter() {
+  if (m_lock_file) {
+    ReleaseLock(false);
+  }
+}
+
+OutputWriter ParsePfm(absl::string_view file_name) {
+  return PfmWriter::Create(file_name);
 }
 
 }  // namespace iris

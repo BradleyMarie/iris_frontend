@@ -48,7 +48,7 @@ void RenderToOutput(Tokenizer& tokenizer, const std::string& search_dir,
                     float_t epsilon, size_t num_threads) {
   auto render_result =
       RenderToFramebuffer(tokenizer, search_dir, epsilon, num_threads);
-  render_result.second(render_result.first);
+  render_result.second->Write(render_result.first);
 }
 
 }  // namespace iris
