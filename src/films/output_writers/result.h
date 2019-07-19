@@ -10,6 +10,7 @@ namespace iris {
 class OutputWriterBase {
  public:
   virtual void Write(const Framebuffer& framebuffer) = 0;
+  virtual ~OutputWriterBase() {}
 };
 
 typedef std::unique_ptr<OutputWriterBase> OutputWriter;

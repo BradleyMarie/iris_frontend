@@ -4,40 +4,34 @@
 #include <memory>
 
 #include "iris_camera_toolkit/pfm_writer.h"
+#include "src/films/output_writers/lock_file.h"
 
 namespace iris {
+namespace {
 
 class PfmWriter final : public OutputWriterBase {
  public:
-  static OutputWriter Create(absl::string_view file_name);
+  static std::unique_ptr<OutputWriterBase> Create(absl::string_view file_name);
   void Write(const Framebuffer& framebuffer);
 
  private:
-  PfmWriter(std::string path, FILE* lock_file);
-  void ReleaseLock(bool report_errors);
-  ~PfmWriter();
+  PfmWriter(std::string path);
 
+  std::unique_ptr<LockFile> m_lock_file;
   std::string m_path;
-  FILE* m_lock_file;
 };
 
-PfmWriter::PfmWriter(std::string path, FILE* lock_file)
-    : m_path(path), m_lock_file(lock_file) {}
-
-OutputWriter PfmWriter::Create(absl::string_view path) {
-  std::string path_copy(path);
-  FILE* lock_file = fopen(path_copy.c_str(), "w+");
-  if (!lock_file) {
-    std::cerr << "ERROR: Failed to open output file: " << path << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  return std::unique_ptr<OutputWriterBase>(
-      new PfmWriter(std::move(path_copy), lock_file));
+std::unique_ptr<OutputWriterBase> PfmWriter::Create(
+    absl::string_view file_name) {
+  std::string path(file_name);
+  return std::unique_ptr<OutputWriterBase>(new PfmWriter(std::move(path)));
 }
 
+PfmWriter::PfmWriter(std::string path)
+    : m_lock_file(LockFile::Create(path)), m_path(std::move(path)) {}
+
 void PfmWriter::Write(const Framebuffer& framebuffer) {
-  ReleaseLock(true);
+  m_lock_file.reset();
 
   ISTATUS status =
       WriteToPfmFile(framebuffer.get(), m_path.c_str(), PFM_PIXEL_FORMAT_SRGB);
@@ -51,22 +45,7 @@ void PfmWriter::Write(const Framebuffer& framebuffer) {
   }
 }
 
-void PfmWriter::ReleaseLock(bool report_errors) {
-  assert(m_lock_file != NULL);
-
-  if (fclose(m_lock_file) != 0 && report_errors) {
-    std::cerr << "ERROR: Failed to release lock on output file" << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  m_lock_file = NULL;
-}
-
-PfmWriter::~PfmWriter() {
-  if (m_lock_file) {
-    ReleaseLock(false);
-  }
-}
+}  // namespace
 
 OutputWriter ParsePfm(absl::string_view file_name) {
   return PfmWriter::Create(file_name);
