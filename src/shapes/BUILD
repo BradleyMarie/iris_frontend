@@ -22,6 +22,19 @@ cc_library(
 )
 
 cc_library(
+    name = "plymesh",
+    srcs = ["plymesh.cc"],
+    hdrs = ["plymesh.h"],
+    deps = [
+        ":result",
+        "//src/common:error",
+        "//src/common:ostream",
+        "//src/common:tokenizer",
+        "//third_party/rply:rply",
+    ],
+)
+
+cc_library(
     name = "trianglemesh",
     srcs = ["trianglemesh.cc"],
     hdrs = ["trianglemesh.h"],

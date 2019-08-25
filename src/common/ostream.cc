@@ -154,3 +154,7 @@ std::ostream& operator<<(std::ostream& os, const ISTATUS& status) {
 std::ostream& operator<<(std::ostream& os, const POINT3& point) {
   return os << "(" << point.x << ", " << point.y << ", " << point.z << ")";
 }
+
+std::ostream& operator<<(std::ostream& os, const VECTOR3& vector) {
+  return os << "(" << vector.x << ", " << vector.y << ", " << vector.z << ")";
+}
