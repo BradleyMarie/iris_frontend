@@ -1,3 +1,5 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 package(default_visibility = ["//visibility:private"])
 
 cc_library(
@@ -30,7 +32,7 @@ cc_library(
         "//src/common:error",
         "//src/common:ostream",
         "//src/common:tokenizer",
-        "//third_party/rply:rply",
+        "//third_party/rply",
     ],
 )
 

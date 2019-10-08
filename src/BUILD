@@ -1,3 +1,5 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+
 package(default_visibility = ["//visibility:private"])
 
 cc_binary(
@@ -23,7 +25,7 @@ cc_library(
         "//src/common:ostream",
         "//src/common:tokenizer",
         "//src/directives:parse",
-        "@com_github_bradleymarie_iris//iris_physx:iris_physx",
+        "@com_github_bradleymarie_iris//iris_physx",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:sample_tracer",
     ],
 )

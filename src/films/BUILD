@@ -1,3 +1,5 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 package(default_visibility = ["//visibility:private"])
 
 cc_library(
@@ -21,10 +23,10 @@ cc_library(
         ":result",
         "//src/common:error",
         "//src/common:tokenizer",
+        "//src/films/output_writers:parser",
         "//src/param_matchers:integral_single",
         "//src/param_matchers:matcher",
         "//src/param_matchers:single",
-        "//src/films/output_writers:parser",
     ],
 )
 

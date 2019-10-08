@@ -1,3 +1,5 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 package(default_visibility = ["//visibility:private"])
 
 cc_library(
@@ -55,8 +57,8 @@ cc_library(
     hdrs = ["parse.h"],
     visibility = ["//src:__subpackages__"],
     deps = [
-        ":global",
         ":geometry",
+        ":global",
         "//src/common:pointer_types",
         "//src/common:tokenizer",
         "//src/films/output_writers:result",

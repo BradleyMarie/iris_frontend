@@ -1,3 +1,5 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 package(default_visibility = ["//src:__subpackages__"])
 
 cc_library(
@@ -15,7 +17,7 @@ cc_library(
     srcs = ["error.cc"],
     hdrs = ["error.h"],
     deps = [
-        "@com_github_bradleymarie_iris//iris:iris",
+        "@com_github_bradleymarie_iris//iris",
     ],
 )
 
