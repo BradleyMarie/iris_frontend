@@ -124,7 +124,7 @@ TEST(RenderTests, CornellBox) {
   auto tokenizer = Tokenizer::CreateFromFile("test/cornell_box.pbrt");
   auto render_result =
       RenderToFramebuffer(*tokenizer, kSearchDir, kEpsilon, kNumThreads);
-  CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.001);
+  CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.1);
 }
 
 TEST(RenderTests, IncludeCornellBox) {
@@ -132,5 +132,5 @@ TEST(RenderTests, IncludeCornellBox) {
       CreateTokenizerFromString("Include \"test/cornell_box.pbrt\"");
   auto render_result =
       RenderToFramebuffer(*tokenizer.first, kSearchDir, kEpsilon, kNumThreads);
-  CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.001);
+  CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.1);
 }
