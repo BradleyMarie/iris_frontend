@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "iris_physx_toolkit/triangle.h"
+#include "iris_physx_toolkit/triangle_mesh.h"
 #include "src/common/error.h"
 #include "src/common/ostream.h"
 #include "src/param_matchers/list.h"
@@ -29,63 +29,66 @@ ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
                               const EmissiveMaterial& back_emissive_material) {
   TriangleMeshPointListMatcher points(base_type_name, type_name, "P", true,
                                       kTriangleMeshDefaultPoints);
-  TriangleMeshIndexListMatcher indices(base_type_name, type_name, "indices",
-                                       true, kTriangleMeshDefaultIndices);
-  MatchParameters<2>(base_type_name, type_name, tokenizer, {&points, &indices});
+  TriangleMeshIndexListMatcher int_indices(base_type_name, type_name, "indices",
+                                           true, kTriangleMeshDefaultIndices);
+  MatchParameters<2>(base_type_name, type_name, tokenizer,
+                     {&points, &int_indices});
 
-  for (const auto& entry : indices.Get()) {
+  std::vector<size_t> indices;
+  for (const auto& entry : int_indices.Get()) {
     static_assert(INT32_MAX < SIZE_MAX);
     if (entry < 0 || points.Get().size() <= (size_t)entry) {
       std::cerr << "ERROR: Out of range value for " << type_name << " "
                 << base_type_name << " parameter: indices" << std::endl;
       exit(EXIT_FAILURE);
     }
+    indices.push_back(entry);
   }
 
   // TODO: Check for nonsensical indices
 
-  std::vector<Shape> shapes;
+  std::vector<Shape> shapes(indices.size() / 3);
+  size_t triangles_allocated;
+  ISTATUS status = EmissiveTriangleMeshAllocate(
+      points.Get().data(), points.Get().size(),
+      reinterpret_cast<const size_t(*)[3]>(indices.data()), indices.size() / 3,
+      front_material.get(), back_material.get(), front_emissive_material.get(),
+      back_emissive_material.get(), reinterpret_cast<PSHAPE*>(shapes.data()),
+      &triangles_allocated);
+  switch (status) {
+    case ISTATUS_ALLOCATION_FAILED:
+      ReportOOM();
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
+
+  if (triangles_allocated != indices.size() / 3) {
+    std::cerr << "WARNING: TriangleMesh contained degenerate triangles that "
+                 "were ignored."
+              << std::endl;
+  }
+
   std::vector<Light> lights;
-  for (size_t i = 0; i < indices.Get().size(); i += 3) {
-    POINT3 p0 = points.Get()[indices.Get()[i]];
-    POINT3 p1 = points.Get()[indices.Get()[i + 1]];
-    POINT3 p2 = points.Get()[indices.Get()[i + 2]];
+  if (!front_emissive_material.get() && !back_emissive_material.get()) {
+    return std::make_pair(std::move(shapes), std::move(lights));
+  }
 
-    Shape triangle;
-    ISTATUS status = EmissiveTriangleAllocate(
-        p0, p1, p2, front_material.get(), back_material.get(),
-        front_emissive_material.get(), back_emissive_material.get(),
-        triangle.release_and_get_address());
-    switch (status) {
-      case ISTATUS_INVALID_ARGUMENT_COMBINATION_00:
-        std::cerr << "WARNING: Degenerate triangle skipped: " << p0 << ", "
-                  << p1 << ", " << p2 << std::endl;
-        continue;
-      case ISTATUS_ALLOCATION_FAILED:
-        ReportOOM();
-      default:
-        assert(status == ISTATUS_SUCCESS);
-    }
-
+  for (size_t i = 0; i < triangles_allocated; i++) {
     if (front_emissive_material.get()) {
       Light light;
-      status = AreaLightAllocate(triangle.get(), TRIANGLE_FRONT_FACE,
+      status = AreaLightAllocate(shapes[i].get(), TRIANGLE_MESH_FRONT_FACE,
                                  light.release_and_get_address());
       SuccessOrOOM(status);
-
       lights.push_back(light);
     }
 
     if (back_emissive_material.get()) {
       Light light;
-      status = AreaLightAllocate(triangle.get(), TRIANGLE_BACK_FACE,
+      status = AreaLightAllocate(shapes[i].get(), TRIANGLE_MESH_BACK_FACE,
                                  light.release_and_get_address());
       SuccessOrOOM(status);
-
       lights.push_back(light);
     }
-
-    shapes.push_back(triangle);
   }
 
   return std::make_pair(std::move(shapes), std::move(lights));

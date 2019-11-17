@@ -47,6 +47,6 @@ cc_library(
         "//src/common:tokenizer",
         "//src/param_matchers:list",
         "//src/param_matchers:matcher",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle_mesh",
     ],
 )
