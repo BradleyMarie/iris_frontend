@@ -8,6 +8,7 @@ cc_library(
     hdrs = ["parser.h"],
     visibility = ["//src:__subpackages__"],
     deps = [
+        ":plymesh",
         ":result",
         ":trianglemesh",
         "//src/common:call_directive",
@@ -32,7 +33,10 @@ cc_library(
         "//src/common:error",
         "//src/common:ostream",
         "//src/common:tokenizer",
+        "//src/param_matchers:matcher",
+        "//src/param_matchers:single",
         "//third_party/rply",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle_mesh",
     ],
 )
 

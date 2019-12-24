@@ -1,15 +1,21 @@
 #include "src/shapes/plymesh.h"
 
 #include <cstdio>
+#include <cstring>
 #include <iostream>
 
+#include "iris_physx_toolkit/triangle_mesh.h"
 #include "src/common/error.h"
 #include "src/common/ostream.h"
+#include "src/param_matchers/matcher.h"
+#include "src/param_matchers/single.h"
 #include "third_party/rply/rply.h"
 #include "third_party/rply/rplyfile.h"
 
 namespace iris {
 namespace {
+
+static const std::string kPlyMeshDefaultFilename;
 
 static const int kRplySuccess = 1;
 
@@ -584,6 +590,20 @@ PlyData ReadPlyFile(const std::string& file_name) {
     }
   }
 
+  for (const auto& texture_coordinate : context.GetUVs()) {
+    if (!isfinite(texture_coordinate.first)) {
+      std::cerr << "ERROR: PLY file contained an invalid u: "
+                << texture_coordinate.first << std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    if (!isfinite(texture_coordinate.second)) {
+      std::cerr << "ERROR: PLY file contained an invalid v: "
+                << texture_coordinate.second << std::endl;
+      exit(EXIT_FAILURE);
+    }
+  }
+
   for (size_t i = 0; i < context.GetFaces().size(); i += 3) {
     size_t face0 = context.GetFaces()[i];
     size_t face1 = context.GetFaces()[i + 1];
@@ -601,5 +621,69 @@ PlyData ReadPlyFile(const std::string& file_name) {
 }
 
 }  // namespace
+
+ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
+                         Tokenizer& tokenizer, const Material& front_material,
+                         const Material& back_material,
+                         const EmissiveMaterial& front_emissive_material,
+                         const EmissiveMaterial& back_emissive_material) {
+  SingleStringMatcher filename(base_type_name, type_name, "filename", true,
+                               kPlyMeshDefaultFilename);
+  MatchParameters<1>(base_type_name, type_name, tokenizer, {&filename});
+
+  PlyData fileData = ReadPlyFile(filename.Get());
+
+  std::vector<Shape> shapes(fileData.GetFaces().size());
+  size_t triangles_allocated;
+  ISTATUS status = TriangleMeshAllocate(
+      fileData.GetVertices().data(),
+      fileData.GetNormals().empty() ? nullptr : fileData.GetNormals().data(),
+      fileData.GetUVs().empty()
+          ? nullptr
+          : reinterpret_cast<const float_t(*)[2]>(fileData.GetUVs().data()),
+      fileData.GetVertices().size(),
+      reinterpret_cast<const size_t(*)[3]>(fileData.GetFaces().data()),
+      fileData.GetFaces().size(), front_material.get(), back_material.get(),
+      front_emissive_material.get(), back_emissive_material.get(),
+      reinterpret_cast<PSHAPE*>(shapes.data()), &triangles_allocated);
+
+  switch (status) {
+    case ISTATUS_ALLOCATION_FAILED:
+      ReportOOM();
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
+
+  if (triangles_allocated != fileData.GetFaces().size()) {
+    std::cerr << "WARNING: PlyMesh contained degenerate triangles that "
+                 "were ignored."
+              << std::endl;
+  }
+
+  std::vector<Light> lights;
+  if (!front_emissive_material.get() && !back_emissive_material.get()) {
+    return std::make_pair(std::move(shapes), std::move(lights));
+  }
+
+  for (size_t i = 0; i < triangles_allocated; i++) {
+    if (front_emissive_material.get()) {
+      Light light;
+      status = AreaLightAllocate(shapes[i].get(), TRIANGLE_MESH_FRONT_FACE,
+                                 light.release_and_get_address());
+      SuccessOrOOM(status);
+      lights.push_back(light);
+    }
+
+    if (back_emissive_material.get()) {
+      Light light;
+      status = AreaLightAllocate(shapes[i].get(), TRIANGLE_MESH_BACK_FACE,
+                                 light.release_and_get_address());
+      SuccessOrOOM(status);
+      lights.push_back(light);
+    }
+  }
+
+  return std::make_pair(std::move(shapes), std::move(lights));
+}
 
 }  // namespace iris
