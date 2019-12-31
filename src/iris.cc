@@ -2,8 +2,8 @@
 #include <thread>
 
 #include "absl/flags/flag.h"
-#include "absl/flags/internal/usage.h"
 #include "absl/flags/parse.h"
+#include "absl/flags/usage.h"
 #include "src/common/tokenizer.h"
 #include "src/render.h"
 
@@ -27,8 +27,7 @@ std::string GetParentDirectory(const std::string& file_name) {
 }  // namespace
 
 int main(int argc, char** argv) {
-  absl::flags_internal::SetProgramUsageMessage(
-      "A pbrt frontend for the iris renderer.");
+  absl::SetProgramUsageMessage("A pbrt frontend for the iris renderer.");
 
   auto unparsed = absl::ParseCommandLine(argc, argv);
   if (2 < unparsed.size()) {

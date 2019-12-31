@@ -8,8 +8,8 @@ git_repository(
 
 git_repository(
     name = "com_google_absl",
-    commit = "a18fc7461e7409c2ad64e28537261db1e02e76fa",
     remote = "https://github.com/abseil/abseil-cpp",
+    tag = "20190808",
 )
 
 git_repository(

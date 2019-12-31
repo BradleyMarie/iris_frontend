@@ -12,6 +12,7 @@ cc_binary(
         "@com_google_absl//absl/flags:config",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/flags:usage",
     ],
 )
 
