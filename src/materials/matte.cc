@@ -3,8 +3,8 @@
 #include <iostream>
 
 #include "absl/strings/str_join.h"  // TODO: Move
-#include "iris_physx_toolkit/constant_material.h"
-#include "iris_physx_toolkit/lambertian_bsdf.h"
+#include "iris_physx_toolkit/constant_texture.h"
+#include "iris_physx_toolkit/matte_material.h"
 #include "iris_physx_toolkit/uniform_reflector.h"
 #include "src/common/error.h"
 #include "src/param_matchers/matcher.h"
@@ -60,14 +60,14 @@ MaterialResult ParseMatte(const char* base_type_name, const char* type_name,
                             reflectance);
   MatchParameters<1>(base_type_name, type_name, tokenizer, {&kd});
 
-  Bsdf bsdf;
-  status = LambertianReflectorAllocate(kd.Get().get(),
-                                       bsdf.release_and_get_address());
+  ReflectorTexture diffuse;
+  status = ConstantReflectorTextureAllocate(kd.Get().get(),
+                                            diffuse.release_and_get_address());
   SuccessOrOOM(status);
 
   Material result;
   status =
-      ConstantMaterialAllocate(bsdf.get(), result.release_and_get_address());
+      MatteMaterialAllocate(diffuse.get(), result.release_and_get_address());
   SuccessOrOOM(status);
 
   return std::make_pair(result, std::set<Reflector>({kd.Get()}));

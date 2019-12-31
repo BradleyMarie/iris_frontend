@@ -62,6 +62,8 @@ cc_library(
         ":unique_ptr",
         "@com_github_bradleymarie_iris//iris_camera",
         "@com_github_bradleymarie_iris//iris_physx",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:float_texture",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:reflector_texture",
     ],
 )
 
