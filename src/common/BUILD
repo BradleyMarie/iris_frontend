@@ -83,6 +83,17 @@ cc_library(
 )
 
 cc_library(
+    name = "texture_manager",
+    srcs = ["texture_manager.cc"],
+    hdrs = ["texture_manager.h"],
+    deps = [
+        ":pointer_types",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "tokenizer",
     srcs = ["tokenizer.cc"],
     hdrs = ["tokenizer.h"],

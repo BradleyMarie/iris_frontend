@@ -11,6 +11,7 @@ cc_library(
         ":matte",
         ":result",
         "//src/common:call_directive",
+        "//src/common:texture_manager",
         "//src/common:tokenizer",
     ],
 )
@@ -30,6 +31,7 @@ cc_library(
     deps = [
         ":result",
         "//src/common:error",
+        "//src/common:texture_manager",
         "//src/common:tokenizer",
         "//src/param_matchers:matcher",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_texture",

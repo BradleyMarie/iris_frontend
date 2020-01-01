@@ -1,11 +1,13 @@
 #include "src/directives/geometry.h"
 
 #include <iostream>
+#include <list>
 #include <stack>
 
 #include "iris_physx_toolkit/kd_tree_scene.h"
 #include "src/area_lights/parser.h"
 #include "src/common/error.h"
+#include "src/common/texture_manager.h"
 #include "src/directives/include.h"
 #include "src/directives/transform.h"
 #include "src/materials/parser.h"
@@ -24,15 +26,17 @@ class GraphicsStateManager {
   void AttributeBegin(MatrixManager& matrix_manager);
   void AttributeEnd(MatrixManager& matrix_manager);
 
+  const TextureManager& GetTextureManager() const;
+
   const std::pair<EmissiveMaterial, EmissiveMaterial>& GetEmissiveMaterials();
   void SetEmissiveMaterials(const EmissiveMaterial& front_emissive_material,
                             const EmissiveMaterial& back_emissive_material,
-                            const std::set<Spectrum> light_spectra);
+                            const std::set<Spectrum>& light_spectra);
 
   const std::pair<Material, Material>& GetMaterials();
   void SetMaterial(const Material& front_material,
                    const Material& back_material,
-                   const std::set<Reflector> material_reflectors);
+                   const std::set<Reflector>& material_reflectors);
 
   void PrecomputeColors(ColorIntegrator& color_integrator);
 
@@ -42,6 +46,7 @@ class GraphicsStateManager {
     std::pair<Material, Material> materials;
     std::set<Spectrum> light_spectra;
     std::set<Reflector> material_reflectors;
+    TextureManager texture_manager;
   };
 
   enum PushReason {
@@ -57,8 +62,8 @@ class GraphicsStateManager {
 
   std::set<Spectrum> m_spectra_used;
   std::set<Reflector> m_reflectors_used;
-  std::stack<ShaderState> m_shader_state;
-  std::stack<TransformState> m_transform_state;
+  std::stack<ShaderState, std::list<ShaderState>> m_shader_state;
+  std::stack<TransformState, std::list<TransformState>> m_transform_state;
   std::map<std::string, Material> m_named_materials;
   std::map<std::string, std::vector<Shape>> m_named_objects;
 };
@@ -107,6 +112,10 @@ void GraphicsStateManager::AttributeEnd(MatrixManager& matrix_manager) {
   m_shader_state.pop();
 }
 
+const TextureManager& GraphicsStateManager::GetTextureManager() const {
+  return m_shader_state.top().texture_manager;
+}
+
 const std::pair<EmissiveMaterial, EmissiveMaterial>&
 GraphicsStateManager::GetEmissiveMaterials() {
   m_spectra_used.insert(m_shader_state.top().light_spectra.begin(),
@@ -117,7 +126,7 @@ GraphicsStateManager::GetEmissiveMaterials() {
 void GraphicsStateManager::SetEmissiveMaterials(
     const EmissiveMaterial& front_emissive_material,
     const EmissiveMaterial& back_emissive_material,
-    const std::set<Spectrum> light_spectra) {
+    const std::set<Spectrum>& light_spectra) {
   m_shader_state.top().emissive_materials =
       std::make_pair(front_emissive_material, back_emissive_material);
   m_shader_state.top().light_spectra = light_spectra;
@@ -131,7 +140,7 @@ const std::pair<Material, Material>& GraphicsStateManager::GetMaterials() {
 
 void GraphicsStateManager::SetMaterial(
     const Material& front_material, const Material& back_material,
-    const std::set<Reflector> material_reflectors) {
+    const std::set<Reflector>& material_reflectors) {
   m_shader_state.top().materials =
       std::make_pair(front_material, back_material);
   m_shader_state.top().material_reflectors = material_reflectors;
@@ -227,7 +236,8 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     }
 
     if (token == "Material") {
-      auto material_state = ParseMaterial("Material", tokenizer);
+      auto material_state = ParseMaterial("Material", tokenizer,
+                                          graphics_state.GetTextureManager());
       graphics_state.SetMaterial(material_state.first, material_state.first,
                                  material_state.second);
       continue;

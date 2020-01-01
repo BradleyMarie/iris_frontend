@@ -64,7 +64,7 @@ void CheckEquals(const char* expected, const iris::Framebuffer& actual,
   ASSERT_EQ(expected_xres, actual_xres);
   ASSERT_EQ(expected_yres, actual_yres);
 
-  bool swap_needed;
+  bool swap_needed = false;
   ByteSwapNeeded(left, &swap_needed);
 
   ASSERT_EQ('\n', fgetc(left));
