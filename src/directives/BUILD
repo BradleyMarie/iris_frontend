@@ -37,6 +37,7 @@ cc_library(
         "//src/common:tokenizer",
         "//src/materials:parser",
         "//src/shapes:parser",
+        "//src/textures:parser",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:kd_tree_scene",
     ],
 )

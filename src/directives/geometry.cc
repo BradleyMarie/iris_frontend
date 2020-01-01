@@ -12,6 +12,7 @@
 #include "src/directives/transform.h"
 #include "src/materials/parser.h"
 #include "src/shapes/parser.h"
+#include "src/textures/parser.h"
 
 namespace iris {
 namespace {
@@ -26,7 +27,7 @@ class GraphicsStateManager {
   void AttributeBegin(MatrixManager& matrix_manager);
   void AttributeEnd(MatrixManager& matrix_manager);
 
-  const TextureManager& GetTextureManager() const;
+  TextureManager& GetTextureManager();
 
   const std::pair<EmissiveMaterial, EmissiveMaterial>& GetEmissiveMaterials();
   void SetEmissiveMaterials(const EmissiveMaterial& front_emissive_material,
@@ -112,7 +113,7 @@ void GraphicsStateManager::AttributeEnd(MatrixManager& matrix_manager) {
   m_shader_state.pop();
 }
 
-const TextureManager& GraphicsStateManager::GetTextureManager() const {
+TextureManager& GraphicsStateManager::GetTextureManager() {
   return m_shader_state.top().texture_manager;
 }
 
@@ -270,6 +271,11 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
       std::cerr << "ERROR: Invalid directive before WorldBegin: " << *token
                 << std::endl;
       exit(EXIT_FAILURE);
+      continue;
+    }
+
+    if (token == "Texture") {
+      ParseTexture("Texture", tokenizer, graphics_state.GetTextureManager());
       continue;
     }
 
