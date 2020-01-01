@@ -60,3 +60,13 @@ cc_library(
         ":matcher",
     ],
 )
+
+cc_library(
+    name = "spectrum_single",
+    srcs = ["spectrum_single.cc"],
+    hdrs = ["spectrum_single.h"],
+    deps = [
+        ":matcher",
+        "//src/common:pointer_types",
+    ],
+)
