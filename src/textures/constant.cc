@@ -51,6 +51,7 @@ static const float_t kConstantTextureDefaultValue = (float_t)1.0;
 
 std::pair<ReflectorTexture, std::set<Reflector>> ParseConstantReflector(
     const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
+    const ColorExtrapolator& color_extrapolator,
     const TextureManager& texture_manager) {
   Reflector reflectance;
   ISTATUS status = UniformReflectorAllocate(
@@ -71,6 +72,7 @@ std::pair<ReflectorTexture, std::set<Reflector>> ParseConstantReflector(
 
 FloatTexture ParseConstantFloat(const char* base_type_name,
                                 const char* type_name, Tokenizer& tokenizer,
+                                const ColorExtrapolator& color_extrapolator,
                                 const TextureManager& texture_manager) {
   SingleFloatMatcher value(base_type_name, type_name, "value", false, true,
                            (float_t)0.0, (float_t)1.0,

@@ -31,6 +31,7 @@ absl::string_view ParseNextQuotedString(const char* base_type_name,
 }  // namespace
 
 void ParseTexture(const char* base_type_name, Tokenizer& tokenizer,
+                  const ColorExtrapolator& color_extrapolator,
                   TextureManager& texture_manager) {
   std::string name(ParseNextQuotedString(base_type_name, tokenizer, "name"));
   absl::string_view format_name =
@@ -38,19 +39,22 @@ void ParseTexture(const char* base_type_name, Tokenizer& tokenizer,
   if (format_name == "spectrum" || format_name == "color") {
     auto reflector_texture =
         CallDirective<std::pair<ReflectorTexture, std::set<Reflector>>, 1,
-                      const TextureManager&>(
+                      const ColorExtrapolator&, const TextureManager&>(
             base_type_name, tokenizer,
             {std::make_pair("constant", ParseConstantReflector)},
-            texture_manager);
+            color_extrapolator, texture_manager);
     texture_manager.SetReflectorTexture(name, reflector_texture.first,
                                         reflector_texture.second);
     return;
   }
 
   if (format_name == "float") {
-    auto float_texture = CallDirective<FloatTexture, 1, const TextureManager&>(
-        base_type_name, tokenizer,
-        {std::make_pair("constant", ParseConstantFloat)}, texture_manager);
+    auto float_texture =
+        CallDirective<FloatTexture, 1, const ColorExtrapolator&,
+                      const TextureManager&>(
+            base_type_name, tokenizer,
+            {std::make_pair("constant", ParseConstantFloat)},
+            color_extrapolator, texture_manager);
     texture_manager.SetFloatTexture(name, float_texture);
     return;
   }

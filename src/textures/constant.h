@@ -8,10 +8,12 @@ namespace iris {
 
 std::pair<ReflectorTexture, std::set<Reflector>> ParseConstantReflector(
     const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
+    const ColorExtrapolator& color_extrapolator,
     const TextureManager& texture_manager);
 
 FloatTexture ParseConstantFloat(const char* base_type_name,
                                 const char* type_name, Tokenizer& tokenizer,
+                                const ColorExtrapolator& color_extrapolator,
                                 const TextureManager& texture_manager);
 
 }  // namespace iris

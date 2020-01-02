@@ -51,6 +51,7 @@ static const float_t kMatteMaterialDefaultReflectance = (float_t)0.5;
 
 MaterialResult ParseMatte(const char* base_type_name, const char* type_name,
                           Tokenizer& tokenizer,
+                          const ColorExtrapolator& color_extrapolator,
                           const TextureManager& texture_manager) {
   Reflector reflectance;
   ISTATUS status = UniformReflectorAllocate(

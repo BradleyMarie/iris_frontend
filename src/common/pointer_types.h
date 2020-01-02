@@ -5,6 +5,7 @@
 #include "iris_physx/iris_physx.h"
 #include "iris_physx_toolkit/float_texture.h"
 #include "iris_physx_toolkit/reflector_texture.h"
+#include "iris_physx_toolkit/rgb_interpolator.h"
 #include "src/common/shared_ptr.h"
 #include "src/common/unique_ptr.h"
 
@@ -12,6 +13,7 @@ namespace iris {
 
 typedef SharedPtr<BSDF, BsdfRetain, BsdfRelease> Bsdf;
 typedef UniquePtr<CAMERA, CameraFree> Camera;
+typedef UniquePtr<RGB_INTERPOLATOR, RgbInterpolatorFree> ColorExtrapolator;
 typedef UniquePtr<COLOR_INTEGRATOR, ColorIntegratorFree> ColorIntegrator;
 typedef SharedPtr<EMISSIVE_MATERIAL, EmissiveMaterialRetain,
                   EmissiveMaterialRelease>

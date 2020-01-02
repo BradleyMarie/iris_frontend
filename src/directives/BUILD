@@ -10,6 +10,7 @@ cc_library(
         ":include",
         ":transform",
         "//src/cameras:parser",
+        "//src/color_extrapolators:parser",
         "//src/color_integrators:parser",
         "//src/common:matrix_manager",
         "//src/common:pointer_types",

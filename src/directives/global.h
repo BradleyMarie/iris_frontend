@@ -12,7 +12,8 @@
 namespace iris {
 
 typedef std::tuple<Camera, PixelSampler, Framebuffer, Integrator,
-                   LightSamplerFactory, ColorIntegrator, OutputWriter, Random>
+                   LightSamplerFactory, ColorExtrapolator, ColorIntegrator,
+                   OutputWriter, Random>
     GlobalConfig;
 
 GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,

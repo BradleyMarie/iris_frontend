@@ -8,6 +8,7 @@
 namespace iris {
 
 MaterialResult ParseMaterial(const char* base_type_name, Tokenizer& tokenizer,
+                             const ColorExtrapolator& color_extrapolator,
                              const TextureManager& texture_manager);
 
 }  // namespace iris

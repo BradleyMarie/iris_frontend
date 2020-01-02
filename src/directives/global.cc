@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "src/cameras/parser.h"
+#include "src/color_extrapolators/parser.h"
 #include "src/color_integrators/parser.h"
 #include "src/directives/include.h"
 #include "src/directives/transform.h"
@@ -19,6 +20,7 @@ GlobalConfig CreateGlobalConfig(
     absl::optional<FilmResult>&& film_result,
     absl::optional<IntegratorResult>&& integrator_result,
     absl::optional<CameraFactory>&& camera_factory,
+    absl::optional<ColorExtrapolator>&& color_extrapolator,
     absl::optional<ColorIntegrator>&& color_integrator,
     absl::optional<Random>&& random) {
   if (!pixel_sampler) {
@@ -37,6 +39,10 @@ GlobalConfig CreateGlobalConfig(
     camera_factory = CreateDefaultCamera();
   }
 
+  if (!color_extrapolator) {
+    color_extrapolator = CreateDefaultColorExtrapolator();
+  }
+
   if (!color_integrator) {
     color_integrator = CreateDefaultColorIntegrator();
   }
@@ -52,6 +58,7 @@ GlobalConfig CreateGlobalConfig(
           std::move(film_result->first),
           std::move(integrator_result->first),
           std::move(integrator_result->second),
+          std::move(*color_extrapolator),
           std::move(*color_integrator),
           std::move(film_result->second),
           std::move(*random)};
@@ -89,6 +96,7 @@ GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
   absl::optional<FilmResult> film_result;
   absl::optional<IntegratorResult> integrator_result;
   absl::optional<CameraFactory> camera_factory;
+  absl::optional<ColorExtrapolator> color_extrapolator;
   absl::optional<ColorIntegrator> color_integrator;
   absl::optional<Random> random;
   for (auto token = tokenizer.Next(); token; token = tokenizer.Next()) {
@@ -96,8 +104,8 @@ GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
       return CreateGlobalConfig(
           matrix_manager.GetCurrent().first, std::move(pixel_sampler),
           std::move(film_result), std::move(integrator_result),
-          std::move(camera_factory), std::move(color_integrator),
-          std::move(random));
+          std::move(camera_factory), std::move(color_extrapolator),
+          std::move(color_integrator), std::move(random));
     }
 
     if (TryParseTransformDirectives(*token, tokenizer, matrix_manager)) {
@@ -111,6 +119,12 @@ GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
     if (CallOnce<CameraFactory, MatrixManager&>("Camera", *token,
                                                 camera_factory, ParseCamera,
                                                 tokenizer, matrix_manager)) {
+      continue;
+    }
+
+    if (CallOnce<ColorExtrapolator>("ColorExtrapolator", *token,
+                                    color_extrapolator, ParseColorExtrapolator,
+                                    tokenizer)) {
       continue;
     }
 
