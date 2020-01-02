@@ -152,10 +152,35 @@ static NormalParameter ParseNormal(Tokenizer& tokenizer) {
   return NormalParameter{std::move(data)};
 }
 
+static std::array<float_t, 3> MakeRgb(float_t x, float_t y, float_t z) {
+  return {x, y, z};
+}
+
+static bool ValidateRgb(std::array<float_t, 3> value) {
+  if (!isfinite(value[0]) || value[0] < (float_t)0.0 || !isfinite(value[1]) ||
+      value[1] < (float_t)0.0 || !isfinite(value[2]) ||
+      value[2] < (float_t)0.0) {
+    return false;
+  }
+  return true;
+}
+
+static RgbParameter ParseRgb(Tokenizer& tokenizer) {
+  auto data = ParseFloatTuple<std::array<float_t, 3>, MakeRgb, ValidateRgb>(
+      tokenizer, "Rgb", "rgb");
+  return RgbParameter{std::move(data)};
+}
+
 static StringParameter ParseString(Tokenizer& tokenizer) {
   auto data = ParseData<std::string, ParseQuotedTokenToString>(
       tokenizer, "String", "string");
   return StringParameter{std::move(data)};
+}
+
+static XyzParameter ParseXyz(Tokenizer& tokenizer) {
+  auto data = ParseFloatTuple<COLOR3, ColorCreate, ColorValidate>(tokenizer,
+                                                                  "Xyz", "xyz");
+  return XyzParameter{std::move(data)};
 }
 
 template <typename ContainerType, typename PointerType,
@@ -243,14 +268,14 @@ static const std::map<absl::string_view, ParserCallback> kParsers = {
     {"point", ToCallback<Point3Parameter>(ParsePoint)},
     // point2
     {"point3", ToCallback<Point3Parameter>(ParsePoint3)},
-    // rgb
+    {"rgb", ToCallback<RgbParameter>(ParseRgb)},
     {"spectrum", ToCallback<SpectrumParameter>(ParseSpectrum)},
     {"string", ToCallback<StringParameter>(ParseString)},
     // texture
     {"vector", ToCallback<Vector3Parameter>(ParseVector)},
     // vector2
     {"vector3", ToCallback<Vector3Parameter>(ParseVector3)},
-    // xyz
+    {"xyz", ToCallback<XyzParameter>(ParseXyz)},
 };
 
 }  // namespace
