@@ -230,7 +230,8 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     }
 
     if (token == "AreaLightSource") {
-      auto light_state = ParseAreaLight("AreaLightSource", tokenizer);
+      auto light_state =
+          ParseAreaLight("AreaLightSource", tokenizer, color_extrapolator);
       graphics_state.SetEmissiveMaterials(std::get<0>(light_state),
                                           std::get<1>(light_state),
                                           std::get<2>(light_state));

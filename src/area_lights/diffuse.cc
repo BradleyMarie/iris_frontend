@@ -10,16 +10,19 @@ namespace iris {
 namespace {
 
 static const bool kDiffuseAreaLightDefaultTwoSided = false;
-static const Spectrum kDiffuseAreaLightDefaultL;  // TODO: initialize
+static const std::array<float_t, 3> kDiffuseAreaLightDefaultL = {
+    (float_t)1.0, (float_t)1.0, (float_t)1.0};
 
 }  // namespace
 
 AreaLightResult ParseDiffuse(const char* base_type_name, const char* type_name,
-                             Tokenizer& tokenizer) {
+                             Tokenizer& tokenizer,
+                             const ColorExtrapolator& color_extrapolator) {
   SingleBoolMatcher twosided(base_type_name, type_name, "twosided", false,
                              kDiffuseAreaLightDefaultTwoSided);
-  SingleSpectrumMatcher spectrum(base_type_name, type_name, "L", false,
-                                 kDiffuseAreaLightDefaultL);
+  SingleSpectrumMatcher spectrum = SingleSpectrumMatcher::FromRgb(
+      base_type_name, type_name, "L", false, color_extrapolator,
+      kDiffuseAreaLightDefaultL);
   MatchParameters<2>(base_type_name, type_name, tokenizer,
                      {&twosided, &spectrum});
 

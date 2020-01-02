@@ -43,14 +43,14 @@ void ParamMatcher::Validate() const {
   exit(EXIT_FAILURE);
 }
 
-void ParamMatcher::NumberOfElementsError[[noreturn]]() {
+void ParamMatcher::NumberOfElementsError[[noreturn]]() const {
   std::cerr << "ERROR: Wrong number of values for " << m_type_name << " "
             << m_base_type_name << " parameter: " << m_parameter_name
             << std::endl;
   exit(EXIT_FAILURE);
 }
 
-void ParamMatcher::ElementRangeError[[noreturn]]() {
+void ParamMatcher::ElementRangeError[[noreturn]]() const {
   std::cerr << "ERROR: Out of range value for " << m_type_name << " "
             << m_base_type_name << " parameter: " << m_parameter_name
             << std::endl;

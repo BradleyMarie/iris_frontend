@@ -25,8 +25,8 @@ class ParamMatcher {
         m_found(false) {}
 
   virtual void Match(ParameterData& data) = 0;
-  void NumberOfElementsError[[noreturn]]();
-  void ElementRangeError[[noreturn]]();
+  void NumberOfElementsError [[noreturn]] () const;
+  void ElementRangeError [[noreturn]] () const;
 
  private:
   const char* m_parameter_name;

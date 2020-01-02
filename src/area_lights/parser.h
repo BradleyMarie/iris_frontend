@@ -6,8 +6,8 @@
 
 namespace iris {
 
-AreaLightResult ParseAreaLight(const char* base_type_name,
-                               Tokenizer& tokenizer);
+AreaLightResult ParseAreaLight(const char* base_type_name, Tokenizer& tokenizer,
+                               const ColorExtrapolator& color_extrapolator);
 
 }  // namespace iris
 
