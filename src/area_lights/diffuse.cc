@@ -4,7 +4,7 @@
 #include "src/common/error.h"
 #include "src/param_matchers/matcher.h"
 #include "src/param_matchers/single.h"
-#include "src/param_matchers/spectrum_single.h"
+#include "src/param_matchers/spectrum.h"
 
 namespace iris {
 namespace {
@@ -20,9 +20,9 @@ AreaLightResult ParseDiffuse(const char* base_type_name, const char* type_name,
                              const ColorExtrapolator& color_extrapolator) {
   SingleBoolMatcher twosided(base_type_name, type_name, "twosided", false,
                              kDiffuseAreaLightDefaultTwoSided);
-  SingleSpectrumMatcher spectrum = SingleSpectrumMatcher::FromRgb(
-      base_type_name, type_name, "L", false, color_extrapolator,
-      kDiffuseAreaLightDefaultL);
+  SpectrumMatcher spectrum =
+      SpectrumMatcher::FromRgb(base_type_name, type_name, "L", false,
+                               color_extrapolator, kDiffuseAreaLightDefaultL);
   MatchParameters<2>(base_type_name, type_name, tokenizer,
                      {&twosided, &spectrum});
 

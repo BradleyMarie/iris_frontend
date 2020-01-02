@@ -1,4 +1,4 @@
-#include "src/param_matchers/spectrum_single.h"
+#include "src/param_matchers/spectrum.h"
 
 namespace iris {
 namespace {
@@ -15,37 +15,36 @@ Spectrum SpectrumFromRgb(const ColorExtrapolator& color_extrapolator,
 
 }  // namespace
 
-const size_t SingleSpectrumMatcher::m_variant_indices[3] = {
+const size_t SpectrumMatcher::m_variant_indices[3] = {
     GetIndex<RgbParameter, ParameterData>(),
     GetIndex<SpectrumParameter, ParameterData>(),
     GetIndex<XyzParameter, ParameterData>()};
 
-SingleSpectrumMatcher SingleSpectrumMatcher::FromRgb(
+SpectrumMatcher SpectrumMatcher::FromRgb(
     const char* base_type_name, const char* type_name,
     const char* parameter_name, bool required,
     const ColorExtrapolator& color_extrapolator,
     const std::array<float_t, 3>& default_rgb) {
-  return SingleSpectrumMatcher(
-      base_type_name, type_name, parameter_name, required, color_extrapolator,
-      SpectrumFromRgb(color_extrapolator, default_rgb));
+  return SpectrumMatcher(base_type_name, type_name, parameter_name, required,
+                         color_extrapolator,
+                         SpectrumFromRgb(color_extrapolator, default_rgb));
 }
 
-Spectrum SingleSpectrumMatcher::Match(const RgbParameter& parameter) const {
+Spectrum SpectrumMatcher::Match(const RgbParameter& parameter) const {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
   }
   return SpectrumFromRgb(m_color_extrapolator, parameter.data[0]);
 }
 
-Spectrum SingleSpectrumMatcher::Match(
-    const SpectrumParameter& parameter) const {
+Spectrum SpectrumMatcher::Match(const SpectrumParameter& parameter) const {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
   }
   return parameter.data[0].first;
 }
 
-Spectrum SingleSpectrumMatcher::Match(const XyzParameter& parameter) const {
+Spectrum SpectrumMatcher::Match(const XyzParameter& parameter) const {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
   }
@@ -69,7 +68,7 @@ Spectrum SingleSpectrumMatcher::Match(const XyzParameter& parameter) const {
   return SpectrumFromRgb(m_color_extrapolator, {r, g, b});
 }
 
-void SingleSpectrumMatcher::Match(ParameterData& data) {
+void SpectrumMatcher::Match(ParameterData& data) {
   if (absl::holds_alternative<RgbParameter>(data)) {
     m_value = Match(absl::get<RgbParameter>(data));
   } else if (absl::holds_alternative<SpectrumParameter>(data)) {

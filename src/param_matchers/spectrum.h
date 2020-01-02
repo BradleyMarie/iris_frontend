@@ -1,5 +1,5 @@
-#ifndef _SRC_PARAM_MATCHER_SPECTRUM_SINGLE_
-#define _SRC_PARAM_MATCHER_SPECTRUM_SINGLE_
+#ifndef _SRC_PARAM_MATCHER_SPECTRUM_
+#define _SRC_PARAM_MATCHER_SPECTRUM_
 
 #include "src/common/error.h"
 #include "src/common/pointer_types.h"
@@ -7,23 +7,23 @@
 
 namespace iris {
 
-class SingleSpectrumMatcher : public ParamMatcher {
+class SpectrumMatcher : public ParamMatcher {
  public:
-  SingleSpectrumMatcher(const char* base_type_name, const char* type_name,
-                        const char* parameter_name, bool required,
-                        const ColorExtrapolator& color_extrapolator,
-                        Spectrum default_value)
+  SpectrumMatcher(const char* base_type_name, const char* type_name,
+                  const char* parameter_name, bool required,
+                  const ColorExtrapolator& color_extrapolator,
+                  Spectrum default_value)
       : ParamMatcher(base_type_name, type_name, parameter_name, required,
                      m_variant_indices, 3),
         m_color_extrapolator(color_extrapolator),
         m_value(std::move(default_value)) {}
   const Spectrum& Get() { return m_value; }
 
-  static SingleSpectrumMatcher FromRgb(
-      const char* base_type_name, const char* type_name,
-      const char* parameter_name, bool required,
-      const ColorExtrapolator& color_extrapolator,
-      const std::array<float_t, 3>& default_rgb);
+  static SpectrumMatcher FromRgb(const char* base_type_name,
+                                 const char* type_name,
+                                 const char* parameter_name, bool required,
+                                 const ColorExtrapolator& color_extrapolator,
+                                 const std::array<float_t, 3>& default_rgb);
 
  private:
   void Match(ParameterData& data) final;
@@ -40,4 +40,4 @@ class SingleSpectrumMatcher : public ParamMatcher {
 
 }  // namespace iris
 
-#endif  // _SRC_PARAM_MATCHER_SPECTRUM_SINGLE_
+#endif  // _SRC_PARAM_MATCHER_SPECTRUM_
