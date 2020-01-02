@@ -13,7 +13,7 @@ class IntegralSingleValueMatcher : public ParamMatcher {
                              ValueType default_value)
       : ParamMatcher(base_type_name, type_name, parameter_name, required,
                      &m_variant_type, 1),
-        m_value(default_value) {}
+        m_value(std::move(default_value)) {}
   const ValueType& Get() { return m_value; }
 
  protected:

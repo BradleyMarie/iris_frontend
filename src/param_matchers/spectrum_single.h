@@ -16,7 +16,7 @@ class SingleSpectrumMatcher : public ParamMatcher {
       : ParamMatcher(base_type_name, type_name, parameter_name, required,
                      m_variant_indices, 3),
         m_color_extrapolator(color_extrapolator),
-        m_value(default_value) {}
+        m_value(std::move(default_value)) {}
   const Spectrum& Get() { return m_value; }
 
   static SingleSpectrumMatcher FromRgb(
