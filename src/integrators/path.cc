@@ -35,7 +35,7 @@ IntegratorResult ParsePath(const char* base_type_name, const char* type_name,
   Integrator integrator;
   ISTATUS status = PathTracerAllocate(
       std::min(kPathTracerDefaultMinDepth, maxdepth.Get()), maxdepth.Get(),
-      rrthreshold.Get(), integrator.release_and_get_address());
+      *rrthreshold.Get(), integrator.release_and_get_address());
   SuccessOrOOM(status);
 
   return std::make_pair(std::move(integrator),

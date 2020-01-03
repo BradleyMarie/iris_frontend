@@ -3,6 +3,7 @@
 
 #include <limits>
 
+#include "absl/types/optional.h"
 #include "src/param_matchers/matcher.h"
 
 namespace iris {
@@ -11,36 +12,36 @@ class SingleFloatMatcher : public ParamMatcher {
  public:
   SingleFloatMatcher(const char* base_type_name, const char* type_name,
                      const char* parameter_name, bool required, bool inclusive,
-                     float_t minimum, float_t maximum, float_t default_value)
+                     float_t minimum, float_t maximum,
+                     absl::optional<float_t> default_value)
       : ParamMatcher(base_type_name, type_name, parameter_name, required,
                      &m_variant_type, 1),
         m_minimum(minimum),
         m_maximum(maximum),
         m_value(default_value),
         m_inclusive(inclusive) {
+    assert(!std::isnan(minimum));
+    assert(!std::isnan(maximum));
     assert(!inclusive || std::isfinite(minimum));
     assert(!inclusive || std::isfinite(maximum));
-    assert(inclusive || minimum < maximum);
+    assert((inclusive && minimum <= maximum) ||
+           (!inclusive && minimum < maximum));
+    if (default_value) {
+      assert(ValidateFloat(*default_value));
+    }
   }
-  const float_t& Get() { return m_value; }
+  const absl::optional<float_t>& Get() { return m_value; }
 
  protected:
-  void Match(ParameterData& data) final {
-    if (absl::get<FloatParameter>(data).data.size() != 1) {
-      NumberOfElementsError();
-    }
-    auto value = absl::get<FloatParameter>(data).data[0];
-    if (!std::isfinite(value) || value < m_minimum || m_maximum < value) {
-      ElementRangeError();
-    }
-    m_value = static_cast<float_t>(absl::get<FloatParameter>(data).data[0]);
-  }
+  void Match(ParameterData& data) final;
 
  private:
+  bool ValidateFloat(float_t value) const;
+
   static const size_t m_variant_type;
   float_t m_minimum;
   float_t m_maximum;
-  float_t m_value;
+  absl::optional<float_t> m_value;
   bool m_inclusive;
 };
 

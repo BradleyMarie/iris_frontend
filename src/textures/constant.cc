@@ -17,9 +17,8 @@ std::pair<ReflectorTexture, std::set<Reflector>> ParseConstantReflector(
     const TextureManager& texture_manager) {
   ReflectorTextureMatcher value =
       ReflectorTextureMatcher::FromUniformReflectance(
-          base_type_name, type_name, "value", false, true, (float_t)0.0,
-          (float_t)1.0, texture_manager, color_extrapolator,
-          kConstantTextureDefaultValue);
+          base_type_name, type_name, "value", false, texture_manager,
+          color_extrapolator, kConstantTextureDefaultValue);
 
   MatchParameters<1>(base_type_name, type_name, tokenizer, {&value});
 

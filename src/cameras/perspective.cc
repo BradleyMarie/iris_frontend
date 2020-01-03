@@ -13,17 +13,17 @@ namespace {
 
 static const float_t kPi = (float_t)3.1415926535897932384626433832;
 
-CameraFactory CreatePerspectiveCameraFactory(const Matrix& camera_to_world,
-                                             float_t frame_aspect_ratio,
-                                             float_t half_fov) {
+CameraFactory CreatePerspectiveCameraFactory(
+    const Matrix& camera_to_world, absl::optional<float_t> frame_aspect_ratio,
+    float_t half_fov) {
   return [=](const Framebuffer& framebuffer) {
     float_t aspect_ratio;
-    if (std::isnan(frame_aspect_ratio)) {
+    if (frame_aspect_ratio) {
+      aspect_ratio = *frame_aspect_ratio;
+    } else {
       size_t xdim, ydim;
       FramebufferGetSize(framebuffer.get(), &xdim, &ydim);
       aspect_ratio = (float_t)((double)xdim / (double)ydim);
-    } else {
-      aspect_ratio = frame_aspect_ratio;
     }
 
     auto camera_params = ComputeCameraDimensions(
@@ -44,8 +44,6 @@ CameraFactory CreatePerspectiveCameraFactory(const Matrix& camera_to_world,
 static const float_t kDefaultHalfFov = (float_t)45.0;
 static const float_t kDefaultLensRadius = (float_t)0.0;
 static const float_t kDefaultFocalDistance = (float_t)1e31;
-static const float_t kDefaultAspectRatio =
-    std::numeric_limits<float_t>::quiet_NaN();
 
 }  // namespace
 
@@ -53,29 +51,27 @@ CameraFactory ParsePerspective(const char* base_type_name,
                                const char* type_name, Tokenizer& tokenizer,
                                MatrixManager& matrix_manager) {
   SingleFloatMatcher halffov(base_type_name, type_name, "halffov", false, false,
-                             (float_t)0.0, (float_t)90.0,
-                             std::numeric_limits<float_t>::quiet_NaN());
+                             (float_t)0.0, (float_t)90.0, absl::nullopt);
   SingleFloatMatcher fov(base_type_name, type_name, "fov", false, false,
-                         (float_t)0.0, (float_t)180.0,
-                         std::numeric_limits<float_t>::quiet_NaN());
+                         (float_t)0.0, (float_t)180.0, absl::nullopt);
   SingleFloatMatcher frameaspectratio(
       base_type_name, type_name, "frameaspectratio", false, false, (float_t)0.0,
-      (float_t)INFINITY, kDefaultAspectRatio);
+      (float_t)INFINITY, absl::nullopt);
 
   MatchParameters<3>(base_type_name, type_name, tokenizer,
                      {&halffov, &fov, &frameaspectratio});
 
-  if (!std::isnan(halffov.Get()) && !std::isnan(fov.Get())) {
+  if (halffov.Get() && fov.Get()) {
     std::cerr << "ERROR: Only one of halffov or fov may be specified "
               << std::endl;
     exit(EXIT_FAILURE);
   }
 
   float_t half_fov;
-  if (!std::isnan(halffov.Get())) {
-    half_fov = halffov.Get();
-  } else if (!std::isnan(fov.Get())) {
-    half_fov = fov.Get() / (float_t)2.0;
+  if (halffov.Get()) {
+    half_fov = *halffov.Get();
+  } else if (fov.Get()) {
+    half_fov = *fov.Get() / (float_t)2.0;
   } else {
     half_fov = kDefaultHalfFov;
   }

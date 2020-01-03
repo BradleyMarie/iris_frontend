@@ -24,7 +24,8 @@ class FloatTextureMatcher : public ParamMatcher {
         m_inclusive(inclusive) {
     assert(!inclusive || std::isfinite(minimum));
     assert(!inclusive || std::isfinite(maximum));
-    assert(inclusive || minimum < maximum);
+    assert((inclusive && minimum <= maximum) ||
+           (!inclusive && minimum < maximum));
   }
   const FloatTexture& Get() { return m_value; }
 
@@ -36,12 +37,15 @@ class FloatTextureMatcher : public ParamMatcher {
                                        const TextureManager& texture_manager,
                                        float_t default_value);
 
- private:
+ protected:
   void Match(ParameterData& data) final;
 
+ private:
   FloatTexture Match(const FloatParameter& parameter) const;
   FloatTexture Match(const TextureParameter& parameter,
                      const TextureManager& texture_manager) const;
+
+  bool ValidateFloat(float_t value) const;
 
  private:
   static const size_t m_variant_indices[2];

@@ -13,6 +13,25 @@ FloatTexture FloatTextureFromValue(float_t reflectance) {
   return result;
 }
 
+bool ValidateFloatImpl(bool inclusive, float_t minimum, float_t maximum,
+                       float_t value) {
+  assert(!std::isnan(minimum));
+  assert(!std::isnan(maximum));
+  assert(!inclusive || std::isfinite(minimum));
+  assert(!inclusive || std::isfinite(maximum));
+  assert((inclusive && minimum <= maximum) ||
+         (!inclusive && minimum < maximum));
+
+  bool valid;
+  if (inclusive) {
+    valid = minimum <= value && value <= maximum;
+  } else {
+    valid = minimum < value && value < maximum;
+  }
+
+  return valid;
+}
+
 }  // namespace
 
 const size_t FloatTextureMatcher::m_variant_indices[2] = {
@@ -24,22 +43,23 @@ FloatTextureMatcher FloatTextureMatcher::FromValue(
     const char* parameter_name, bool required, bool inclusive, float_t minimum,
     float_t maximum, const TextureManager& texture_manager,
     float_t default_value) {
-  assert(!inclusive || std::isfinite(minimum));
-  assert(!inclusive || std::isfinite(maximum));
-  assert(inclusive || minimum < maximum);
-  assert((inclusive && minimum <= default_value) ||
-         (!inclusive && minimum < default_value));
-  assert((inclusive && default_value <= maximum) ||
-         (!inclusive && default_value < maximum));
+  assert(ValidateFloatImpl(inclusive, minimum, maximum, default_value));
   return FloatTextureMatcher(base_type_name, type_name, parameter_name,
                              required, inclusive, minimum, maximum,
                              texture_manager,
                              std::move(FloatTextureFromValue(default_value)));
 }
 
+bool FloatTextureMatcher::ValidateFloat(float_t value) const {
+  return ValidateFloatImpl(m_inclusive, m_minimum, m_maximum, value);
+}
+
 FloatTexture FloatTextureMatcher::Match(const FloatParameter& parameter) const {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
+  }
+  if (!ValidateFloat(parameter.data[0])) {
+    ElementRangeError();
   }
   return FloatTextureFromValue(parameter.data[0]);
 }

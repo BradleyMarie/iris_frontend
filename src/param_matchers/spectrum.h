@@ -25,9 +25,10 @@ class SpectrumMatcher : public ParamMatcher {
                                  const ColorExtrapolator& color_extrapolator,
                                  const std::array<float_t, 3>& default_rgb);
 
- private:
+ protected:
   void Match(ParameterData& data) final;
 
+ private:
   Spectrum Match(const RgbParameter& parameter) const;
   Spectrum Match(const SpectrumParameter& parameter) const;
   Spectrum Match(const XyzParameter& parameter) const;

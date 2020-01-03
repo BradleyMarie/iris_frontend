@@ -48,26 +48,31 @@ const size_t ReflectorTextureMatcher::m_variant_indices[5] = {
 
 ReflectorTextureMatcher ReflectorTextureMatcher::FromUniformReflectance(
     const char* base_type_name, const char* type_name,
-    const char* parameter_name, bool required, bool inclusive, float_t minimum,
-    float_t maximum, const TextureManager& texture_manager,
+    const char* parameter_name, bool required,
+    const TextureManager& texture_manager,
     const ColorExtrapolator& color_extrapolator, float_t default_reflectance) {
-  assert(!inclusive || std::isfinite(minimum));
-  assert(!inclusive || std::isfinite(maximum));
-  assert(inclusive || minimum < maximum);
-  assert((inclusive && minimum <= default_reflectance) ||
-         (!inclusive && minimum < default_reflectance));
-  assert((inclusive && default_reflectance <= maximum) ||
-         (!inclusive && default_reflectance < maximum));
+  assert(ValidateFloat(default_reflectance));
   return ReflectorTextureMatcher(
-      base_type_name, type_name, parameter_name, required, inclusive, minimum,
-      maximum, texture_manager, color_extrapolator,
+      base_type_name, type_name, parameter_name, required, texture_manager,
+      color_extrapolator,
       std::move(ReflectorFromUniformReflectance(default_reflectance)));
+}
+
+bool ReflectorTextureMatcher::ValidateFloat(float_t value) {
+  if (!std::isfinite(value) || value < (float_t)0.0 || (float_t)1.0 < value) {
+    return false;
+  }
+
+  return true;
 }
 
 std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
     const FloatParameter& parameter) const {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
+  }
+  if (!ValidateFloat(parameter.data[0])) {
+    ElementRangeError();
   }
   return ReflectorFromUniformReflectance(parameter.data[0]);
 }
@@ -76,6 +81,11 @@ std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
     const RgbParameter& parameter) const {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
+  }
+  if (!ValidateFloat(parameter.data[0][0]) ||
+      !ValidateFloat(parameter.data[0][1]) ||
+      !ValidateFloat(parameter.data[0][2])) {
+    ElementRangeError();
   }
   return ReflectorFromRgb(m_color_extrapolator, parameter.data[0]);
 }
@@ -112,6 +122,11 @@ std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
     const XyzParameter& parameter) const {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
+  }
+  if (!ValidateFloat(parameter.data[0].x) ||
+      !ValidateFloat(parameter.data[0].y) ||
+      !ValidateFloat(parameter.data[0].z)) {
+    ElementRangeError();
   }
 
   float_t r = (float_t)3.2404542 * parameter.data[0].x -
