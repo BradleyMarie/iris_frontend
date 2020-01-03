@@ -39,7 +39,8 @@ std::pair<ReflectorTexture, std::set<Reflector>> ReflectorFromRgb(
 
 }  // namespace
 
-const size_t ReflectorTextureMatcher::m_variant_indices[4] = {
+const size_t ReflectorTextureMatcher::m_variant_indices[5] = {
+    GetIndex<FloatParameter, ParameterData>(),
     GetIndex<RgbParameter, ParameterData>(),
     GetIndex<SpectrumParameter, ParameterData>(),
     GetIndex<TextureParameter, ParameterData>(),
@@ -54,6 +55,14 @@ ReflectorTextureMatcher ReflectorTextureMatcher::FromUniformReflectance(
       base_type_name, type_name, parameter_name, required, texture_manager,
       color_extrapolator,
       std::move(ReflectorFromUniformReflectance(default_reflectance)));
+}
+
+std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
+    const FloatParameter& parameter) const {
+  if (parameter.data.size() != 1) {
+    NumberOfElementsError();
+  }
+  return ReflectorFromUniformReflectance(parameter.data[0]);
 }
 
 std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
@@ -118,7 +127,9 @@ std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
 }
 
 void ReflectorTextureMatcher::Match(ParameterData& data) {
-  if (absl::holds_alternative<RgbParameter>(data)) {
+  if (absl::holds_alternative<FloatParameter>(data)) {
+    m_value = Match(absl::get<FloatParameter>(data));
+  } else if (absl::holds_alternative<RgbParameter>(data)) {
     m_value = Match(absl::get<RgbParameter>(data));
   } else if (absl::holds_alternative<SpectrumParameter>(data)) {
     m_value = Match(absl::get<SpectrumParameter>(data));

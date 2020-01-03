@@ -35,6 +35,8 @@ class ReflectorTextureMatcher : public ParamMatcher {
   void Match(ParameterData& data) final;
 
   std::pair<ReflectorTexture, std::set<Reflector>> Match(
+      const FloatParameter& parameter) const;
+  std::pair<ReflectorTexture, std::set<Reflector>> Match(
       const RgbParameter& parameter) const;
   std::pair<ReflectorTexture, std::set<Reflector>> Match(
       const SpectrumParameter& parameter) const;
@@ -45,7 +47,7 @@ class ReflectorTextureMatcher : public ParamMatcher {
       const XyzParameter& parameter) const;
 
  private:
-  static const size_t m_variant_indices[4];
+  static const size_t m_variant_indices[5];
   const TextureManager& m_texture_manager;
   const ColorExtrapolator& m_color_extrapolator;
   std::pair<ReflectorTexture, std::set<Reflector>> m_value;
