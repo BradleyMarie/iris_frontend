@@ -18,7 +18,10 @@ class FloatTextureMatcher : public ParamMatcher {
       : ParamMatcher(base_type_name, type_name, parameter_name, required,
                      m_variant_indices, 3),
         m_texture_manager(texture_manager),
-        m_value(std::move(default_value)) {
+        m_value(std::move(default_value)),
+        m_minimum(minimum),
+        m_maximum(maximum),
+        m_inclusive(inclusive) {
     assert(!inclusive || std::isfinite(minimum));
     assert(!inclusive || std::isfinite(maximum));
     assert(inclusive || minimum < maximum);

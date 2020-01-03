@@ -48,12 +48,19 @@ const size_t ReflectorTextureMatcher::m_variant_indices[5] = {
 
 ReflectorTextureMatcher ReflectorTextureMatcher::FromUniformReflectance(
     const char* base_type_name, const char* type_name,
-    const char* parameter_name, bool required,
-    const TextureManager& texture_manager,
+    const char* parameter_name, bool required, bool inclusive, float_t minimum,
+    float_t maximum, const TextureManager& texture_manager,
     const ColorExtrapolator& color_extrapolator, float_t default_reflectance) {
+  assert(!inclusive || std::isfinite(minimum));
+  assert(!inclusive || std::isfinite(maximum));
+  assert(inclusive || minimum < maximum);
+  assert((inclusive && minimum <= default_reflectance) ||
+         (!inclusive && minimum < default_reflectance));
+  assert((inclusive && default_reflectance <= maximum) ||
+         (!inclusive && default_reflectance < maximum));
   return ReflectorTextureMatcher(
-      base_type_name, type_name, parameter_name, required, texture_manager,
-      color_extrapolator,
+      base_type_name, type_name, parameter_name, required, inclusive, minimum,
+      maximum, texture_manager, color_extrapolator,
       std::move(ReflectorFromUniformReflectance(default_reflectance)));
 }
 

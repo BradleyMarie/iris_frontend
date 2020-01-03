@@ -17,8 +17,8 @@ MaterialResult ParseMatte(const char* base_type_name, const char* type_name,
                           const ColorExtrapolator& color_extrapolator,
                           const TextureManager& texture_manager) {
   ReflectorTextureMatcher kd = ReflectorTextureMatcher::FromUniformReflectance(
-      base_type_name, type_name, "Kd", false, texture_manager,
-      color_extrapolator, kMatteMaterialDefaultReflectance);
+      base_type_name, type_name, "Kd", false, true, (float_t)0.0, (float_t)1.0,
+      texture_manager, color_extrapolator, kMatteMaterialDefaultReflectance);
   MatchParameters<1>(base_type_name, type_name, tokenizer, {&kd});
 
   Material result;
