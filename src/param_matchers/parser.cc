@@ -165,6 +165,12 @@ static bool ValidateRgb(std::array<float_t, 3> value) {
   return true;
 }
 
+static RgbParameter ParseColor(Tokenizer& tokenizer) {
+  auto data = ParseFloatTuple<std::array<float_t, 3>, MakeRgb, ValidateRgb>(
+      tokenizer, "Color", "color");
+  return RgbParameter{std::move(data)};
+}
+
 static RgbParameter ParseRgb(Tokenizer& tokenizer) {
   auto data = ParseFloatTuple<std::array<float_t, 3>, MakeRgb, ValidateRgb>(
       tokenizer, "Rgb", "rgb");
@@ -175,6 +181,12 @@ static StringParameter ParseString(Tokenizer& tokenizer) {
   auto data = ParseData<std::string, ParseQuotedTokenToString>(
       tokenizer, "String", "string");
   return StringParameter{std::move(data)};
+}
+
+static TextureParameter ParseTexture(Tokenizer& tokenizer) {
+  auto data = ParseData<std::string, ParseQuotedTokenToString>(
+      tokenizer, "Texture", "texture");
+  return TextureParameter{std::move(data)};
 }
 
 static XyzParameter ParseXyz(Tokenizer& tokenizer) {
@@ -261,7 +273,7 @@ ParserCallback ToCallback(std::function<Result(Tokenizer&)> func) {
 static const std::map<absl::string_view, ParserCallback> kParsers = {
     // blackbody
     {"bool", ToCallback<BoolParameter>(ParseBool)},
-    // color
+    {"color", ToCallback<RgbParameter>(ParseColor)},
     {"float", ToCallback<FloatParameter>(ParseFloat)},
     {"integer", ToCallback<IntParameter>(ParseInt)},
     {"normal", ToCallback<NormalParameter>(ParseNormal)},
@@ -271,7 +283,7 @@ static const std::map<absl::string_view, ParserCallback> kParsers = {
     {"rgb", ToCallback<RgbParameter>(ParseRgb)},
     {"spectrum", ToCallback<SpectrumParameter>(ParseSpectrum)},
     {"string", ToCallback<StringParameter>(ParseString)},
-    // texture
+    {"texture", ToCallback<TextureParameter>(ParseTexture)},
     {"vector", ToCallback<Vector3Parameter>(ParseVector)},
     // vector2
     {"vector3", ToCallback<Vector3Parameter>(ParseVector3)},

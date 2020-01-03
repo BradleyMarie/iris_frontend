@@ -50,6 +50,10 @@ struct StringParameter {
   std::vector<std::string> data;
 };
 
+struct TextureParameter {
+  std::vector<std::string> data;
+};
+
 struct XyzParameter {
   std::vector<COLOR3> data;
 };
@@ -57,7 +61,7 @@ struct XyzParameter {
 typedef absl::variant<BoolParameter, IntParameter, FloatParameter,
                       SpectrumParameter, Point3Parameter, Vector3Parameter,
                       NormalParameter, RgbParameter, StringParameter,
-                      XyzParameter>
+                      TextureParameter, XyzParameter>
     ParameterData;
 
 typedef std::pair<std::string, ParameterData> Parameter;

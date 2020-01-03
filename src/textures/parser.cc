@@ -50,11 +50,10 @@ void ParseTexture(const char* base_type_name, Tokenizer& tokenizer,
 
   if (format_name == "float") {
     auto float_texture =
-        CallDirective<FloatTexture, 1, const ColorExtrapolator&,
-                      const TextureManager&>(
+        CallDirective<FloatTexture, 1, const TextureManager&>(
             base_type_name, tokenizer,
             {std::make_pair("constant", ParseConstantFloat)},
-            color_extrapolator, texture_manager);
+            texture_manager);
     texture_manager.SetFloatTexture(name, float_texture);
     return;
   }

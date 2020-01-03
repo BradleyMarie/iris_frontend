@@ -34,9 +34,7 @@ cc_library(
         "//src/common:texture_manager",
         "//src/common:tokenizer",
         "//src/param_matchers:matcher",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_texture",
+        "//src/param_matchers:reflector_texture",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:matte_material",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:uniform_reflector",
-        "@com_google_absl//absl/strings",  # TODO: Remove
     ],
 )

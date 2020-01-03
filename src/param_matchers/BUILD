@@ -12,6 +12,18 @@ cc_library(
 )
 
 cc_library(
+    name = "float_texture",
+    srcs = ["float_texture.cc"],
+    hdrs = ["float_texture.h"],
+    deps = [
+        ":matcher",
+        "//src/common:pointer_types",
+        "//src/common:texture_manager",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_texture",
+    ],
+)
+
+cc_library(
     name = "integral_single",
     hdrs = ["integral_single.h"],
     deps = [
@@ -50,6 +62,19 @@ cc_library(
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:variant",
+    ],
+)
+
+cc_library(
+    name = "reflector_texture",
+    srcs = ["reflector_texture.cc"],
+    hdrs = ["reflector_texture.h"],
+    deps = [
+        ":matcher",
+        "//src/common:pointer_types",
+        "//src/common:texture_manager",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_texture",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:uniform_reflector",
     ],
 )
 
