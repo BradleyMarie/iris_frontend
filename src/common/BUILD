@@ -84,6 +84,18 @@ cc_library(
 )
 
 cc_library(
+    name = "spectrum_manager",
+    srcs = ["spectrum_manager.cc"],
+    hdrs = ["spectrum_manager.h"],
+    deps = [
+        ":error",
+        ":pointer_types",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:interpolated_spectrum",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
+cc_library(
     name = "texture_manager",
     srcs = ["texture_manager.cc"],
     hdrs = ["texture_manager.h"],
