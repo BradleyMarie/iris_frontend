@@ -9,6 +9,7 @@
 #include "iris_physx_toolkit/interpolated_spectrum.h"
 #include "src/common/error.h"
 #include "src/common/quoted_string.h"
+#include "src/param_matchers/spd_file.h"
 
 namespace iris {
 namespace {
@@ -200,7 +201,8 @@ template <typename ContainerType, typename PointerType,
                               PointerType*)>
 static ContainerType AllocateSpectrum(const std::vector<float_t>& data,
                                       const std::vector<float_t>& wavelengths,
-                                      const std::vector<float_t>& intensities) {
+                                      const std::vector<float_t>& intensities,
+                                      absl::optional<absl::string_view> file) {
   ContainerType result;
   ISTATUS status =
       Allocate(wavelengths.data(), intensities.data(), wavelengths.size(),
@@ -209,6 +211,10 @@ static ContainerType AllocateSpectrum(const std::vector<float_t>& data,
     ReportOOM();
   }
   if (status != ISTATUS_SUCCESS) {
+    if (file) {
+      InvalidSpdFile(*file);
+    }
+
     std::cerr << "ERROR: Could not construct a spectrum from values ("
               << absl::StrJoin(data, ", ") << ")" << std::endl;
     exit(EXIT_FAILURE);
@@ -218,15 +224,24 @@ static ContainerType AllocateSpectrum(const std::vector<float_t>& data,
 }
 
 static SpectrumParameter ParseSpectrum(Tokenizer& tokenizer) {
-  if (UnquoteToken(*tokenizer.Peek())) {
-    std::cerr << "ERROR: String values are unsupported for Spectrum parameters"
-              << std::endl;
-    exit(EXIT_FAILURE);
+  auto maybe_filename = UnquoteToken(*tokenizer.Peek());
+
+  std::vector<std::string> files;
+  std::vector<float_t> data;
+  if (maybe_filename) {
+    std::string filename(*maybe_filename);
+    files.push_back(filename);
+    data = ReadSpdFile(tokenizer, filename);
+  } else {
+    data =
+        ParseData<float_t, absl::SimpleAtof>(tokenizer, "Spectrum", "spectrum");
   }
 
-  auto data =
-      ParseData<float_t, absl::SimpleAtof>(tokenizer, "Spectrum", "spectrum");
   if (data.size() % 2 != 0) {
+    if (maybe_filename) {
+      InvalidSpdFile(*maybe_filename);
+    }
+
     std::cerr << "ERROR: The number of parameters for spectrum must be "
                  "divisible by 2"
               << std::endl;
@@ -247,20 +262,21 @@ static SpectrumParameter ParseSpectrum(Tokenizer& tokenizer) {
 
   Spectrum spectrum =
       AllocateSpectrum<Spectrum, PSPECTRUM, InterpolatedSpectrumAllocate>(
-          data, wavelengths, intensities);
+          data, wavelengths, intensities, maybe_filename);
 
   Reflector reflector;
   if (allocate_reflector) {
     reflector =
         AllocateSpectrum<Reflector, PREFLECTOR, InterpolatedReflectorAllocate>(
-            data, wavelengths, intensities);
+            data, wavelengths, intensities, maybe_filename);
   }
 
   std::vector<std::pair<Spectrum, Reflector>> result;
   result.push_back(std::make_pair(spectrum, reflector));
   std::vector<std::vector<float_t>> values;
   values.push_back(std::move(data));
-  return SpectrumParameter{std::move(result), std::move(values)};
+  return SpectrumParameter{std::move(result), std::move(values),
+                           std::move(files)};
 }
 
 typedef std::function<ParameterData(Tokenizer&)> ParserCallback;

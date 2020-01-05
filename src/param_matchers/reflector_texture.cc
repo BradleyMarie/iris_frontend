@@ -96,9 +96,14 @@ std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
     NumberOfElementsError();
   }
   if (!parameter.data[0].second.get()) {
-    std::cerr
-        << "ERROR: Could not construct a reflection spectrum from values ("
-        << absl::StrJoin(parameter.values[0], ", ") << ")" << std::endl;
+    if (!parameter.files.empty()) {
+      std::cerr << "ERROR: Malformed reflection SPD file: "
+                << parameter.files[0] << std::endl;
+    } else {
+      std::cerr
+          << "ERROR: Could not construct a reflection spectrum from values ("
+          << absl::StrJoin(parameter.values[0], ", ") << ")" << std::endl;
+    }
     exit(EXIT_FAILURE);
   }
   ReflectorTexture result;

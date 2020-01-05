@@ -53,6 +53,7 @@ cc_library(
     srcs = ["parser.cc"],
     hdrs = ["parser.h"],
     deps = [
+        ":spd_file",
         "//src/common:error",
         "//src/common:pointer_types",
         "//src/common:quoted_string",
@@ -91,6 +92,7 @@ cc_library(
     srcs = ["spd_file.cc"],
     hdrs = ["spd_file.h"],
     deps = [
+        "//src/common:tokenizer",
         "@com_google_absl//absl/strings",
     ],
 )

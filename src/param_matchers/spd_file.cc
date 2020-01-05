@@ -10,15 +10,20 @@ float_t ParseFloat(const std::string& file, const std::vector<char>& token) {
   bool success =
       absl::SimpleAtof(absl::string_view(token.data(), token.size()), &parsed);
   if (!success) {
-    std::cerr << "ERROR: Malformed SPD file: " << file << std::endl;
-    exit(EXIT_FAILURE);
+    InvalidSpdFile(file);
   }
   return parsed;
 }
 
 }  // namespace
 
-std::vector<float_t> ReadSpdFile(const std::string& file,
+void InvalidSpdFile [[noreturn]] (absl::string_view filename) {
+  std::cerr << "ERROR: Malformed SPD file: " << filename << std::endl;
+  exit(EXIT_FAILURE);
+}
+
+std::vector<float_t> ReadSpdFile(const Tokenizer& tokenizer,
+                                 const std::string& file,
                                  std::istream& stream) {
   std::vector<float_t> result;
   std::vector<char> token;
@@ -48,8 +53,7 @@ std::vector<float_t> ReadSpdFile(const std::string& file,
       continue;
     }
 
-    std::cerr << "ERROR: Malformed SPD file: " << file << std::endl;
-    exit(EXIT_FAILURE);
+    InvalidSpdFile(file);
   }
 
   if (token.size() != 0) {
@@ -59,7 +63,7 @@ std::vector<float_t> ReadSpdFile(const std::string& file,
   return result;
 }
 
-std::vector<float_t> ReadSpdFile(const std::string& search_dir,
+std::vector<float_t> ReadSpdFile(const Tokenizer& tokenizer,
                                  const std::string& file) {
   std::ifstream stream(file);
   if (stream.fail()) {
@@ -67,7 +71,7 @@ std::vector<float_t> ReadSpdFile(const std::string& search_dir,
     exit(EXIT_FAILURE);
   }
 
-  return ReadSpdFile(file, stream);
+  return ReadSpdFile(tokenizer, file, stream);
 }
 
 }  // namespace iris
