@@ -27,7 +27,7 @@ static char ReadEscapedCharacter(char ch) {
       return '"';
   }
 
-  std::cerr << "ERROR: Illegal escape character \\" << ch << std::endl;
+  std::cerr << "ERROR: Illegal escape character: \\" << ch << std::endl;
   exit(EXIT_FAILURE);
 }
 
@@ -144,7 +144,7 @@ std::unique_ptr<Tokenizer> Tokenizer::CreateFromStream(std::istream& stream) {
 void Tokenizer::Include(const std::string& file) {
   auto buffer = absl::make_unique<std::ifstream>(file);
   if (buffer->fail()) {
-    std::cerr << "ERROR: Error opening file " << file << std::endl;
+    std::cerr << "ERROR: Error opening file: " << file << std::endl;
     exit(EXIT_FAILURE);
   }
 

@@ -87,6 +87,15 @@ cc_library(
 )
 
 cc_library(
+    name = "spd_file",
+    srcs = ["spd_file.cc"],
+    hdrs = ["spd_file.h"],
+    deps = [
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "spectrum",
     srcs = ["spectrum.cc"],
     hdrs = ["spectrum.h"],
