@@ -5,8 +5,7 @@
 
 namespace iris {
 
-bool TryParseInclude(absl::string_view directive, Tokenizer& tokenizer,
-                     const std::string& search_dir);
+bool TryParseInclude(absl::string_view directive, Tokenizer& tokenizer);
 
 }  // namespace iris
 

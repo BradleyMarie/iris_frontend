@@ -129,20 +129,27 @@ bool ParseNext(std::istream& stream, std::string& output) {
 
 }  // namespace
 
-std::unique_ptr<Tokenizer> Tokenizer::CreateFromFile(const std::string& file) {
-  auto result = absl::make_unique<Tokenizer>();
+Tokenizer::Tokenizer(const std::string& search_dir)
+    : m_search_dir(search_dir){};
+
+std::unique_ptr<Tokenizer> Tokenizer::CreateFromFile(
+    const std::string& search_dir, const std::string& file) {
+  auto result = absl::make_unique<Tokenizer>(search_dir);
   result->Include(file);
   return result;
 }
 
-std::unique_ptr<Tokenizer> Tokenizer::CreateFromStream(std::istream& stream) {
-  auto result = absl::make_unique<Tokenizer>();
+std::unique_ptr<Tokenizer> Tokenizer::CreateFromStream(
+    const std::string& search_dir, std::istream& stream) {
+  auto result = absl::make_unique<Tokenizer>(search_dir);
   result->m_streams.push(std::make_pair(std::ref(stream), nullptr));
   return result;
 }
 
+std::string Tokenizer::AbsolutePath(const std::string& file) { return file; }
+
 void Tokenizer::Include(const std::string& file) {
-  auto buffer = absl::make_unique<std::ifstream>(file);
+  auto buffer = absl::make_unique<std::ifstream>(AbsolutePath(file));
   if (buffer->fail()) {
     std::cerr << "ERROR: Error opening file: " << file << std::endl;
     exit(EXIT_FAILURE);

@@ -48,17 +48,16 @@ int main(int argc, char** argv) {
   }
 
   std::unique_ptr<iris::Tokenizer> tokenizer;
-  std::string search_dir;
   if (unparsed.size() == 1) {
-    search_dir = GetWorkingDirectory();
-    tokenizer = iris::Tokenizer::CreateFromStream(std::cin);
+    tokenizer =
+        iris::Tokenizer::CreateFromStream(GetWorkingDirectory(), std::cin);
   } else {
-    search_dir = GetParentDirectory(unparsed[1]);
-    tokenizer = iris::Tokenizer::CreateFromFile(unparsed[1]);
+    tokenizer = iris::Tokenizer::CreateFromFile(GetParentDirectory(unparsed[1]),
+                                                unparsed[1]);
   }
 
   while (tokenizer->Peek()) {
-    iris::RenderToOutput(*tokenizer, search_dir, absl::GetFlag(FLAGS_epsilon),
+    iris::RenderToOutput(*tokenizer, absl::GetFlag(FLAGS_epsilon),
                          absl::GetFlag(FLAGS_num_threads));
   }
 

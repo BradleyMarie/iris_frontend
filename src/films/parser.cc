@@ -13,7 +13,7 @@ FilmResult ParseFilm(const char* base_type_name, Tokenizer& tokenizer) {
 }
 
 FilmResult CreateDefaultFilm() {
-  Tokenizer tokenizer;
+  Tokenizer tokenizer("");
   return ParseImage("Unused", "Unused", tokenizer);
 }
 

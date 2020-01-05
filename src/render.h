@@ -7,12 +7,11 @@
 
 namespace iris {
 
-std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(
-    Tokenizer& tokenizer, const std::string& search_dir, float_t epsilon,
-    size_t num_threads);
+std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(Tokenizer& tokenizer,
+                                                         float_t epsilon,
+                                                         size_t num_threads);
 
-void RenderToOutput(Tokenizer& tokenizer, const std::string& search_dir,
-                    float_t epsilon, size_t num_threads);
+void RenderToOutput(Tokenizer& tokenizer, float_t epsilon, size_t num_threads);
 
 }  // namespace iris
 

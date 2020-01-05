@@ -10,8 +10,8 @@
 namespace iris {
 
 std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
-    Tokenizer& tokenizer, const std::string& search_dir,
-    MatrixManager& matrix_manager, const ColorExtrapolator& color_extrapolator,
+    Tokenizer& tokenizer, MatrixManager& matrix_manager,
+    const ColorExtrapolator& color_extrapolator,
     ColorIntegrator& color_integrator);
 
 }  // namespace iris

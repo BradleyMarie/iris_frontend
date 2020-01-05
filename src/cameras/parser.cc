@@ -16,7 +16,7 @@ CameraFactory ParseCamera(const char* base_type_name, Tokenizer& tokenizer,
 
 CameraFactory CreateDefaultCamera() {
   MatrixManager matrix_manager;
-  Tokenizer tokenizer;
+  Tokenizer tokenizer("");
   return ParsePerspective("Unused", "Unused", tokenizer, matrix_manager);
 }
 

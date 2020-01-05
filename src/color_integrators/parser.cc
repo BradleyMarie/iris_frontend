@@ -10,11 +10,11 @@ namespace iris {
 ColorIntegrator ParseColorIntegrator(const char* base_type_name,
                                      Tokenizer& tokenizer) {
   return CallDirective<ColorIntegrator, 1>(base_type_name, tokenizer,
-                                            {std::make_pair("cie", ParseCie)});
+                                           {std::make_pair("cie", ParseCie)});
 }
 
 ColorIntegrator CreateDefaultColorIntegrator() {
-  Tokenizer tokenizer;
+  Tokenizer tokenizer("");
   return ParseCie("Unused", "Unused", tokenizer);
 }
 

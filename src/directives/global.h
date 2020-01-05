@@ -17,7 +17,6 @@ typedef std::tuple<Camera, PixelSampler, Framebuffer, Integrator,
     GlobalConfig;
 
 GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
-                                   const std::string& search_dir,
                                    MatrixManager& matrix_manager);
 
 }  // namespace iris

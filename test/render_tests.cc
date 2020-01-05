@@ -107,23 +107,24 @@ void CheckEquals(const char* expected, const iris::Framebuffer& actual,
   fclose(left);
 }
 
+static const std::string kSearchDir(".");
+
 std::pair<std::unique_ptr<Tokenizer>, std::unique_ptr<std::stringstream>>
 CreateTokenizerFromString(const std::string& string_to_parse) {
   auto buffer = absl::make_unique<std::stringstream>(string_to_parse);
-  auto tokenizer = Tokenizer::CreateFromStream(*buffer);
+  auto tokenizer = Tokenizer::CreateFromStream(kSearchDir, *buffer);
   return std::make_pair(std::move(tokenizer), std::move(buffer));
 }
 
 static const float_t kEpsilon = (float_t)0.001;
-static const std::string kSearchDir(".");
 static const size_t kNumThreads = 1;
 
 }  // namespace
 
 TEST(RenderTests, CornellBox) {
-  auto tokenizer = Tokenizer::CreateFromFile("test/cornell_box.pbrt");
-  auto render_result =
-      RenderToFramebuffer(*tokenizer, kSearchDir, kEpsilon, kNumThreads);
+  auto tokenizer =
+      Tokenizer::CreateFromFile(kSearchDir, "test/cornell_box.pbrt");
+  auto render_result = RenderToFramebuffer(*tokenizer, kEpsilon, kNumThreads);
   CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.1);
 }
 
@@ -131,6 +132,6 @@ TEST(RenderTests, IncludeCornellBox) {
   auto tokenizer =
       CreateTokenizerFromString("Include \"test/cornell_box.pbrt\"");
   auto render_result =
-      RenderToFramebuffer(*tokenizer.first, kSearchDir, kEpsilon, kNumThreads);
+      RenderToFramebuffer(*tokenizer.first, kEpsilon, kNumThreads);
   CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.1);
 }

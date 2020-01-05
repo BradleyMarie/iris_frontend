@@ -13,8 +13,7 @@ typedef std::tuple<Scene, LightSampler, Camera, PixelSampler, Integrator,
                    ColorIntegrator, Random, Framebuffer, OutputWriter>
     RenderConfiguration;
 
-RenderConfiguration ParseDirectives(Tokenizer& tokenizer,
-                                    const std::string& search_dir);
+RenderConfiguration ParseDirectives(Tokenizer& tokenizer);
 
 }  // namespace iris
 

@@ -87,7 +87,6 @@ bool CallOnce(const char* base_type_name, absl::string_view token,
 }  // namespace
 
 GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
-                                   const std::string& search_dir,
                                    MatrixManager& matrix_manager) {
   matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
   matrix_manager.Identity();
@@ -112,7 +111,7 @@ GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
       continue;
     }
 
-    if (TryParseInclude(*token, tokenizer, search_dir)) {
+    if (TryParseInclude(*token, tokenizer)) {
       continue;
     }
 

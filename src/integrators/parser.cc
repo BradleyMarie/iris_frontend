@@ -14,7 +14,7 @@ IntegratorResult ParseIntegrator(const char* base_type_name,
 }
 
 IntegratorResult CreateDefaultIntegrator() {
-  Tokenizer tokenizer;
+  Tokenizer tokenizer("");
   return ParsePath("Unused", "Unused", tokenizer);
 }
 

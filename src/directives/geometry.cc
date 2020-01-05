@@ -184,8 +184,8 @@ Scene CreateScene(std::vector<Shape>& shapes, std::vector<Matrix>& transforms) {
 }  // namespace
 
 std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
-    Tokenizer& tokenizer, const std::string& search_dir,
-    MatrixManager& matrix_manager, const ColorExtrapolator& color_extrapolator,
+    Tokenizer& tokenizer, MatrixManager& matrix_manager,
+    const ColorExtrapolator& color_extrapolator,
     ColorIntegrator& color_integrator) {
   matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
   matrix_manager.Identity();
@@ -205,7 +205,7 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
       continue;
     }
 
-    if (TryParseInclude(*token, tokenizer, search_dir)) {
+    if (TryParseInclude(*token, tokenizer)) {
       continue;
     }
 

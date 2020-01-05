@@ -9,13 +9,13 @@
 
 namespace iris {
 
-std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(
-    Tokenizer& tokenizer, const std::string& search_dir, float_t epsilon,
-    size_t num_threads) {
+std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(Tokenizer& tokenizer,
+                                                         float_t epsilon,
+                                                         size_t num_threads) {
   assert(isfinite(epsilon) && (float_t)0.0 <= epsilon);
   assert(num_threads != 0);
 
-  auto render_config = ParseDirectives(tokenizer, search_dir);
+  auto render_config = ParseDirectives(tokenizer);
 
   SampleTracer sample_tracer;
   ISTATUS status = PhysxSampleTracerAllocate(
@@ -44,10 +44,8 @@ std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(
                         std::move(std::get<8>(render_config)));
 }
 
-void RenderToOutput(Tokenizer& tokenizer, const std::string& search_dir,
-                    float_t epsilon, size_t num_threads) {
-  auto render_result =
-      RenderToFramebuffer(tokenizer, search_dir, epsilon, num_threads);
+void RenderToOutput(Tokenizer& tokenizer, float_t epsilon, size_t num_threads) {
+  auto render_result = RenderToFramebuffer(tokenizer, epsilon, num_threads);
   render_result.second->Write(render_result.first);
 }
 

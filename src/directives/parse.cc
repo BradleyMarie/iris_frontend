@@ -5,14 +5,12 @@
 
 namespace iris {
 
-RenderConfiguration ParseDirectives(Tokenizer& tokenizer,
-                                    const std::string& search_dir) {
+RenderConfiguration ParseDirectives(Tokenizer& tokenizer) {
   MatrixManager matrix_manager;
-  auto global_config =
-      ParseGlobalDirectives(tokenizer, search_dir, matrix_manager);
-  auto geometry_config = ParseGeometryDirectives(
-      tokenizer, search_dir, matrix_manager, std::get<5>(global_config),
-      std::get<6>(global_config));
+  auto global_config = ParseGlobalDirectives(tokenizer, matrix_manager);
+  auto geometry_config = ParseGeometryDirectives(tokenizer, matrix_manager,
+                                                 std::get<5>(global_config),
+                                                 std::get<6>(global_config));
   return {
       std::move(geometry_config.first),
       std::move(std::get<4>(global_config)(geometry_config.second)),

@@ -13,7 +13,7 @@ Random ParseRandom(const char* base_type_name, Tokenizer& tokenizer) {
 }
 
 Random CreateDefaultRandom() {
-  Tokenizer tokenizer;
+  Tokenizer tokenizer("");
   return ParsePcg("Unused", "Unused", tokenizer);
 }
 

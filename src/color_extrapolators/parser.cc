@@ -14,7 +14,7 @@ ColorExtrapolator ParseColorExtrapolator(const char* base_type_name,
 }
 
 ColorExtrapolator CreateDefaultColorExtrapolator() {
-  Tokenizer tokenizer;
+  Tokenizer tokenizer("");
   return ParseSmits("Unused", "Unused", tokenizer);
 }
 
