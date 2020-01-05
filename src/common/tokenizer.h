@@ -21,7 +21,7 @@ class Tokenizer {
   static std::unique_ptr<Tokenizer> CreateFromStream(
       const std::string& search_dir, std::istream& stream);
 
-  std::string AbsolutePath(const std::string& file);
+  std::string AbsolutePath(const std::string& file) const;
   void Include(const std::string& file);
 
   absl::optional<absl::string_view> Peek();

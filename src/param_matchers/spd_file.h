@@ -12,8 +12,7 @@
 namespace iris {
 
 void InvalidSpdFile [[noreturn]] (absl::string_view filename);
-std::vector<float_t> ReadSpdFile(const Tokenizer& tokenizer,
-                                 const std::string& file, std::istream& stream);
+std::vector<float_t> ReadSpdFile(const std::string& file, std::istream& stream);
 std::vector<float_t> ReadSpdFile(const Tokenizer& tokenizer,
                                  const std::string& file);
 

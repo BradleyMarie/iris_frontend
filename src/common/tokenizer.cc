@@ -146,7 +146,9 @@ std::unique_ptr<Tokenizer> Tokenizer::CreateFromStream(
   return result;
 }
 
-std::string Tokenizer::AbsolutePath(const std::string& file) { return file; }
+std::string Tokenizer::AbsolutePath(const std::string& file) const {
+  return file;
+}
 
 void Tokenizer::Include(const std::string& file) {
   auto buffer = absl::make_unique<std::ifstream>(AbsolutePath(file));

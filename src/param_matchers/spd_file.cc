@@ -22,8 +22,7 @@ void InvalidSpdFile [[noreturn]] (absl::string_view filename) {
   exit(EXIT_FAILURE);
 }
 
-std::vector<float_t> ReadSpdFile(const Tokenizer& tokenizer,
-                                 const std::string& file,
+std::vector<float_t> ReadSpdFile(const std::string& file,
                                  std::istream& stream) {
   std::vector<float_t> result;
   std::vector<char> token;
@@ -65,13 +64,13 @@ std::vector<float_t> ReadSpdFile(const Tokenizer& tokenizer,
 
 std::vector<float_t> ReadSpdFile(const Tokenizer& tokenizer,
                                  const std::string& file) {
-  std::ifstream stream(file);
+  std::ifstream stream(tokenizer.AbsolutePath(file));
   if (stream.fail()) {
     std::cerr << "ERROR: Error opening file: " << file << std::endl;
     exit(EXIT_FAILURE);
   }
 
-  return ReadSpdFile(tokenizer, file, stream);
+  return ReadSpdFile(file, stream);
 }
 
 }  // namespace iris
