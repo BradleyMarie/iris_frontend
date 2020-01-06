@@ -1,19 +1,9 @@
 #include "src/param_matchers/spectrum.h"
 
+#include "absl/strings/str_join.h"
+#include "src/param_matchers/spd_file.h"
+
 namespace iris {
-namespace {
-
-Spectrum SpectrumFromRgb(const ColorExtrapolator& color_extrapolator,
-                         const std::array<float_t, 3>& rgb) {
-  Spectrum result;
-  ISTATUS status =
-      RgbInterpolatorAllocateSpectrum(color_extrapolator.get(), rgb[0], rgb[1],
-                                      rgb[2], result.release_and_get_address());
-  SuccessOrOOM(status);
-  return result;
-}
-
-}  // namespace
 
 const size_t SpectrumMatcher::m_variant_indices[3] = {
     GetIndex<RgbParameter, ParameterData>(),
@@ -23,49 +13,67 @@ const size_t SpectrumMatcher::m_variant_indices[3] = {
 SpectrumMatcher SpectrumMatcher::FromRgb(
     const char* base_type_name, const char* type_name,
     const char* parameter_name, bool required,
-    const ColorExtrapolator& color_extrapolator,
+    SpectrumManager& spectrum_manager,
     const std::array<float_t, 3>& default_rgb) {
-  return SpectrumMatcher(base_type_name, type_name, parameter_name, required,
-                         color_extrapolator,
-                         SpectrumFromRgb(color_extrapolator, default_rgb));
+  return SpectrumMatcher(
+      base_type_name, type_name, parameter_name, required, spectrum_manager,
+      spectrum_manager.AllocateRgbSpectrum(default_rgb).value());
 }
 
-Spectrum SpectrumMatcher::Match(const RgbParameter& parameter) const {
+Spectrum SpectrumMatcher::Match(const RgbParameter& parameter) {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
   }
-  return SpectrumFromRgb(m_color_extrapolator, parameter.data[0]);
+  return m_spectrum_manager.AllocateRgbSpectrum(parameter.data[0]).value();
 }
 
-Spectrum SpectrumMatcher::Match(const SpectrumParameter& parameter) const {
+Spectrum SpectrumMatcher::Match(const std::vector<std::string>& files) {
+  if (files.size() != 1) {
+    NumberOfElementsError();
+  }
+  auto maybe_samples = ReadSpdFile(/*search_dir=*/"", files[0]);
+  if (!maybe_samples) {
+    std::cerr << "ERROR: Malformed SPD file: " << files[0] << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  auto maybe_spectrum =
+      m_spectrum_manager.AllocateInterpolatedSpectrum(*maybe_samples);
+  if (!maybe_samples) {
+    std::cerr << "ERROR: Malformed SPD file: " << files[0] << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  return *maybe_spectrum;
+}
+
+Spectrum SpectrumMatcher::Match(
+    const std::pair<std::vector<std::string>, std::vector<float_t>>& samples) {
+  if (samples.second.size() % 2 != 0) {
+    NumberOfElementsError();
+  }
+  auto result = m_spectrum_manager.AllocateInterpolatedSpectrum(samples.second);
+  if (!result) {
+    std::cerr << "ERROR: Could not construct a spectrum from values ("
+              << absl::StrJoin(samples.first, ", ") << ")" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  return *result;
+}
+
+Spectrum SpectrumMatcher::Match(const SpectrumParameter& parameter) {
+  if (absl::holds_alternative<std::vector<std::string>>(parameter.data)) {
+    return Match(absl::get<std::vector<std::string>>(parameter.data));
+  } else {
+    return Match(
+        absl::get<std::pair<std::vector<std::string>, std::vector<float_t>>>(
+            parameter.data));
+  }
+}
+
+Spectrum SpectrumMatcher::Match(const XyzParameter& parameter) {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
   }
-  return parameter.data[0].first;
-}
-
-Spectrum SpectrumMatcher::Match(const XyzParameter& parameter) const {
-  if (parameter.data.size() != 1) {
-    NumberOfElementsError();
-  }
-
-  float_t r = (float_t)3.2404542 * parameter.data[0].x -
-              (float_t)1.5371385 * parameter.data[0].y -
-              (float_t)0.4985314 * parameter.data[0].z;
-
-  float_t g = (float_t)-0.969266 * parameter.data[0].x +
-              (float_t)1.8760108 * parameter.data[0].y +
-              (float_t)0.0415560 * parameter.data[0].z;
-
-  float_t b = (float_t)0.0556434 * parameter.data[0].x -
-              (float_t)0.2040259 * parameter.data[0].y +
-              (float_t)1.0572252 * parameter.data[0].z;
-
-  r = std::max((float_t)0.0, r);
-  g = std::max((float_t)0.0, g);
-  b = std::max((float_t)0.0, b);
-
-  return SpectrumFromRgb(m_color_extrapolator, {r, g, b});
+  return m_spectrum_manager.AllocateXyzSpectrum(parameter.data[0]).value();
 }
 
 void SpectrumMatcher::Match(ParameterData& data) {

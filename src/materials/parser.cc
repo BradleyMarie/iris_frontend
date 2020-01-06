@@ -8,12 +8,12 @@
 namespace iris {
 
 MaterialResult ParseMaterial(const char* base_type_name, Tokenizer& tokenizer,
-                             const ColorExtrapolator& color_extrapolator,
+                             SpectrumManager& spectrum_manager,
                              const TextureManager& texture_manager) {
-  return CallDirective<MaterialResult, 1, const ColorExtrapolator&,
+  return CallDirective<MaterialResult, 1, SpectrumManager&,
                        const TextureManager&>(
       base_type_name, tokenizer, {std::make_pair("matte", ParseMatte)},
-      color_extrapolator, texture_manager);
+      spectrum_manager, texture_manager);
 }
 
 }  // namespace iris

@@ -1,29 +1,26 @@
 #include "src/param_matchers/spd_file.h"
 
+#include <fstream>
+
 #include "absl/strings/numbers.h"
 
 namespace iris {
 namespace {
 
-float_t ParseFloat(const std::string& file, const std::vector<char>& token) {
+absl::optional<float_t> ParseFloat(const std::vector<char>& token) {
   float_t parsed;
   bool success =
       absl::SimpleAtof(absl::string_view(token.data(), token.size()), &parsed);
   if (!success) {
-    InvalidSpdFile(file);
+    return absl::nullopt;
   }
   return parsed;
 }
 
 }  // namespace
 
-void InvalidSpdFile [[noreturn]] (absl::string_view filename) {
-  std::cerr << "ERROR: Malformed SPD file: " << filename << std::endl;
-  exit(EXIT_FAILURE);
-}
-
-std::vector<float_t> ReadSpdFile(const std::string& file,
-                                 std::istream& stream) {
+absl::optional<std::vector<float_t>> ReadSpdFile(const std::string& file,
+                                                 std::istream& stream) {
   std::vector<float_t> result;
   std::vector<char> token;
   for (int read = stream.get(); read != EOF; read = stream.get()) {
@@ -33,7 +30,12 @@ std::vector<float_t> ReadSpdFile(const std::string& file,
     }
 
     if (token.size() != 0) {
-      result.push_back(ParseFloat(file, token));
+      auto maybe_float = ParseFloat(token);
+      if (!maybe_float) {
+        return absl::nullopt;
+      }
+
+      result.push_back(*maybe_float);
       token.clear();
     }
 
@@ -52,19 +54,24 @@ std::vector<float_t> ReadSpdFile(const std::string& file,
       continue;
     }
 
-    InvalidSpdFile(file);
+    return absl::nullopt;
   }
 
   if (token.size() != 0) {
-    result.push_back(ParseFloat(file, token));
+    auto maybe_float = ParseFloat(token);
+    if (!maybe_float) {
+      return absl::nullopt;
+    }
+
+    result.push_back(*maybe_float);
   }
 
   return result;
 }
 
-std::vector<float_t> ReadSpdFile(const Tokenizer& tokenizer,
-                                 const std::string& file) {
-  std::ifstream stream(tokenizer.AbsolutePath(file));
+absl::optional<std::vector<float_t>> ReadSpdFile(const std::string& search_dir,
+                                                 const std::string& file) {
+  std::ifstream stream(file);
   if (stream.fail()) {
     std::cerr << "ERROR: Error opening file: " << file << std::endl;
     exit(EXIT_FAILURE);

@@ -8,10 +8,10 @@
 namespace iris {
 
 AreaLightResult ParseAreaLight(const char* base_type_name, Tokenizer& tokenizer,
-                               const ColorExtrapolator& color_extrapolator) {
-  return CallDirective<AreaLightResult, 1, const ColorExtrapolator&>(
+                               SpectrumManager& spectrum_manager) {
+  return CallDirective<AreaLightResult, 1, SpectrumManager&>(
       base_type_name, tokenizer, {std::make_pair("diffuse", ParseDiffuse)},
-      color_extrapolator);
+      spectrum_manager);
 }
 
 }  // namespace iris

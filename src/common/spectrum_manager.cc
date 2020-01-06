@@ -1,6 +1,7 @@
 #include "src/common/spectrum_manager.h"
 
 #include "iris_physx_toolkit/interpolated_spectrum.h"
+#include "iris_physx_toolkit/uniform_reflector.h"
 #include "src/common/error.h"
 
 namespace iris {
@@ -149,6 +150,27 @@ absl::optional<Reflector> SpectrumManager::AllocateXyzReflector(
     const COLOR3& color) {
   auto rgb = XyzToRgb(color);
   return AllocateRgbReflector(rgb);
+}
+
+absl::optional<Reflector> SpectrumManager::AllocateUniformReflector(
+    float_t reflectance) {
+  auto iter = m_uniform_reflector.find(reflectance);
+  if (iter != m_uniform_reflector.end()) {
+    return iter->second;
+  }
+
+  Reflector result;
+  ISTATUS status =
+      UniformReflectorAllocate(reflectance, result.release_and_get_address());
+  if (status != ISTATUS_SUCCESS) {
+    if (status == ISTATUS_ALLOCATION_FAILED) {
+      ReportOOM();
+    }
+    return absl::nullopt;
+  }
+
+  m_uniform_reflector[reflectance] = result;
+  return result;
 }
 
 }  // namespace iris

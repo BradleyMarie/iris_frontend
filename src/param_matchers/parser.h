@@ -26,9 +26,9 @@ struct FloatParameter {
 };
 
 struct SpectrumParameter {
-  std::vector<std::pair<Spectrum, Reflector>> data;
-  std::vector<std::vector<float_t>> values;
-  std::vector<std::string> files;
+  absl::variant<std::pair<std::vector<std::string>, std::vector<float_t>>,
+                std::vector<std::string>>
+      data;
 };
 
 struct Point3Parameter {

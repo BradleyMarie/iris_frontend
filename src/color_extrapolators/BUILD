@@ -7,6 +7,7 @@ cc_library(
     srcs = ["smits.cc"],
     hdrs = ["smits.h"],
     deps = [
+        "//src/common:error",
         "//src/common:pointer_types",
         "//src/common:tokenizer",
         "//src/param_matchers:matcher",

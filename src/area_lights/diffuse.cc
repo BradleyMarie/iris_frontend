@@ -17,12 +17,12 @@ static const std::array<float_t, 3> kDiffuseAreaLightDefaultL = {
 
 AreaLightResult ParseDiffuse(const char* base_type_name, const char* type_name,
                              Tokenizer& tokenizer,
-                             const ColorExtrapolator& color_extrapolator) {
+                             SpectrumManager& spectrum_manager) {
   SingleBoolMatcher twosided(base_type_name, type_name, "twosided", false,
                              kDiffuseAreaLightDefaultTwoSided);
   SpectrumMatcher spectrum =
       SpectrumMatcher::FromRgb(base_type_name, type_name, "L", false,
-                               color_extrapolator, kDiffuseAreaLightDefaultL);
+                               spectrum_manager, kDiffuseAreaLightDefaultL);
   MatchParameters<2>(base_type_name, type_name, tokenizer,
                      {&twosided, &spectrum});
 

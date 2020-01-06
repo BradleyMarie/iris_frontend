@@ -14,11 +14,11 @@ static const float_t kMatteMaterialDefaultReflectance = (float_t)0.5;
 
 MaterialResult ParseMatte(const char* base_type_name, const char* type_name,
                           Tokenizer& tokenizer,
-                          const ColorExtrapolator& color_extrapolator,
+                          SpectrumManager& spectrum_manager,
                           const TextureManager& texture_manager) {
   ReflectorTextureMatcher kd = ReflectorTextureMatcher::FromUniformReflectance(
-      base_type_name, type_name, "Kd", false,
-      texture_manager, color_extrapolator, kMatteMaterialDefaultReflectance);
+      base_type_name, type_name, "Kd", false, texture_manager, spectrum_manager,
+      kMatteMaterialDefaultReflectance);
   MatchParameters<1>(base_type_name, type_name, tokenizer, {&kd});
 
   Material result;

@@ -185,8 +185,7 @@ Scene CreateScene(std::vector<Shape>& shapes, std::vector<Matrix>& transforms) {
 
 std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     Tokenizer& tokenizer, MatrixManager& matrix_manager,
-    const ColorExtrapolator& color_extrapolator,
-    ColorIntegrator& color_integrator) {
+    SpectrumManager& spectrum_manager, ColorIntegrator& color_integrator) {
   matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
   matrix_manager.Identity();
 
@@ -231,7 +230,7 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
 
     if (token == "AreaLightSource") {
       auto light_state =
-          ParseAreaLight("AreaLightSource", tokenizer, color_extrapolator);
+          ParseAreaLight("AreaLightSource", tokenizer, spectrum_manager);
       graphics_state.SetEmissiveMaterials(std::get<0>(light_state),
                                           std::get<1>(light_state),
                                           std::get<2>(light_state));
@@ -240,7 +239,7 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
 
     if (token == "Material") {
       auto material_state =
-          ParseMaterial("Material", tokenizer, color_extrapolator,
+          ParseMaterial("Material", tokenizer, spectrum_manager,
                         graphics_state.GetTextureManager());
       graphics_state.SetMaterial(material_state.first, material_state.first,
                                  material_state.second);
@@ -278,7 +277,7 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     }
 
     if (token == "Texture") {
-      ParseTexture("Texture", tokenizer, color_extrapolator,
+      ParseTexture("Texture", tokenizer, spectrum_manager,
                    graphics_state.GetTextureManager());
       continue;
     }

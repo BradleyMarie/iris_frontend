@@ -1,18 +1,21 @@
 #include "src/param_matchers/parser.h"
 
 #include <iostream>
+#include <utility>
 #include <vector>
 
 #include "absl/strings/numbers.h"
-#include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
-#include "iris_physx_toolkit/interpolated_spectrum.h"
-#include "src/common/error.h"
 #include "src/common/quoted_string.h"
-#include "src/param_matchers/spd_file.h"
 
 namespace iris {
 namespace {
+
+static bool ParseStringWithoutValidation(absl::string_view token,
+                                         std::string* result) {
+  result->assign(token.begin(), token.size());
+  return true;
+}
 
 static bool ParseQuotedTokenToBool(absl::string_view token, bool* result) {
   if (token == "\"true\"") {
@@ -40,7 +43,7 @@ void ParseSingle(absl::string_view token, const char* lower_type_name,
     exit(EXIT_FAILURE);
   }
 
-  result->push_back(value);
+  result->push_back(std::move(value));
 }
 
 template <typename Type, bool (*ParseFunc)(absl::string_view, Type*)>
@@ -196,87 +199,34 @@ static XyzParameter ParseXyz(Tokenizer& tokenizer) {
   return XyzParameter{std::move(data)};
 }
 
-template <typename ContainerType, typename PointerType,
-          ISTATUS (*Allocate)(const float_t*, const float_t*, size_t,
-                              PointerType*)>
-static ContainerType AllocateSpectrum(const std::vector<float_t>& data,
-                                      const std::vector<float_t>& wavelengths,
-                                      const std::vector<float_t>& intensities,
-                                      absl::optional<absl::string_view> file) {
-  ContainerType result;
-  ISTATUS status =
-      Allocate(wavelengths.data(), intensities.data(), wavelengths.size(),
-               result.release_and_get_address());
-  if (status == ISTATUS_ALLOCATION_FAILED) {
-    ReportOOM();
+static std::vector<std::string> ParseSpectrumFilenames(
+    const std::vector<std::string>& quoted_filenames) {
+  std::vector<std::string> result;
+  for (const auto& filename : quoted_filenames) {
+    ParseSingle<std::string, ParseQuotedTokenToString>(filename, "spectrum",
+                                                       &result);
   }
-  if (status != ISTATUS_SUCCESS) {
-    if (file) {
-      InvalidSpdFile(*file);
-    }
-
-    std::cerr << "ERROR: Could not construct a spectrum from values ("
-              << absl::StrJoin(data, ", ") << ")" << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
   return result;
 }
 
+static std::pair<std::vector<std::string>, std::vector<float_t>> ParseSpectrumSamples(
+    const std::vector<std::string>& samples) {
+  std::vector<float_t> result;
+  for (const auto& sample : samples) {
+    ParseSingle<float_t, absl::SimpleAtof>(sample, "spectrum", &result);
+  }
+  return std::make_pair(samples, std::move(result));
+}
+
 static SpectrumParameter ParseSpectrum(Tokenizer& tokenizer) {
-  auto maybe_filename = UnquoteToken(*tokenizer.Peek());
-
-  std::vector<std::string> files;
-  std::vector<float_t> data;
-  if (maybe_filename) {
-    std::string filename(*maybe_filename);
-    files.push_back(filename);
-    data = ReadSpdFile(tokenizer, filename);
+  std::vector<std::string> unknown_data =
+      ParseData<std::string, ParseStringWithoutValidation>(
+          tokenizer, "Spectrum", "spectrum");
+  if (unknown_data.empty() || unknown_data[0][0] == '"') {
+    return {{ParseSpectrumFilenames(unknown_data)}};
   } else {
-    data =
-        ParseData<float_t, absl::SimpleAtof>(tokenizer, "Spectrum", "spectrum");
+    return {{ParseSpectrumSamples(unknown_data)}};
   }
-
-  if (data.size() % 2 != 0) {
-    if (maybe_filename) {
-      InvalidSpdFile(*maybe_filename);
-    }
-
-    std::cerr << "ERROR: The number of parameters for spectrum must be "
-                 "divisible by 2"
-              << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  bool allocate_reflector = true;
-  std::vector<float_t> wavelengths;
-  std::vector<float_t> intensities;
-  for (size_t i = 0; i < data.size(); i += 2) {
-    wavelengths.push_back(data[i]);
-    intensities.push_back(data[i + 1]);
-
-    if ((float_t)1.0 < data[i + 1]) {
-      allocate_reflector = false;
-    }
-  }
-
-  Spectrum spectrum =
-      AllocateSpectrum<Spectrum, PSPECTRUM, InterpolatedSpectrumAllocate>(
-          data, wavelengths, intensities, maybe_filename);
-
-  Reflector reflector;
-  if (allocate_reflector) {
-    reflector =
-        AllocateSpectrum<Reflector, PREFLECTOR, InterpolatedReflectorAllocate>(
-            data, wavelengths, intensities, maybe_filename);
-  }
-
-  std::vector<std::pair<Spectrum, Reflector>> result;
-  result.push_back(std::make_pair(spectrum, reflector));
-  std::vector<std::vector<float_t>> values;
-  values.push_back(std::move(data));
-  return SpectrumParameter{std::move(result), std::move(values),
-                           std::move(files)};
 }
 
 typedef std::function<ParameterData(Tokenizer&)> ParserCallback;

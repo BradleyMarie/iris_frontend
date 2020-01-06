@@ -3,6 +3,7 @@
 
 #include "src/common/error.h"
 #include "src/common/pointer_types.h"
+#include "src/common/spectrum_manager.h"
 #include "src/common/texture_manager.h"
 #include "src/param_matchers/matcher.h"
 
@@ -13,13 +14,12 @@ class ReflectorTextureMatcher : public ParamMatcher {
   ReflectorTextureMatcher(
       const char* base_type_name, const char* type_name,
       const char* parameter_name, bool required,
-      const TextureManager& texture_manager,
-      const ColorExtrapolator& color_extrapolator,
+      const TextureManager& texture_manager, SpectrumManager& spectrum_manager,
       std::pair<ReflectorTexture, std::set<Reflector>> default_value)
       : ParamMatcher(base_type_name, type_name, parameter_name, required,
                      m_variant_indices, 3),
         m_texture_manager(texture_manager),
-        m_color_extrapolator(color_extrapolator),
+        m_spectrum_manager(spectrum_manager),
         m_value(std::move(default_value)) {}
 
   const std::pair<ReflectorTexture, std::set<Reflector>>& Get() {
@@ -29,31 +29,35 @@ class ReflectorTextureMatcher : public ParamMatcher {
   static ReflectorTextureMatcher FromUniformReflectance(
       const char* base_type_name, const char* type_name,
       const char* parameter_name, bool required,
-      const TextureManager& texture_manager,
-      const ColorExtrapolator& color_extrapolator, float_t default_reflectance);
+      const TextureManager& texture_manager, SpectrumManager& spectrum_manager,
+      float_t default_reflectance);
 
  protected:
   void Match(ParameterData& data) final;
 
  private:
   std::pair<ReflectorTexture, std::set<Reflector>> Match(
-      const FloatParameter& parameter) const;
+      const FloatParameter& parameter);
   std::pair<ReflectorTexture, std::set<Reflector>> Match(
-      const RgbParameter& parameter) const;
+      const RgbParameter& parameter);
   std::pair<ReflectorTexture, std::set<Reflector>> Match(
-      const SpectrumParameter& parameter) const;
+      const SpectrumParameter& parameter);
   std::pair<ReflectorTexture, std::set<Reflector>> Match(
-      const TextureParameter& parameter,
-      const TextureManager& texture_manager) const;
+      const TextureParameter& parameter, const TextureManager& texture_manager);
   std::pair<ReflectorTexture, std::set<Reflector>> Match(
-      const XyzParameter& parameter) const;
+      const XyzParameter& parameter);
+
+  std::pair<ReflectorTexture, std::set<Reflector>> Match(
+      const std::vector<std::string>& files);
+  std::pair<ReflectorTexture, std::set<Reflector>> Match(
+      const std::pair<std::vector<std::string>, std::vector<float_t>>& samples);
 
   static bool ValidateFloat(float_t value);
 
  private:
   static const size_t m_variant_indices[5];
   const TextureManager& m_texture_manager;
-  const ColorExtrapolator& m_color_extrapolator;
+  SpectrumManager& m_spectrum_manager;
   std::pair<ReflectorTexture, std::set<Reflector>> m_value;
 };
 

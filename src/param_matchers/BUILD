@@ -17,6 +17,7 @@ cc_library(
     hdrs = ["float_texture.h"],
     deps = [
         ":matcher",
+        "//src/common:error",
         "//src/common:pointer_types",
         "//src/common:texture_manager",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_texture",
@@ -53,13 +54,10 @@ cc_library(
     srcs = ["parser.cc"],
     hdrs = ["parser.h"],
     deps = [
-        ":spd_file",
-        "//src/common:error",
         "//src/common:pointer_types",
         "//src/common:quoted_string",
         "//src/common:tokenizer",
         "@com_github_bradleymarie_iris//iris_physx",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:interpolated_spectrum",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:variant",
@@ -72,7 +70,10 @@ cc_library(
     hdrs = ["reflector_texture.h"],
     deps = [
         ":matcher",
+        ":spd_file",
+        "//src/common:error",
         "//src/common:pointer_types",
+        "//src/common:spectrum_manager",
         "//src/common:texture_manager",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_texture",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:uniform_reflector",
@@ -103,6 +104,9 @@ cc_library(
     hdrs = ["spectrum.h"],
     deps = [
         ":matcher",
+        ":spd_file",
         "//src/common:pointer_types",
+        "//src/common:spectrum_manager",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_texture",
     ],
 )

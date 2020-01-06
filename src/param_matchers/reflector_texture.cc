@@ -4,35 +4,19 @@
 
 #include "absl/strings/str_join.h"
 #include "iris_physx_toolkit/constant_texture.h"
-#include "iris_physx_toolkit/uniform_reflector.h"
+#include "src/param_matchers/spd_file.h"
 
 namespace iris {
 namespace {
 
 std::pair<ReflectorTexture, std::set<Reflector>>
-ReflectorFromUniformReflectance(float_t reflectance) {
-  Reflector reflector;
-  ISTATUS status = UniformReflectorAllocate(
-      reflectance, reflector.release_and_get_address());
-  SuccessOrOOM(status);
+ReflectorFromUniformReflectance(SpectrumManager& spectrum_manager,
+                                float_t reflectance) {
+  Reflector reflector =
+      spectrum_manager.AllocateUniformReflector(reflectance).value();
   ReflectorTexture result;
-  status = ConstantReflectorTextureAllocate(reflector.get(),
-                                            result.release_and_get_address());
-  SuccessOrOOM(status);
-  return std::make_pair(std::move(result), std::set<Reflector>({reflector}));
-}
-
-std::pair<ReflectorTexture, std::set<Reflector>> ReflectorFromRgb(
-    const ColorExtrapolator& color_extrapolator,
-    const std::array<float_t, 3>& rgb) {
-  Reflector reflector;
-  ISTATUS status = RgbInterpolatorAllocateReflector(
-      color_extrapolator.get(), rgb[0], rgb[1], rgb[2],
-      reflector.release_and_get_address());
-  SuccessOrOOM(status);
-  ReflectorTexture result;
-  status = ConstantReflectorTextureAllocate(reflector.get(),
-                                            result.release_and_get_address());
+  ISTATUS status = ConstantReflectorTextureAllocate(
+      reflector.get(), result.release_and_get_address());
   SuccessOrOOM(status);
   return std::make_pair(std::move(result), std::set<Reflector>({reflector}));
 }
@@ -49,13 +33,13 @@ const size_t ReflectorTextureMatcher::m_variant_indices[5] = {
 ReflectorTextureMatcher ReflectorTextureMatcher::FromUniformReflectance(
     const char* base_type_name, const char* type_name,
     const char* parameter_name, bool required,
-    const TextureManager& texture_manager,
-    const ColorExtrapolator& color_extrapolator, float_t default_reflectance) {
+    const TextureManager& texture_manager, SpectrumManager& spectrum_manager,
+    float_t default_reflectance) {
   assert(ValidateFloat(default_reflectance));
-  return ReflectorTextureMatcher(
-      base_type_name, type_name, parameter_name, required, texture_manager,
-      color_extrapolator,
-      std::move(ReflectorFromUniformReflectance(default_reflectance)));
+  return ReflectorTextureMatcher(base_type_name, type_name, parameter_name,
+                                 required, texture_manager, spectrum_manager,
+                                 std::move(ReflectorFromUniformReflectance(
+                                     spectrum_manager, default_reflectance)));
 }
 
 bool ReflectorTextureMatcher::ValidateFloat(float_t value) {
@@ -67,18 +51,18 @@ bool ReflectorTextureMatcher::ValidateFloat(float_t value) {
 }
 
 std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
-    const FloatParameter& parameter) const {
+    const FloatParameter& parameter) {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
   }
   if (!ValidateFloat(parameter.data[0])) {
     ElementRangeError();
   }
-  return ReflectorFromUniformReflectance(parameter.data[0]);
+  return ReflectorFromUniformReflectance(m_spectrum_manager, parameter.data[0]);
 }
 
 std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
-    const RgbParameter& parameter) const {
+    const RgbParameter& parameter) {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
   }
@@ -87,36 +71,74 @@ std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
       !ValidateFloat(parameter.data[0][2])) {
     ElementRangeError();
   }
-  return ReflectorFromRgb(m_color_extrapolator, parameter.data[0]);
+  Reflector reflector =
+      m_spectrum_manager.AllocateRgbReflector(parameter.data[0]).value();
+  ReflectorTexture result;
+  ISTATUS status = ConstantReflectorTextureAllocate(
+      reflector.get(), result.release_and_get_address());
+  SuccessOrOOM(status);
+  return std::make_pair(std::move(result), std::set<Reflector>({reflector}));
 }
 
 std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
-    const SpectrumParameter& parameter) const {
-  if (parameter.data.size() != 1) {
+    const std::vector<std::string>& files) {
+  if (files.size() != 1) {
     NumberOfElementsError();
   }
-  if (!parameter.data[0].second.get()) {
-    if (!parameter.files.empty()) {
-      std::cerr << "ERROR: Malformed reflection SPD file: "
-                << parameter.files[0] << std::endl;
-    } else {
-      std::cerr
-          << "ERROR: Could not construct a reflection spectrum from values ("
-          << absl::StrJoin(parameter.values[0], ", ") << ")" << std::endl;
-    }
+  auto maybe_samples = ReadSpdFile(/*search_dir=*/"", files[0]);
+  if (!maybe_samples) {
+    std::cerr << "ERROR: Malformed SPD file: " << files[0] << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  auto maybe_reflector =
+      m_spectrum_manager.AllocateInterpolatedReflector(*maybe_samples);
+  if (!maybe_samples) {
+    std::cerr << "ERROR: Malformed reflection SPD file: " << files[0]
+              << std::endl;
     exit(EXIT_FAILURE);
   }
   ReflectorTexture result;
   ISTATUS status = ConstantReflectorTextureAllocate(
-      parameter.data[0].second.get(), result.release_and_get_address());
+      maybe_reflector->get(), result.release_and_get_address());
   SuccessOrOOM(status);
   return std::make_pair(std::move(result),
-                        std::set<Reflector>({parameter.data[0].second}));
+                        std::set<Reflector>({*maybe_reflector}));
 }
 
 std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
-    const TextureParameter& parameter,
-    const TextureManager& texture_manager) const {
+    const std::pair<std::vector<std::string>, std::vector<float_t>>& samples) {
+  if (samples.second.size() % 2 != 0) {
+    NumberOfElementsError();
+  }
+  auto maybe_reflector =
+      m_spectrum_manager.AllocateInterpolatedReflector(samples.second);
+  if (!maybe_reflector) {
+    std::cerr
+        << "ERROR: Could not construct a reflection spectrum from values ("
+        << absl::StrJoin(samples.first, ", ") << ")" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  ReflectorTexture result;
+  ISTATUS status = ConstantReflectorTextureAllocate(
+      maybe_reflector->get(), result.release_and_get_address());
+  SuccessOrOOM(status);
+  return std::make_pair(std::move(result),
+                        std::set<Reflector>({*maybe_reflector}));
+}
+
+std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
+    const SpectrumParameter& parameter) {
+  if (absl::holds_alternative<std::vector<std::string>>(parameter.data)) {
+    return Match(absl::get<std::vector<std::string>>(parameter.data));
+  } else {
+    return Match(
+        absl::get<std::pair<std::vector<std::string>, std::vector<float_t>>>(
+            parameter.data));
+  }
+}
+
+std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
+    const TextureParameter& parameter, const TextureManager& texture_manager) {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
   }
@@ -124,7 +146,7 @@ std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
 }
 
 std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
-    const XyzParameter& parameter) const {
+    const XyzParameter& parameter) {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
   }
@@ -133,24 +155,13 @@ std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
       !ValidateFloat(parameter.data[0].z)) {
     ElementRangeError();
   }
-
-  float_t r = (float_t)3.2404542 * parameter.data[0].x -
-              (float_t)1.5371385 * parameter.data[0].y -
-              (float_t)0.4985314 * parameter.data[0].z;
-
-  float_t g = (float_t)-0.969266 * parameter.data[0].x +
-              (float_t)1.8760108 * parameter.data[0].y +
-              (float_t)0.0415560 * parameter.data[0].z;
-
-  float_t b = (float_t)0.0556434 * parameter.data[0].x -
-              (float_t)0.2040259 * parameter.data[0].y +
-              (float_t)1.0572252 * parameter.data[0].z;
-
-  r = std::max((float_t)0.0, r);
-  g = std::max((float_t)0.0, g);
-  b = std::max((float_t)0.0, b);
-
-  return ReflectorFromRgb(m_color_extrapolator, {r, g, b});
+  Reflector reflector =
+      m_spectrum_manager.AllocateXyzReflector(parameter.data[0]).value();
+  ReflectorTexture result;
+  ISTATUS status = ConstantReflectorTextureAllocate(
+      reflector.get(), result.release_and_get_address());
+  SuccessOrOOM(status);
+  return std::make_pair(std::move(result), std::set<Reflector>({reflector}));
 }
 
 void ReflectorTextureMatcher::Match(ParameterData& data) {
