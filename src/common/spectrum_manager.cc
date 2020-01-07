@@ -70,15 +70,11 @@ absl::optional<Spectrum> SpectrumManager::AllocateInterpolatedSpectrum(
 
 absl::optional<Spectrum> SpectrumManager::AllocateRgbSpectrum(
     const std::array<float_t, 3>& rgb) {
-  auto iter = m_rgb_spectra.find(rgb);
-  if (iter != m_rgb_spectra.end()) {
-    return iter->second;
-  }
+  float_t rgb_2d[][3] = {{rgb[0], rgb[1], rgb[2]}};
 
   Spectrum result;
   ISTATUS status = RgbInterpolatorAllocateSpectrum(
-      m_color_extrapolator.get(), rgb[0], rgb[1], rgb[2],
-      result.release_and_get_address());
+      m_color_extrapolator.get(), rgb_2d, 1, result.release_and_get_address());
   if (status != ISTATUS_SUCCESS) {
     if (status == ISTATUS_ALLOCATION_FAILED) {
       ReportOOM();
@@ -86,7 +82,6 @@ absl::optional<Spectrum> SpectrumManager::AllocateRgbSpectrum(
     return absl::nullopt;
   }
 
-  m_rgb_spectra[rgb] = result;
   return result;
 }
 
@@ -126,15 +121,11 @@ absl::optional<Reflector> SpectrumManager::AllocateInterpolatedReflector(
 
 absl::optional<Reflector> SpectrumManager::AllocateRgbReflector(
     const std::array<float_t, 3>& rgb) {
-  auto iter = m_rgb_reflectors.find(rgb);
-  if (iter != m_rgb_reflectors.end()) {
-    return iter->second;
-  }
+  float_t rgb_2d[][3] = {{rgb[0], rgb[1], rgb[2]}};
 
   Reflector result;
   ISTATUS status = RgbInterpolatorAllocateReflector(
-      m_color_extrapolator.get(), rgb[0], rgb[1], rgb[2],
-      result.release_and_get_address());
+      m_color_extrapolator.get(), rgb_2d, 1, result.release_and_get_address());
   if (status != ISTATUS_SUCCESS) {
     if (status == ISTATUS_ALLOCATION_FAILED) {
       ReportOOM();
@@ -142,7 +133,6 @@ absl::optional<Reflector> SpectrumManager::AllocateRgbReflector(
     return absl::nullopt;
   }
 
-  m_rgb_reflectors[rgb] = result;
   return result;
 }
 

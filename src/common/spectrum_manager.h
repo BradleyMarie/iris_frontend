@@ -32,9 +32,7 @@ class SpectrumManager {
  private:
   ColorExtrapolator m_color_extrapolator;
   std::map<std::vector<float_t>, Spectrum> m_interpolated_spectra;
-  std::map<std::array<float_t, 3>, Spectrum> m_rgb_spectra;
   std::map<std::vector<float_t>, Reflector> m_interpolated_reflectors;
-  std::map<std::array<float_t, 3>, Reflector> m_rgb_reflectors;
   std::map<float_t, Reflector> m_uniform_reflector;
 };
 
