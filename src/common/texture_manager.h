@@ -11,20 +11,17 @@ namespace iris {
 
 class TextureManager {
  public:
-  const std::pair<ReflectorTexture, std::set<Reflector>>& GetReflectorTexture(
+  const ReflectorTexture& GetReflectorTexture(
       const absl::string_view name) const;
   void SetReflectorTexture(absl::string_view name,
-                           const ReflectorTexture& texture,
-                           const std::set<Reflector>& texture_reflectors);
+                           const ReflectorTexture& texture);
 
   const FloatTexture& GetFloatTexture(const absl::string_view name) const;
   void SetFloatTexture(absl::string_view name, const FloatTexture& texture);
 
  private:
   absl::flat_hash_map<std::string, FloatTexture> m_float_textures;
-  absl::flat_hash_map<std::string,
-                      std::pair<ReflectorTexture, std::set<Reflector>>>
-      m_reflector_textures;
+  absl::flat_hash_map<std::string, ReflectorTexture> m_reflector_textures;
 };
 
 }  // namespace iris

@@ -9,16 +9,15 @@
 namespace iris {
 namespace {
 
-std::pair<ReflectorTexture, std::set<Reflector>>
-ReflectorFromUniformReflectance(SpectrumManager& spectrum_manager,
-                                float_t reflectance) {
+ReflectorTexture ReflectorFromUniformReflectance(
+    SpectrumManager& spectrum_manager, float_t reflectance) {
   Reflector reflector =
       spectrum_manager.AllocateUniformReflector(reflectance).value();
   ReflectorTexture result;
   ISTATUS status = ConstantReflectorTextureAllocate(
       reflector.get(), result.release_and_get_address());
   SuccessOrOOM(status);
-  return std::make_pair(std::move(result), std::set<Reflector>({reflector}));
+  return result;
 }
 
 }  // namespace
@@ -50,7 +49,7 @@ bool ReflectorTextureMatcher::ValidateFloat(float_t value) {
   return true;
 }
 
-std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
+ReflectorTexture ReflectorTextureMatcher::Match(
     const FloatParameter& parameter) {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
@@ -61,8 +60,7 @@ std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
   return ReflectorFromUniformReflectance(m_spectrum_manager, parameter.data[0]);
 }
 
-std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
-    const RgbParameter& parameter) {
+ReflectorTexture ReflectorTextureMatcher::Match(const RgbParameter& parameter) {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
   }
@@ -77,10 +75,10 @@ std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
   ISTATUS status = ConstantReflectorTextureAllocate(
       reflector.get(), result.release_and_get_address());
   SuccessOrOOM(status);
-  return std::make_pair(std::move(result), std::set<Reflector>({reflector}));
+  return result;
 }
 
-std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
+ReflectorTexture ReflectorTextureMatcher::Match(
     const std::vector<std::string>& files) {
   if (files.size() != 1) {
     NumberOfElementsError();
@@ -101,11 +99,10 @@ std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
   ISTATUS status = ConstantReflectorTextureAllocate(
       maybe_reflector->get(), result.release_and_get_address());
   SuccessOrOOM(status);
-  return std::make_pair(std::move(result),
-                        std::set<Reflector>({*maybe_reflector}));
+  return result;
 }
 
-std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
+ReflectorTexture ReflectorTextureMatcher::Match(
     const std::pair<std::vector<std::string>, std::vector<float_t>>& samples) {
   if (samples.second.size() % 2 != 0) {
     NumberOfElementsError();
@@ -122,11 +119,10 @@ std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
   ISTATUS status = ConstantReflectorTextureAllocate(
       maybe_reflector->get(), result.release_and_get_address());
   SuccessOrOOM(status);
-  return std::make_pair(std::move(result),
-                        std::set<Reflector>({*maybe_reflector}));
+  return result;
 }
 
-std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
+ReflectorTexture ReflectorTextureMatcher::Match(
     const SpectrumParameter& parameter) {
   if (absl::holds_alternative<std::vector<std::string>>(parameter.data)) {
     return Match(absl::get<std::vector<std::string>>(parameter.data));
@@ -137,7 +133,7 @@ std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
   }
 }
 
-std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
+ReflectorTexture ReflectorTextureMatcher::Match(
     const TextureParameter& parameter, const TextureManager& texture_manager) {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
@@ -145,8 +141,7 @@ std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
   return texture_manager.GetReflectorTexture(parameter.data[0]);
 }
 
-std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
-    const XyzParameter& parameter) {
+ReflectorTexture ReflectorTextureMatcher::Match(const XyzParameter& parameter) {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
   }
@@ -161,7 +156,7 @@ std::pair<ReflectorTexture, std::set<Reflector>> ReflectorTextureMatcher::Match(
   ISTATUS status = ConstantReflectorTextureAllocate(
       reflector.get(), result.release_and_get_address());
   SuccessOrOOM(status);
-  return std::make_pair(std::move(result), std::set<Reflector>({reflector}));
+  return result;
 }
 
 void ReflectorTextureMatcher::Match(ParameterData& data) {

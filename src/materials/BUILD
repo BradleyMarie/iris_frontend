@@ -9,18 +9,9 @@ cc_library(
     visibility = ["//src:__subpackages__"],
     deps = [
         ":matte",
-        ":result",
         "//src/common:call_directive",
         "//src/common:texture_manager",
         "//src/common:tokenizer",
-    ],
-)
-
-cc_library(
-    name = "result",
-    hdrs = ["result.h"],
-    deps = [
-        "//src/common:pointer_types",
     ],
 )
 
@@ -29,7 +20,6 @@ cc_library(
     srcs = ["matte.cc"],
     hdrs = ["matte.h"],
     deps = [
-        ":result",
         "//src/common:error",
         "//src/common:texture_manager",
         "//src/common:tokenizer",

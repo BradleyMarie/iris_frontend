@@ -12,21 +12,20 @@ static const float_t kMatteMaterialDefaultReflectance = (float_t)0.5;
 
 }  // namespace
 
-MaterialResult ParseMatte(const char* base_type_name, const char* type_name,
-                          Tokenizer& tokenizer,
-                          SpectrumManager& spectrum_manager,
-                          const TextureManager& texture_manager) {
+Material ParseMatte(const char* base_type_name, const char* type_name,
+                    Tokenizer& tokenizer, SpectrumManager& spectrum_manager,
+                    const TextureManager& texture_manager) {
   ReflectorTextureMatcher kd = ReflectorTextureMatcher::FromUniformReflectance(
       base_type_name, type_name, "Kd", false, texture_manager, spectrum_manager,
       kMatteMaterialDefaultReflectance);
   MatchParameters<1>(base_type_name, type_name, tokenizer, {&kd});
 
   Material result;
-  ISTATUS status = MatteMaterialAllocate(kd.Get().first.get(),
-                                         result.release_and_get_address());
+  ISTATUS status =
+      MatteMaterialAllocate(kd.Get().get(), result.release_and_get_address());
   SuccessOrOOM(status);
 
-  return std::make_pair(result, kd.Get().second);
+  return result;
 }
 
 }  // namespace iris

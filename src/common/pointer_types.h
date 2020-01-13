@@ -3,9 +3,9 @@
 
 #include "iris_camera/iris_camera.h"
 #include "iris_physx/iris_physx.h"
+#include "iris_physx_toolkit/color_extrapolator.h"
 #include "iris_physx_toolkit/float_texture.h"
 #include "iris_physx_toolkit/reflector_texture.h"
-#include "iris_physx_toolkit/rgb_interpolator.h"
 #include "src/common/shared_ptr.h"
 #include "src/common/unique_ptr.h"
 
@@ -13,8 +13,10 @@ namespace iris {
 
 typedef SharedPtr<BSDF, BsdfRetain, BsdfRelease> Bsdf;
 typedef UniquePtr<CAMERA, CameraFree> Camera;
-typedef UniquePtr<RGB_INTERPOLATOR, RgbInterpolatorFree> ColorExtrapolator;
-typedef UniquePtr<COLOR_INTEGRATOR, ColorIntegratorFree> ColorIntegrator;
+typedef UniquePtr<COLOR_EXTRAPOLATOR, ColorExtrapolatorFree> ColorExtrapolator;
+typedef SharedPtr<COLOR_INTEGRATOR, ColorIntegratorRetain,
+                  ColorIntegratorRelease>
+    ColorIntegrator;
 typedef SharedPtr<EMISSIVE_MATERIAL, EmissiveMaterialRetain,
                   EmissiveMaterialRelease>
     EmissiveMaterial;
@@ -25,7 +27,8 @@ typedef UniquePtr<INTEGRATOR, IntegratorFree> Integrator;
 typedef SharedPtr<MATERIAL, MaterialRetain, MaterialRelease> Material;
 typedef SharedPtr<MATRIX, MatrixRetain, MatrixRelease> Matrix;
 typedef SharedPtr<LIGHT, LightRetain, LightRelease> Light;
-typedef UniquePtr<LIGHT_SAMPLER, LightSamplerFree> LightSampler;
+typedef SharedPtr<LIGHT_SAMPLER, LightSamplerRetain, LightSamplerRelease>
+    LightSampler;
 typedef UniquePtr<PIXEL_SAMPLER, PixelSamplerFree> PixelSampler;
 typedef UniquePtr<RANDOM, RandomFree> Random;
 typedef SharedPtr<REFLECTOR, ReflectorRetain, ReflectorRelease> Reflector;
@@ -33,7 +36,7 @@ typedef SharedPtr<REFLECTOR_TEXTURE, ReflectorTextureRetain,
                   ReflectorTextureRelease>
     ReflectorTexture;
 typedef UniquePtr<SAMPLE_TRACER, SampleTracerFree> SampleTracer;
-typedef UniquePtr<SCENE, SceneFree> Scene;
+typedef SharedPtr<SCENE, SceneRetain, SceneRelease> Scene;
 typedef SharedPtr<SHAPE, ShapeRetain, ShapeRelease> Shape;
 typedef SharedPtr<SPECTRUM, SpectrumRetain, SpectrumRelease> Spectrum;
 

@@ -31,22 +31,16 @@ class GraphicsStateManager {
 
   const std::pair<EmissiveMaterial, EmissiveMaterial>& GetEmissiveMaterials();
   void SetEmissiveMaterials(const EmissiveMaterial& front_emissive_material,
-                            const EmissiveMaterial& back_emissive_material,
-                            const std::set<Spectrum>& light_spectra);
+                            const EmissiveMaterial& back_emissive_material);
 
   const std::pair<Material, Material>& GetMaterials();
   void SetMaterial(const Material& front_material,
-                   const Material& back_material,
-                   const std::set<Reflector>& material_reflectors);
-
-  void PrecomputeColors(ColorIntegrator& color_integrator);
+                   const Material& back_material);
 
  private:
   struct ShaderState {
     std::pair<EmissiveMaterial, EmissiveMaterial> emissive_materials;
     std::pair<Material, Material> materials;
-    std::set<Spectrum> light_spectra;
-    std::set<Reflector> material_reflectors;
     TextureManager texture_manager;
   };
 
@@ -119,45 +113,24 @@ TextureManager& GraphicsStateManager::GetTextureManager() {
 
 const std::pair<EmissiveMaterial, EmissiveMaterial>&
 GraphicsStateManager::GetEmissiveMaterials() {
-  m_spectra_used.insert(m_shader_state.top().light_spectra.begin(),
-                        m_shader_state.top().light_spectra.end());
   return m_shader_state.top().emissive_materials;
 }
 
 void GraphicsStateManager::SetEmissiveMaterials(
     const EmissiveMaterial& front_emissive_material,
-    const EmissiveMaterial& back_emissive_material,
-    const std::set<Spectrum>& light_spectra) {
+    const EmissiveMaterial& back_emissive_material) {
   m_shader_state.top().emissive_materials =
       std::make_pair(front_emissive_material, back_emissive_material);
-  m_shader_state.top().light_spectra = light_spectra;
 }
 
 const std::pair<Material, Material>& GraphicsStateManager::GetMaterials() {
-  m_reflectors_used.insert(m_shader_state.top().material_reflectors.begin(),
-                           m_shader_state.top().material_reflectors.end());
   return m_shader_state.top().materials;
 }
 
-void GraphicsStateManager::SetMaterial(
-    const Material& front_material, const Material& back_material,
-    const std::set<Reflector>& material_reflectors) {
+void GraphicsStateManager::SetMaterial(const Material& front_material,
+                                       const Material& back_material) {
   m_shader_state.top().materials =
       std::make_pair(front_material, back_material);
-  m_shader_state.top().material_reflectors = material_reflectors;
-}
-
-void GraphicsStateManager::PrecomputeColors(ColorIntegrator& color_integrator) {
-  for (const auto& spectrum : m_spectra_used) {
-    ISTATUS status = ColorIntegratorPrecomputeSpectrumColor(
-        color_integrator.get(), spectrum.get());
-    SuccessOrOOM(status);
-  }
-  for (const auto& reflector : m_reflectors_used) {
-    ISTATUS status = ColorIntegratorPrecomputeReflectorColor(
-        color_integrator.get(), reflector.get());
-    SuccessOrOOM(status);
-  }
 }
 
 Scene CreateScene(std::vector<Shape>& shapes, std::vector<Matrix>& transforms) {
@@ -196,7 +169,6 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
 
   for (auto token = tokenizer.Next(); token; token = tokenizer.Next()) {
     if (token == "WorldEnd") {
-      graphics_state.PrecomputeColors(color_integrator);
       return std::make_pair(CreateScene(shapes, transforms), std::move(lights));
     }
 
@@ -232,17 +204,14 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
       auto light_state =
           ParseAreaLight("AreaLightSource", tokenizer, spectrum_manager);
       graphics_state.SetEmissiveMaterials(std::get<0>(light_state),
-                                          std::get<1>(light_state),
-                                          std::get<2>(light_state));
+                                          std::get<1>(light_state));
       continue;
     }
 
     if (token == "Material") {
-      auto material_state =
-          ParseMaterial("Material", tokenizer, spectrum_manager,
-                        graphics_state.GetTextureManager());
-      graphics_state.SetMaterial(material_state.first, material_state.first,
-                                 material_state.second);
+      auto material = ParseMaterial("Material", tokenizer, spectrum_manager,
+                                    graphics_state.GetTextureManager());
+      graphics_state.SetMaterial(material, material);
       continue;
     }
 

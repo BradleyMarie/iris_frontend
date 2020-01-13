@@ -16,6 +16,11 @@ ABSL_FLAG(uint32_t, num_threads, 0,
           "number of threads will equal the number of processors in the "
           "system.");
 
+ABSL_FLAG(bool, spectral, false,
+          "Controls whether rendering should be fully spectral or approximate. "
+          "If false, XYZ colors instead of SPD samples will be used in shading "
+          "calculations.");
+
 namespace {
 
 std::string GetWorkingDirectory() { return ""; }
@@ -58,7 +63,8 @@ int main(int argc, char** argv) {
 
   while (tokenizer->Peek()) {
     iris::RenderToOutput(*tokenizer, absl::GetFlag(FLAGS_epsilon),
-                         absl::GetFlag(FLAGS_num_threads));
+                         absl::GetFlag(FLAGS_num_threads),
+                         absl::GetFlag(FLAGS_spectral));
   }
 
   return EXIT_SUCCESS;

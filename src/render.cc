@@ -11,18 +11,30 @@ namespace iris {
 
 std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(Tokenizer& tokenizer,
                                                          float_t epsilon,
-                                                         size_t num_threads) {
+                                                         size_t num_threads,
+                                                         bool spectral) {
   assert(isfinite(epsilon) && (float_t)0.0 <= epsilon);
   assert(num_threads != 0);
 
   auto render_config = ParseDirectives(tokenizer);
 
-  SampleTracer sample_tracer;
-  ISTATUS status = PhysxSampleTracerAllocate(
-      std::get<4>(render_config).detach(), std::get<0>(render_config).get(),
+  ISTATUS status = IntegratorPrepare(
+      std::get<4>(render_config).get(), std::get<0>(render_config).get(),
       std::get<1>(render_config).get(), std::get<5>(render_config).get(),
-      sample_tracer.release_and_get_address());
+      spectral);
   SuccessOrOOM(status);
+
+  SampleTracer sample_tracer;
+  if (spectral) {
+    status = PhysxSpectralSampleTracerAllocate(
+        std::get<4>(render_config).detach(),
+        sample_tracer.release_and_get_address());
+    SuccessOrOOM(status);
+  } else {
+    status = PhysxSampleTracerAllocate(std::get<4>(render_config).detach(),
+                                       sample_tracer.release_and_get_address());
+    SuccessOrOOM(status);
+  }
 
   status = IrisCameraRender(
       std::get<2>(render_config).get(), std::get<3>(render_config).get(),
@@ -44,8 +56,10 @@ std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(Tokenizer& tokenizer,
                         std::move(std::get<8>(render_config)));
 }
 
-void RenderToOutput(Tokenizer& tokenizer, float_t epsilon, size_t num_threads) {
-  auto render_result = RenderToFramebuffer(tokenizer, epsilon, num_threads);
+void RenderToOutput(Tokenizer& tokenizer, float_t epsilon, size_t num_threads,
+                    bool spectral) {
+  auto render_result =
+      RenderToFramebuffer(tokenizer, epsilon, num_threads, spectral);
   render_result.second->Write(render_result.first);
 }
 

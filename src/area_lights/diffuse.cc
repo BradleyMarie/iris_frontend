@@ -36,8 +36,7 @@ AreaLightResult ParseDiffuse(const char* base_type_name, const char* type_name,
     back_emissive_material = front_emissive_material;
   }
 
-  return std::make_tuple(front_emissive_material, back_emissive_material,
-                         std::set<Spectrum>({spectrum.Get()}));
+  return std::make_pair(front_emissive_material, back_emissive_material);
 }
 
 }  // namespace iris

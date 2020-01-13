@@ -9,9 +9,11 @@ namespace iris {
 
 std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(Tokenizer& tokenizer,
                                                          float_t epsilon,
-                                                         size_t num_threads);
+                                                         size_t num_threads,
+                                                         bool spectral);
 
-void RenderToOutput(Tokenizer& tokenizer, float_t epsilon, size_t num_threads);
+void RenderToOutput(Tokenizer& tokenizer, float_t epsilon, size_t num_threads,
+                    bool spectral);
 
 }  // namespace iris
 

@@ -2,14 +2,13 @@
 #define _SRC_AREA_LIGHTS_RESULT_
 
 #include <set>
-#include <tuple>
+#include <utility>
 
 #include "src/common/pointer_types.h"
 
 namespace iris {
 
-typedef std::tuple<EmissiveMaterial, EmissiveMaterial, std::set<Spectrum>>
-    AreaLightResult;
+typedef std::pair<EmissiveMaterial, EmissiveMaterial> AreaLightResult;
 
 }  // namespace iris
 

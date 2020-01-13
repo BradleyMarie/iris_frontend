@@ -4,8 +4,8 @@
 
 namespace iris {
 
-const std::pair<ReflectorTexture, std::set<Reflector>>&
-TextureManager::GetReflectorTexture(const absl::string_view name) const {
+const ReflectorTexture& TextureManager::GetReflectorTexture(
+    const absl::string_view name) const {
   auto iter = m_reflector_textures.find(name);
   if (iter == m_reflector_textures.end()) {
     std::cerr << "ERROR: Texture not defined: " << name << std::endl;
@@ -14,10 +14,9 @@ TextureManager::GetReflectorTexture(const absl::string_view name) const {
   return iter->second;
 }
 
-void TextureManager::SetReflectorTexture(
-    absl::string_view name, const ReflectorTexture& texture,
-    const std::set<Reflector>& texture_reflectors) {
-  m_reflector_textures[name] = std::make_pair(texture, texture_reflectors);
+void TextureManager::SetReflectorTexture(absl::string_view name,
+                                         const ReflectorTexture& texture) {
+  m_reflector_textures[name] = texture;
 }
 
 const FloatTexture& TextureManager::GetFloatTexture(

@@ -11,9 +11,11 @@ static const float_t kConstantTextureDefaultValue = (float_t)1.0;
 
 }  // namespace
 
-std::pair<ReflectorTexture, std::set<Reflector>> ParseConstantReflector(
-    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
-    SpectrumManager& spectrum_manager, const TextureManager& texture_manager) {
+ReflectorTexture ParseConstantReflector(const char* base_type_name,
+                                        const char* type_name,
+                                        Tokenizer& tokenizer,
+                                        SpectrumManager& spectrum_manager,
+                                        const TextureManager& texture_manager) {
   ReflectorTextureMatcher value =
       ReflectorTextureMatcher::FromUniformReflectance(
           base_type_name, type_name, "value", false, texture_manager,
