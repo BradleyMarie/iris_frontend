@@ -10,6 +10,7 @@ cc_library(
     deps = [
         ":matte",
         "//src/common:call_directive",
+        "//src/common:named_texture_manager",
         "//src/common:texture_manager",
         "//src/common:tokenizer",
     ],
@@ -21,6 +22,7 @@ cc_library(
     hdrs = ["matte.h"],
     deps = [
         "//src/common:error",
+        "//src/common:named_texture_manager",
         "//src/common:texture_manager",
         "//src/common:tokenizer",
         "//src/param_matchers:matcher",

@@ -27,12 +27,14 @@ const size_t ReflectorTextureMatcher::m_variant_indices[5] = {
 
 ReflectorTextureMatcher ReflectorTextureMatcher::FromUniformReflectance(
     const char* base_type_name, const char* type_name,
-    const char* parameter_name, bool required, TextureManager& texture_manager,
-    SpectrumManager& spectrum_manager, float_t default_reflectance) {
+    const char* parameter_name, bool required,
+    const NamedTextureManager& named_texture_manager,
+    TextureManager& texture_manager, SpectrumManager& spectrum_manager,
+    float_t default_reflectance) {
   assert(ValidateFloat(default_reflectance));
   return ReflectorTextureMatcher(
-      base_type_name, type_name, parameter_name, required, texture_manager,
-      spectrum_manager,
+      base_type_name, type_name, parameter_name, required,
+      named_texture_manager, texture_manager, spectrum_manager,
       std::move(ReflectorFromUniformReflectance(
           texture_manager, spectrum_manager, default_reflectance)));
 }
@@ -119,11 +121,11 @@ ReflectorTexture ReflectorTextureMatcher::Match(
 }
 
 ReflectorTexture ReflectorTextureMatcher::Match(
-    const TextureParameter& parameter, const TextureManager& texture_manager) {
+    const TextureParameter& parameter) {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
   }
-  return texture_manager.GetReflectorTexture(parameter.data[0]);
+  return m_named_texture_manager.GetReflectorTexture(parameter.data[0]);
 }
 
 ReflectorTexture ReflectorTextureMatcher::Match(const XyzParameter& parameter) {
@@ -148,7 +150,7 @@ void ReflectorTextureMatcher::Match(ParameterData& data) {
   } else if (absl::holds_alternative<SpectrumParameter>(data)) {
     m_value = Match(absl::get<SpectrumParameter>(data));
   } else if (absl::holds_alternative<TextureParameter>(data)) {
-    m_value = Match(absl::get<TextureParameter>(data), m_texture_manager);
+    m_value = Match(absl::get<TextureParameter>(data));
   } else {
     m_value = Match(absl::get<XyzParameter>(data));
   }

@@ -31,11 +31,12 @@ const size_t FloatTextureMatcher::m_variant_indices[2] = {
 FloatTextureMatcher FloatTextureMatcher::FromValue(
     const char* base_type_name, const char* type_name,
     const char* parameter_name, bool required, bool inclusive, float_t minimum,
-    float_t maximum, TextureManager& texture_manager, float_t default_value) {
+    float_t maximum, const NamedTextureManager& named_texture_manager,
+    TextureManager& texture_manager, float_t default_value) {
   assert(ValidateFloatImpl(inclusive, minimum, maximum, default_value));
   return FloatTextureMatcher(
       base_type_name, type_name, parameter_name, required, inclusive, minimum,
-      maximum, texture_manager,
+      maximum, named_texture_manager, texture_manager,
       std::move(texture_manager.AllocateConstantFloatTexture(default_value)));
 }
 
@@ -53,19 +54,19 @@ FloatTexture FloatTextureMatcher::Match(const FloatParameter& parameter) const {
   return m_texture_manager.AllocateConstantFloatTexture(parameter.data[0]);
 }
 
-FloatTexture FloatTextureMatcher::Match(const TextureParameter& parameter,
-                                        TextureManager& texture_manager) const {
+FloatTexture FloatTextureMatcher::Match(
+    const TextureParameter& parameter) const {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
   }
-  return texture_manager.GetFloatTexture(parameter.data[0]);
+  return m_named_texture_manager.GetFloatTexture(parameter.data[0]);
 }
 
 void FloatTextureMatcher::Match(ParameterData& data) {
   if (absl::holds_alternative<FloatParameter>(data)) {
     m_value = Match(absl::get<FloatParameter>(data));
   } else {
-    m_value = Match(absl::get<TextureParameter>(data), m_texture_manager);
+    m_value = Match(absl::get<TextureParameter>(data));
   }
 }
 

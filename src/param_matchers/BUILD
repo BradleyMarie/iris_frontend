@@ -18,6 +18,7 @@ cc_library(
     deps = [
         ":matcher",
         "//src/common:error",
+        "//src/common:named_texture_manager",
         "//src/common:pointer_types",
         "//src/common:texture_manager",
     ],
@@ -71,6 +72,7 @@ cc_library(
         ":matcher",
         ":spd_file",
         "//src/common:error",
+        "//src/common:named_texture_manager",
         "//src/common:pointer_types",
         "//src/common:spectrum_manager",
         "//src/common:texture_manager",

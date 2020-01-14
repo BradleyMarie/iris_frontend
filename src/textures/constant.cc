@@ -11,26 +11,27 @@ static const float_t kConstantTextureDefaultValue = (float_t)1.0;
 
 }  // namespace
 
-ReflectorTexture ParseConstantReflector(const char* base_type_name,
-                                        const char* type_name,
-                                        Tokenizer& tokenizer,
-                                        SpectrumManager& spectrum_manager,
-                                        TextureManager& texture_manager) {
+ReflectorTexture ParseConstantReflector(
+    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
+    const NamedTextureManager& named_texture_manager,
+    TextureManager& texture_manager, SpectrumManager& spectrum_manager) {
   ReflectorTextureMatcher value =
       ReflectorTextureMatcher::FromUniformReflectance(
-          base_type_name, type_name, "value", false, texture_manager,
-          spectrum_manager, kConstantTextureDefaultValue);
+          base_type_name, type_name, "value", false, named_texture_manager,
+          texture_manager, spectrum_manager, kConstantTextureDefaultValue);
   MatchParameters<1>(base_type_name, type_name, tokenizer, {&value});
 
   return value.Get();
 }
 
-FloatTexture ParseConstantFloat(const char* base_type_name,
-                                const char* type_name, Tokenizer& tokenizer,
-                                TextureManager& texture_manager) {
+FloatTexture ParseConstantFloat(
+    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
+    const NamedTextureManager& named_texture_manager,
+    TextureManager& texture_manager) {
   FloatTextureMatcher value = FloatTextureMatcher::FromValue(
       base_type_name, type_name, "value", false, true, (float_t)0.0,
-      (float_t)1.0, texture_manager, kConstantTextureDefaultValue);
+      (float_t)1.0, named_texture_manager, texture_manager,
+      kConstantTextureDefaultValue);
 
   MatchParameters<1>(base_type_name, type_name, tokenizer, {&value});
 

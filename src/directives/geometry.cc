@@ -7,6 +7,7 @@
 #include "iris_physx_toolkit/kd_tree_scene.h"
 #include "src/area_lights/parser.h"
 #include "src/common/error.h"
+#include "src/common/named_texture_manager.h"
 #include "src/common/texture_manager.h"
 #include "src/directives/include.h"
 #include "src/directives/transform.h"
@@ -27,7 +28,7 @@ class GraphicsStateManager {
   void AttributeBegin(MatrixManager& matrix_manager);
   void AttributeEnd(MatrixManager& matrix_manager);
 
-  TextureManager& GetTextureManager();
+  NamedTextureManager& GetNamedTextureManager();
 
   const std::pair<EmissiveMaterial, EmissiveMaterial>& GetEmissiveMaterials();
   void SetEmissiveMaterials(const EmissiveMaterial& front_emissive_material,
@@ -41,7 +42,7 @@ class GraphicsStateManager {
   struct ShaderState {
     std::pair<EmissiveMaterial, EmissiveMaterial> emissive_materials;
     std::pair<Material, Material> materials;
-    TextureManager texture_manager;
+    NamedTextureManager named_texture_manager;
   };
 
   enum PushReason {
@@ -103,8 +104,8 @@ void GraphicsStateManager::AttributeEnd(MatrixManager& matrix_manager) {
   m_shader_state.pop();
 }
 
-TextureManager& GraphicsStateManager::GetTextureManager() {
-  return m_shader_state.top().texture_manager;
+NamedTextureManager& GraphicsStateManager::GetNamedTextureManager() {
+  return m_shader_state.top().named_texture_manager;
 }
 
 const std::pair<EmissiveMaterial, EmissiveMaterial>&
@@ -162,6 +163,7 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
   std::vector<Matrix> transforms;
   std::vector<Light> lights;
   GraphicsStateManager graphics_state;
+  TextureManager texture_manager;
 
   for (auto token = tokenizer.Next(); token; token = tokenizer.Next()) {
     if (token == "WorldEnd") {
@@ -205,8 +207,9 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     }
 
     if (token == "Material") {
-      auto material = ParseMaterial("Material", tokenizer, spectrum_manager,
-                                    graphics_state.GetTextureManager());
+      auto material = ParseMaterial("Material", tokenizer,
+                                    graphics_state.GetNamedTextureManager(),
+                                    texture_manager, spectrum_manager);
       graphics_state.SetMaterial(material, material);
       continue;
     }
@@ -242,8 +245,9 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     }
 
     if (token == "Texture") {
-      ParseTexture("Texture", tokenizer, spectrum_manager,
-                   graphics_state.GetTextureManager());
+      ParseTexture("Texture", tokenizer,
+                   graphics_state.GetNamedTextureManager(), texture_manager,
+                   spectrum_manager);
       continue;
     }
 
