@@ -10,6 +10,7 @@ cc_library(
     deps = [
         ":matte",
         "//src/common:call_directive",
+        "//src/common:material_manager",
         "//src/common:named_texture_manager",
         "//src/common:texture_manager",
         "//src/common:tokenizer",
@@ -21,12 +22,11 @@ cc_library(
     srcs = ["matte.cc"],
     hdrs = ["matte.h"],
     deps = [
-        "//src/common:error",
+        "//src/common:material_manager",
         "//src/common:named_texture_manager",
         "//src/common:texture_manager",
         "//src/common:tokenizer",
         "//src/param_matchers:matcher",
         "//src/param_matchers:reflector_texture",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:matte_material",
     ],
 )

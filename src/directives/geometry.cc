@@ -7,6 +7,7 @@
 #include "iris_physx_toolkit/kd_tree_scene.h"
 #include "src/area_lights/parser.h"
 #include "src/common/error.h"
+#include "src/common/material_manager.h"
 #include "src/common/named_texture_manager.h"
 #include "src/common/texture_manager.h"
 #include "src/directives/include.h"
@@ -163,6 +164,7 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
   std::vector<Matrix> transforms;
   std::vector<Light> lights;
   GraphicsStateManager graphics_state;
+  MaterialManager material_manager;
   TextureManager texture_manager;
 
   for (auto token = tokenizer.Next(); token; token = tokenizer.Next()) {
@@ -207,7 +209,7 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     }
 
     if (token == "Material") {
-      auto material = ParseMaterial("Material", tokenizer,
+      auto material = ParseMaterial("Material", tokenizer, material_manager,
                                     graphics_state.GetNamedTextureManager(),
                                     texture_manager, spectrum_manager);
       graphics_state.SetMaterial(material, material);
