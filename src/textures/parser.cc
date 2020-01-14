@@ -38,8 +38,7 @@ void ParseTexture(const char* base_type_name, Tokenizer& tokenizer,
       ParseNextQuotedString(base_type_name, tokenizer, "format");
   if (format_name == "spectrum" || format_name == "color") {
     auto reflector_texture =
-        CallDirective<ReflectorTexture, 1, SpectrumManager&,
-                      const TextureManager&>(
+        CallDirective<ReflectorTexture, 1, SpectrumManager&, TextureManager&>(
             base_type_name, tokenizer,
             {std::make_pair("constant", ParseConstantReflector)},
             spectrum_manager, texture_manager);
@@ -48,7 +47,7 @@ void ParseTexture(const char* base_type_name, Tokenizer& tokenizer,
   }
 
   if (format_name == "float") {
-    auto float_texture = CallDirective<FloatTexture, 1, const TextureManager&>(
+    auto float_texture = CallDirective<FloatTexture, 1, TextureManager&>(
         base_type_name, tokenizer,
         {std::make_pair("constant", ParseConstantFloat)}, texture_manager);
     texture_manager.SetFloatTexture(name, float_texture);

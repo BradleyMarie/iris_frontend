@@ -13,7 +13,7 @@ class ReflectorTextureMatcher : public ParamMatcher {
  public:
   ReflectorTextureMatcher(const char* base_type_name, const char* type_name,
                           const char* parameter_name, bool required,
-                          const TextureManager& texture_manager,
+                          TextureManager& texture_manager,
                           SpectrumManager& spectrum_manager,
                           ReflectorTexture default_value)
       : ParamMatcher(base_type_name, type_name, parameter_name, required,
@@ -27,7 +27,7 @@ class ReflectorTextureMatcher : public ParamMatcher {
   static ReflectorTextureMatcher FromUniformReflectance(
       const char* base_type_name, const char* type_name,
       const char* parameter_name, bool required,
-      const TextureManager& texture_manager, SpectrumManager& spectrum_manager,
+      TextureManager& texture_manager, SpectrumManager& spectrum_manager,
       float_t default_reflectance);
 
  protected:
@@ -49,7 +49,7 @@ class ReflectorTextureMatcher : public ParamMatcher {
 
  private:
   static const size_t m_variant_indices[5];
-  const TextureManager& m_texture_manager;
+  TextureManager& m_texture_manager;
   SpectrumManager& m_spectrum_manager;
   ReflectorTexture m_value;
 };

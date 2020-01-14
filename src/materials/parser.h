@@ -9,7 +9,7 @@ namespace iris {
 
 Material ParseMaterial(const char* base_type_name, Tokenizer& tokenizer,
                        SpectrumManager& spectrum_manager,
-                       const TextureManager& texture_manager);
+                       TextureManager& texture_manager);
 
 }  // namespace iris
 

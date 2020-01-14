@@ -3,21 +3,17 @@
 #include <iostream>
 
 #include "absl/strings/str_join.h"
-#include "iris_physx_toolkit/constant_texture.h"
 #include "src/param_matchers/spd_file.h"
 
 namespace iris {
 namespace {
 
 ReflectorTexture ReflectorFromUniformReflectance(
-    SpectrumManager& spectrum_manager, float_t reflectance) {
+    TextureManager& texture_manager, SpectrumManager& spectrum_manager,
+    float_t reflectance) {
   Reflector reflector =
       spectrum_manager.AllocateUniformReflector(reflectance).value();
-  ReflectorTexture result;
-  ISTATUS status = ConstantReflectorTextureAllocate(
-      reflector.get(), result.release_and_get_address());
-  SuccessOrOOM(status);
-  return result;
+  return texture_manager.AllocateConstantReflectorTexture(reflector);
 }
 
 }  // namespace
@@ -31,14 +27,14 @@ const size_t ReflectorTextureMatcher::m_variant_indices[5] = {
 
 ReflectorTextureMatcher ReflectorTextureMatcher::FromUniformReflectance(
     const char* base_type_name, const char* type_name,
-    const char* parameter_name, bool required,
-    const TextureManager& texture_manager, SpectrumManager& spectrum_manager,
-    float_t default_reflectance) {
+    const char* parameter_name, bool required, TextureManager& texture_manager,
+    SpectrumManager& spectrum_manager, float_t default_reflectance) {
   assert(ValidateFloat(default_reflectance));
-  return ReflectorTextureMatcher(base_type_name, type_name, parameter_name,
-                                 required, texture_manager, spectrum_manager,
-                                 std::move(ReflectorFromUniformReflectance(
-                                     spectrum_manager, default_reflectance)));
+  return ReflectorTextureMatcher(
+      base_type_name, type_name, parameter_name, required, texture_manager,
+      spectrum_manager,
+      std::move(ReflectorFromUniformReflectance(
+          texture_manager, spectrum_manager, default_reflectance)));
 }
 
 bool ReflectorTextureMatcher::ValidateFloat(float_t value) {
@@ -57,7 +53,8 @@ ReflectorTexture ReflectorTextureMatcher::Match(
   if (!ValidateFloat(parameter.data[0])) {
     ElementRangeError();
   }
-  return ReflectorFromUniformReflectance(m_spectrum_manager, parameter.data[0]);
+  return ReflectorFromUniformReflectance(m_texture_manager, m_spectrum_manager,
+                                         parameter.data[0]);
 }
 
 ReflectorTexture ReflectorTextureMatcher::Match(const RgbParameter& parameter) {
@@ -71,11 +68,7 @@ ReflectorTexture ReflectorTextureMatcher::Match(const RgbParameter& parameter) {
   }
   Reflector reflector =
       m_spectrum_manager.AllocateRgbReflector(parameter.data[0]).value();
-  ReflectorTexture result;
-  ISTATUS status = ConstantReflectorTextureAllocate(
-      reflector.get(), result.release_and_get_address());
-  SuccessOrOOM(status);
-  return result;
+  return m_texture_manager.AllocateConstantReflectorTexture(reflector);
 }
 
 ReflectorTexture ReflectorTextureMatcher::Match(
@@ -95,11 +88,7 @@ ReflectorTexture ReflectorTextureMatcher::Match(
               << std::endl;
     exit(EXIT_FAILURE);
   }
-  ReflectorTexture result;
-  ISTATUS status = ConstantReflectorTextureAllocate(
-      maybe_reflector->get(), result.release_and_get_address());
-  SuccessOrOOM(status);
-  return result;
+  return m_texture_manager.AllocateConstantReflectorTexture(*maybe_reflector);
 }
 
 ReflectorTexture ReflectorTextureMatcher::Match(
@@ -115,11 +104,7 @@ ReflectorTexture ReflectorTextureMatcher::Match(
         << absl::StrJoin(samples.first, ", ") << ")" << std::endl;
     exit(EXIT_FAILURE);
   }
-  ReflectorTexture result;
-  ISTATUS status = ConstantReflectorTextureAllocate(
-      maybe_reflector->get(), result.release_and_get_address());
-  SuccessOrOOM(status);
-  return result;
+  return m_texture_manager.AllocateConstantReflectorTexture(*maybe_reflector);
 }
 
 ReflectorTexture ReflectorTextureMatcher::Match(
@@ -152,11 +137,7 @@ ReflectorTexture ReflectorTextureMatcher::Match(const XyzParameter& parameter) {
   }
   Reflector reflector =
       m_spectrum_manager.AllocateXyzReflector(parameter.data[0]).value();
-  ReflectorTexture result;
-  ISTATUS status = ConstantReflectorTextureAllocate(
-      reflector.get(), result.release_and_get_address());
-  SuccessOrOOM(status);
-  return result;
+  return m_texture_manager.AllocateConstantReflectorTexture(reflector);
 }
 
 void ReflectorTextureMatcher::Match(ParameterData& data) {

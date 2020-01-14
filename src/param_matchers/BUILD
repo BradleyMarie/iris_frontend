@@ -20,7 +20,6 @@ cc_library(
         "//src/common:error",
         "//src/common:pointer_types",
         "//src/common:texture_manager",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_texture",
     ],
 )
 
@@ -75,8 +74,6 @@ cc_library(
         "//src/common:pointer_types",
         "//src/common:spectrum_manager",
         "//src/common:texture_manager",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_texture",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:uniform_reflector",
     ],
 )
 
@@ -107,6 +104,5 @@ cc_library(
         ":spd_file",
         "//src/common:pointer_types",
         "//src/common:spectrum_manager",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_texture",
     ],
 )

@@ -13,7 +13,7 @@ class FloatTextureMatcher : public ParamMatcher {
   FloatTextureMatcher(const char* base_type_name, const char* type_name,
                       const char* parameter_name, bool required, bool inclusive,
                       float_t minimum, float_t maximum,
-                      const TextureManager& texture_manager,
+                      TextureManager& texture_manager,
                       FloatTexture default_value)
       : ParamMatcher(base_type_name, type_name, parameter_name, required,
                      m_variant_indices, 3),
@@ -34,7 +34,7 @@ class FloatTextureMatcher : public ParamMatcher {
                                        const char* parameter_name,
                                        bool required, bool inclusive,
                                        float_t minimum, float_t maximum,
-                                       const TextureManager& texture_manager,
+                                       TextureManager& texture_manager,
                                        float_t default_value);
 
  protected:
@@ -43,13 +43,13 @@ class FloatTextureMatcher : public ParamMatcher {
  private:
   FloatTexture Match(const FloatParameter& parameter) const;
   FloatTexture Match(const TextureParameter& parameter,
-                     const TextureManager& texture_manager) const;
+                     TextureManager& texture_manager) const;
 
   bool ValidateFloat(float_t value) const;
 
  private:
   static const size_t m_variant_indices[2];
-  const TextureManager& m_texture_manager;
+  TextureManager& m_texture_manager;
   FloatTexture m_value;
   float_t m_minimum;
   float_t m_maximum;

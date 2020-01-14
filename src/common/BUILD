@@ -101,7 +101,9 @@ cc_library(
     srcs = ["texture_manager.cc"],
     hdrs = ["texture_manager.h"],
     deps = [
+        ":error",
         ":pointer_types",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_texture",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/strings",
     ],
