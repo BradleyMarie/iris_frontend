@@ -2,7 +2,6 @@
 #define _SRC_COMMON_TEXTURE_MANAGER_
 
 #include <map>
-#include <set>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/string_view.h"

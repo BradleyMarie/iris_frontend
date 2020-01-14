@@ -55,12 +55,8 @@ class GraphicsStateManager {
     PushReason push_reason;
   };
 
-  std::set<Spectrum> m_spectra_used;
-  std::set<Reflector> m_reflectors_used;
   std::stack<ShaderState, std::list<ShaderState>> m_shader_state;
   std::stack<TransformState, std::list<TransformState>> m_transform_state;
-  std::map<std::string, Material> m_named_materials;
-  std::map<std::string, std::vector<Shape>> m_named_objects;
 };
 
 GraphicsStateManager::GraphicsStateManager() {

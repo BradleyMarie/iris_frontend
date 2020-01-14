@@ -46,6 +46,19 @@ cc_library(
 )
 
 cc_library(
+    name = "material_manager",
+    srcs = ["material_manager.cc"],
+    hdrs = ["material_manager.h"],
+    deps = [
+        ":error",
+        ":pointer_types",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:matte_material",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "ostream",
     srcs = ["ostream.cc"],
     hdrs = ["ostream.h"],

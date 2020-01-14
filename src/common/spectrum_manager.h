@@ -1,9 +1,7 @@
 #ifndef _SRC_COMMON_SPECTRUM_MANAGER_
 #define _SRC_COMMON_SPECTRUM_MANAGER_
 
-#include <iostream>
 #include <map>
-#include <string>
 #include <vector>
 
 #include "absl/types/optional.h"
