@@ -49,15 +49,19 @@ struct GetIndex<T, absl::variant<Ts...>>
     : std::integral_constant<size_t,
                              absl::variant<tag<Ts>...>(tag<T>()).index()> {};
 
-template <size_t NumParams>
+template <typename ParameterForwardIterator,
+          typename SupportedParameterForwardIterator>
 void MatchParameters(
-    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
-    const std::array<ParamMatcher*, NumParams>& supported_parameters) {
-  for (auto param = ParseNextParam(tokenizer); param;
-       param = ParseNextParam(tokenizer)) {
+    const char* base_type_name, const char* type_name,
+    ParameterForwardIterator& parameters_current,
+    const ParameterForwardIterator& parameters_end,
+    SupportedParameterForwardIterator supported_parameters_begin,
+    const SupportedParameterForwardIterator& supported_parameters_end) {
+  for (; parameters_current != parameters_end; ++parameters_current) {
     bool found = false;
-    for (auto& matcher : supported_parameters) {
-      if (matcher->Match(*param)) {
+    for (auto current = supported_parameters_begin;
+         current != supported_parameters_end; ++current) {
+      if ((*current)->Match(*parameters_current)) {
         found = true;
         break;
       }
@@ -65,11 +69,52 @@ void MatchParameters(
 
     if (!found) {
       std::cerr << "ERROR: Unrecognized or misconfigured parameter to "
-                << type_name << " " << base_type_name << ": " << param->first
-                << std::endl;
+                << type_name << " " << base_type_name << ": "
+                << parameters_current->first << std::endl;
       exit(EXIT_FAILURE);
     }
   }
+}
+
+template <size_t NumParams>
+void MatchParameters(
+    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
+    std::array<ParamMatcher*, NumParams> supported_parameters) {
+  class Iterator {
+   public:
+    Iterator(Tokenizer& tokenizer, bool initialize_value)
+        : m_tokenizer(tokenizer) {
+      if (initialize_value) {
+        m_value = ParseNextParam(m_tokenizer);
+      }
+    }
+
+    bool operator!=(const Iterator& other) const {
+      return m_value.has_value() && !other.m_value.has_value();
+    }
+
+    Iterator& operator++() {
+      m_value = ParseNextParam(m_tokenizer);
+      return *this;
+    }
+
+    Parameter& operator*() { return *m_value; }
+    Parameter* operator->() { return &(*m_value); }
+
+   private:
+    absl::optional<Parameter> m_value;
+    std::reference_wrapper<Tokenizer> m_tokenizer;
+  };
+
+  Iterator params_start(tokenizer, true);
+  Iterator params_end(tokenizer, false);
+  auto supported_start = supported_parameters.begin();
+  auto supported_end = supported_parameters.end();
+
+  MatchParameters<Iterator,
+                  typename std::array<ParamMatcher*, NumParams>::iterator>(
+      base_type_name, type_name, params_start, params_end, supported_start,
+      supported_end);
 }
 
 }  // namespace iris
