@@ -15,6 +15,12 @@ Material ParseMaterial(const char* base_type_name, Tokenizer& tokenizer,
                        TextureManager& texture_manager,
                        SpectrumManager& spectrum_manager);
 
+Material ParseMakeNamedMaterial(
+    const char* base_type_name, Tokenizer& tokenizer,
+    MaterialManager& material_manager,
+    const NamedTextureManager& named_texture_manager,
+    TextureManager& texture_manager, SpectrumManager& spectrum_manager);
+
 }  // namespace iris
 
 #endif  // _SRC_MATERIALS_PARSER_

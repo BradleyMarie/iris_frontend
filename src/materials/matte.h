@@ -13,7 +13,7 @@ Material ParseMatte(const char* base_type_name, const char* type_name,
                     Tokenizer& tokenizer, MaterialManager& material_manager,
                     const NamedTextureManager& named_texture_manager,
                     TextureManager& texture_manager,
-                    SpectrumManager& spectrum_manager);
+                    SpectrumManager& spectrum_manager, bool ignore_type);
 
 }  // namespace iris
 
