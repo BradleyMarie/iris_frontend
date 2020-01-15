@@ -81,6 +81,7 @@ Material ParseMaterial(const char* base_type_name, Tokenizer& tokenizer,
 
 Material ParseMakeNamedMaterial(
     const char* base_type_name, Tokenizer& tokenizer,
+    NamedMaterialManager& named_material_manager,
     MaterialManager& material_manager,
     const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager) {
@@ -117,7 +118,16 @@ Material ParseMakeNamedMaterial(
           {std::make_pair(kMatteTypeName, ParseMatte)}, material_manager,
           named_texture_manager, texture_manager, spectrum_manager, true);
 
+  named_material_manager.SetMaterial(name, material);
+
   return material;
+}
+
+Material ParseNamedMaterial(
+    const char* base_type_name, Tokenizer& tokenizer,
+    const NamedMaterialManager& named_material_manager) {
+  auto name = ParseNextQuotedString(base_type_name, tokenizer, "name");
+  return named_material_manager.GetMaterial(name);
 }
 
 }  // namespace iris

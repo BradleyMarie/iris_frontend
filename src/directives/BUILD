@@ -33,6 +33,7 @@ cc_library(
         "//src/area_lights:parser",
         "//src/common:error",
         "//src/common:matrix_manager",
+        "//src/common:named_material_manager",
         "//src/common:named_texture_manager",
         "//src/common:pointer_types",
         "//src/common:texture_manager",

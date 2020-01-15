@@ -8,6 +8,7 @@
 #include "src/area_lights/parser.h"
 #include "src/common/error.h"
 #include "src/common/material_manager.h"
+#include "src/common/named_material_manager.h"
 #include "src/common/named_texture_manager.h"
 #include "src/common/texture_manager.h"
 #include "src/directives/include.h"
@@ -30,6 +31,7 @@ class GraphicsStateManager {
   void AttributeEnd(MatrixManager& matrix_manager);
 
   NamedTextureManager& GetNamedTextureManager();
+  NamedMaterialManager& GetNamedMaterialManager();
 
   const std::pair<EmissiveMaterial, EmissiveMaterial>& GetEmissiveMaterials();
   void SetEmissiveMaterials(const EmissiveMaterial& front_emissive_material,
@@ -44,6 +46,7 @@ class GraphicsStateManager {
     std::pair<EmissiveMaterial, EmissiveMaterial> emissive_materials;
     std::pair<Material, Material> materials;
     NamedTextureManager named_texture_manager;
+    NamedMaterialManager named_material_manager;
   };
 
   enum PushReason {
@@ -107,6 +110,10 @@ void GraphicsStateManager::AttributeEnd(MatrixManager& matrix_manager) {
 
 NamedTextureManager& GraphicsStateManager::GetNamedTextureManager() {
   return m_shader_state.top().named_texture_manager;
+}
+
+NamedMaterialManager& GraphicsStateManager::GetNamedMaterialManager() {
+  return m_shader_state.top().named_material_manager;
 }
 
 const std::pair<EmissiveMaterial, EmissiveMaterial>&
@@ -212,6 +219,23 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
       auto material = ParseMaterial("Material", tokenizer, material_manager,
                                     graphics_state.GetNamedTextureManager(),
                                     texture_manager, spectrum_manager);
+      graphics_state.SetMaterial(material, material);
+      continue;
+    }
+
+    if (token == "MakeNamedMaterial") {
+      auto material = ParseMakeNamedMaterial(
+          "MakeNamedMaterial", tokenizer,
+          graphics_state.GetNamedMaterialManager(), material_manager,
+          graphics_state.GetNamedTextureManager(), texture_manager,
+          spectrum_manager);
+      graphics_state.SetMaterial(material, material);
+      continue;
+    }
+
+    if (token == "NamedMaterial") {
+      auto material = ParseNamedMaterial(
+          "NamedMaterial", tokenizer, graphics_state.GetNamedMaterialManager());
       graphics_state.SetMaterial(material, material);
       continue;
     }

@@ -57,6 +57,17 @@ cc_library(
 )
 
 cc_library(
+    name = "named_material_manager",
+    srcs = ["named_material_manager.cc"],
+    hdrs = ["named_material_manager.h"],
+    deps = [
+        ":pointer_types",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "named_texture_manager",
     srcs = ["named_texture_manager.cc"],
     hdrs = ["named_texture_manager.h"],

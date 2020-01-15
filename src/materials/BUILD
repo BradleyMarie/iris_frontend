@@ -20,6 +20,7 @@ cc_library(
         ":matte",
         "//src/common:call_directive",
         "//src/common:material_manager",
+        "//src/common:named_material_manager",
         "//src/common:named_texture_manager",
         "//src/common:texture_manager",
         "//src/common:tokenizer",
