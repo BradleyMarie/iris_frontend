@@ -117,6 +117,22 @@ void MatchParameters(
       supported_end);
 }
 
+template <size_t NumParams>
+void MatchParameters(
+    const char* base_type_name, const char* type_name,
+    std::vector<Parameter>& parameters,
+    std::array<ParamMatcher*, NumParams> supported_parameters) {
+  auto params_start = parameters.begin();
+  auto params_end = parameters.end();
+  auto supported_start = supported_parameters.begin();
+  auto supported_end = supported_parameters.end();
+
+  MatchParameters<typename std::vector<Parameter>::iterator,
+                  typename std::array<ParamMatcher*, NumParams>::iterator>(
+      base_type_name, type_name, params_start, params_end, supported_start,
+      supported_end);
+}
+
 }  // namespace iris
 
 #endif  // _SRC_PARAM_MATCHER_MATCHER_
