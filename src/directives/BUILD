@@ -35,13 +35,13 @@ cc_library(
         "//src/common:matrix_manager",
         "//src/common:named_material_manager",
         "//src/common:named_texture_manager",
+        "//src/common:object_manager",
         "//src/common:pointer_types",
         "//src/common:texture_manager",
         "//src/common:tokenizer",
         "//src/materials:parser",
         "//src/shapes:parser",
         "//src/textures:parser",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:kd_tree_scene",
     ],
 )
 
@@ -52,7 +52,6 @@ cc_library(
     deps = [
         "//src/common:quoted_string",
         "//src/common:tokenizer",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:kd_tree_scene",
     ],
 )
 

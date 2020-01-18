@@ -4,12 +4,12 @@
 #include <list>
 #include <stack>
 
-#include "iris_physx_toolkit/kd_tree_scene.h"
 #include "src/area_lights/parser.h"
 #include "src/common/error.h"
 #include "src/common/material_manager.h"
 #include "src/common/named_material_manager.h"
 #include "src/common/named_texture_manager.h"
+#include "src/common/object_manager.h"
 #include "src/common/texture_manager.h"
 #include "src/directives/include.h"
 #include "src/directives/transform.h"
@@ -138,27 +138,6 @@ void GraphicsStateManager::SetMaterial(const Material& front_material,
       std::make_pair(front_material, back_material);
 }
 
-Scene CreateScene(std::vector<Shape>& shapes, std::vector<Matrix>& transforms) {
-  assert(shapes.size() == transforms.size());
-  std::vector<PSHAPE> shape_pointers;
-  std::vector<PMATRIX> matrix_pointers;
-  std::unique_ptr<bool[]> premultiplied(new bool[shapes.size()]);
-
-  for (size_t i = 0; i < shapes.size(); i++) {
-    shape_pointers.push_back(shapes[i].get());
-    matrix_pointers.push_back(transforms[i].get());
-    premultiplied[i] = false;
-  }
-
-  Scene result;
-  ISTATUS status = KdTreeSceneAllocate(
-      shape_pointers.data(), matrix_pointers.data(), premultiplied.get(),
-      shapes.size(), result.release_and_get_address());
-  SuccessOrOOM(status);
-
-  return result;
-}
-
 }  // namespace
 
 std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
@@ -167,16 +146,15 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
   matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
   matrix_manager.Identity();
 
-  std::vector<Shape> shapes;
-  std::vector<Matrix> transforms;
   std::vector<Light> lights;
   GraphicsStateManager graphics_state;
   MaterialManager material_manager;
+  ObjectManager object_manager;
   TextureManager texture_manager;
 
   for (auto token = tokenizer.Next(); token; token = tokenizer.Next()) {
     if (token == "WorldEnd") {
-      return std::make_pair(CreateScene(shapes, transforms), std::move(lights));
+      return std::make_pair(object_manager.AllocateScene(), std::move(lights));
     }
 
     if (TryParseTransformDirectives(*token, tokenizer, matrix_manager)) {
@@ -204,6 +182,22 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
 
     if (token == "TransformEnd") {
       graphics_state.TransformEnd(matrix_manager);
+      continue;
+    }
+
+    if (token == "ObjectBegin") {
+      object_manager.ObjectBegin(tokenizer);
+      continue;
+    }
+
+    if (token == "ObjectEnd") {
+      object_manager.ObjectEnd();
+      continue;
+    }
+
+    if (token == "ObjectInstance") {
+      object_manager.ObjectInstance(tokenizer,
+                                    matrix_manager.GetCurrent().first);
       continue;
     }
 
@@ -247,8 +241,9 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
           ParseShape("Shape", tokenizer, materials.first, materials.second,
                      emissive_materials.first, emissive_materials.second);
       for (const auto& shape : shape_result.first) {
-        shapes.push_back(shape);
-        transforms.push_back(matrix_manager.GetCurrent().first);
+        object_manager.AddShape(shape, matrix_manager.GetCurrent().first,
+                                emissive_materials.first,
+                                emissive_materials.second);
       }
       for (const auto& light : shape_result.second) {
         lights.push_back(light);
