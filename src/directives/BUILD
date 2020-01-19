@@ -39,6 +39,7 @@ cc_library(
         "//src/common:pointer_types",
         "//src/common:texture_manager",
         "//src/common:tokenizer",
+        "//src/lights:parser",
         "//src/materials:parser",
         "//src/shapes:parser",
         "//src/textures:parser",

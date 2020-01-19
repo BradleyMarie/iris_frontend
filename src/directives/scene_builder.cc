@@ -124,6 +124,10 @@ void SceneBuilder::AddAreaLight(const Shape& shape, const Matrix& matrix,
   }
 }
 
+void SceneBuilder::AddLight(const Light& light) {
+  m_scene_lights.push_back(light);
+}
+
 std::pair<Scene, std::vector<Light>> SceneBuilder::Build() {
   assert(m_scene_shapes.size() == m_scene_transforms.size());
 

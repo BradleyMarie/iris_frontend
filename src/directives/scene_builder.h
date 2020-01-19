@@ -24,6 +24,7 @@ class SceneBuilder {
   void AddShape(const Shape& shape, const Matrix& matrix);
   void AddAreaLight(const Shape& shape, const Matrix& matrix,
                     const EmissiveMaterial& material, uint32_t face_index);
+  void AddLight(const Light& light);
 
   std::pair<Scene, std::vector<Light>> Build();
 

@@ -35,6 +35,7 @@ const size_t SingleValueMatcher<VariantType, ValueType>::m_variant_type =
 
 typedef SingleValueMatcher<BoolParameter, bool> SingleBoolMatcher;
 typedef SingleValueMatcher<StringParameter, std::string> SingleStringMatcher;
+typedef SingleValueMatcher<Point3Parameter, POINT3> SinglePoint3Matcher;
 
 }  // namespace iris
 

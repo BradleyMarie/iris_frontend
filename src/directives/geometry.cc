@@ -13,6 +13,7 @@
 #include "src/directives/include.h"
 #include "src/directives/scene_builder.h"
 #include "src/directives/transform.h"
+#include "src/lights/parser.h"
 #include "src/materials/parser.h"
 #include "src/shapes/parser.h"
 #include "src/textures/parser.h"
@@ -205,6 +206,13 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
           ParseAreaLight("AreaLightSource", tokenizer, spectrum_manager);
       graphics_state.SetEmissiveMaterials(std::get<0>(light_state),
                                           std::get<1>(light_state));
+      continue;
+    }
+
+    if (token == "LightSource") {
+      auto light = ParseLight("LightSource", tokenizer, spectrum_manager,
+                              matrix_manager.GetCurrent().first);
+      scene_builder.AddLight(light);
       continue;
     }
 
