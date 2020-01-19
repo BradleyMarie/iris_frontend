@@ -1,4 +1,4 @@
-#include "src/common/object_manager.h"
+#include "src/directives/scene_builder.h"
 
 #include <iostream>
 
@@ -31,7 +31,7 @@ absl::string_view ParseNextQuotedString(const char* base_type_name,
 
 }  // namespace
 
-ObjectManager::~ObjectManager() {
+SceneBuilder::~SceneBuilder() {
   for (PMATRIX matrix : m_scene_transforms) {
     MatrixRelease(matrix);
   }
@@ -41,7 +41,7 @@ ObjectManager::~ObjectManager() {
   }
 }
 
-void ObjectManager::ObjectBegin(Tokenizer& tokenizer) {
+void SceneBuilder::ObjectBegin(Tokenizer& tokenizer) {
   if (m_current) {
     std::cerr << "ERROR: Mismatched ObjectBegin and ObjectEnd directives"
               << std::endl;
@@ -53,7 +53,7 @@ void ObjectManager::ObjectBegin(Tokenizer& tokenizer) {
   m_current->second.clear();
 }
 
-void ObjectManager::ObjectInstance(Tokenizer& tokenizer, const Matrix& matrix) {
+void SceneBuilder::ObjectInstance(Tokenizer& tokenizer, const Matrix& matrix) {
   if (m_current) {
     std::cerr << "ERROR: Invalid directive between ObjectBegin and "
                  "ObjectEnd: ObjectInstance"
@@ -78,7 +78,7 @@ void ObjectManager::ObjectInstance(Tokenizer& tokenizer, const Matrix& matrix) {
   }
 }
 
-void ObjectManager::ObjectEnd() {
+void SceneBuilder::ObjectEnd() {
   if (!m_current) {
     std::cerr << "ERROR: Mismatched ObjectBegin and ObjectEnd directives"
               << std::endl;
@@ -87,7 +87,7 @@ void ObjectManager::ObjectEnd() {
   m_current = nullptr;
 }
 
-void ObjectManager::AddShape(const Shape& shape, const Matrix& matrix) {
+void SceneBuilder::AddShape(const Shape& shape, const Matrix& matrix) {
   if (m_current) {
     if (matrix.get()) {
       std::cerr << "ERROR: Transformations not supported in instanced objects"
@@ -104,9 +104,9 @@ void ObjectManager::AddShape(const Shape& shape, const Matrix& matrix) {
   }
 }
 
-void ObjectManager::AddAreaLight(const Shape& shape, const Matrix& matrix,
-                                 const EmissiveMaterial& material,
-                                 uint32_t face_index) {
+void SceneBuilder::AddAreaLight(const Shape& shape, const Matrix& matrix,
+                                const EmissiveMaterial& material,
+                                uint32_t face_index) {
   if (m_current) {
     if (matrix.get()) {
       std::cerr << "ERROR: Transformations not supported in instanced objects"
@@ -124,7 +124,7 @@ void ObjectManager::AddAreaLight(const Shape& shape, const Matrix& matrix,
   }
 }
 
-std::pair<Scene, std::vector<Light>> ObjectManager::AllocateScene() {
+std::pair<Scene, std::vector<Light>> SceneBuilder::Build() {
   assert(m_scene_shapes.size() == m_scene_transforms.size());
 
   std::unique_ptr<bool[]> premultiplied(new bool[m_scene_shapes.size()]());

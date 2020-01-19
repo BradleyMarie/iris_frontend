@@ -29,13 +29,13 @@ cc_library(
     hdrs = ["geometry.h"],
     deps = [
         ":include",
+        ":scene_builder",
         ":transform",
         "//src/area_lights:parser",
         "//src/common:error",
         "//src/common:matrix_manager",
         "//src/common:named_material_manager",
         "//src/common:named_texture_manager",
-        "//src/common:object_manager",
         "//src/common:pointer_types",
         "//src/common:texture_manager",
         "//src/common:tokenizer",
@@ -66,6 +66,20 @@ cc_library(
         "//src/common:pointer_types",
         "//src/common:tokenizer",
         "//src/films/output_writers:result",
+    ],
+)
+
+cc_library(
+    name = "scene_builder",
+    srcs = ["scene_builder.cc"],
+    hdrs = ["scene_builder.h"],
+    deps = [
+        "//src/common:error",
+        "//src/common:pointer_types",
+        "//src/common:quoted_string",
+        "//src/common:tokenizer",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:kd_tree_scene",
+        "@com_google_absl//absl/container:flat_hash_map",
     ],
 )
 

@@ -9,9 +9,9 @@
 #include "src/common/material_manager.h"
 #include "src/common/named_material_manager.h"
 #include "src/common/named_texture_manager.h"
-#include "src/common/object_manager.h"
 #include "src/common/texture_manager.h"
 #include "src/directives/include.h"
+#include "src/directives/scene_builder.h"
 #include "src/directives/transform.h"
 #include "src/materials/parser.h"
 #include "src/shapes/parser.h"
@@ -148,12 +148,12 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
 
   GraphicsStateManager graphics_state;
   MaterialManager material_manager;
-  ObjectManager object_manager;
+  SceneBuilder scene_builder;
   TextureManager texture_manager;
 
   for (auto token = tokenizer.Next(); token; token = tokenizer.Next()) {
     if (token == "WorldEnd") {
-      return object_manager.AllocateScene();
+      return scene_builder.Build();
     }
 
     if (TryParseTransformDirectives(*token, tokenizer, matrix_manager)) {
@@ -185,18 +185,18 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     }
 
     if (token == "ObjectBegin") {
-      object_manager.ObjectBegin(tokenizer);
+      scene_builder.ObjectBegin(tokenizer);
       continue;
     }
 
     if (token == "ObjectEnd") {
-      object_manager.ObjectEnd();
+      scene_builder.ObjectEnd();
       continue;
     }
 
     if (token == "ObjectInstance") {
-      object_manager.ObjectInstance(tokenizer,
-                                    matrix_manager.GetCurrent().first);
+      scene_builder.ObjectInstance(tokenizer,
+                                   matrix_manager.GetCurrent().first);
       continue;
     }
 
@@ -240,12 +240,12 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
           ParseShape("Shape", tokenizer, materials.first, materials.second,
                      emissive_materials.first, emissive_materials.second);
       for (const auto& shape : shape_result.first) {
-        object_manager.AddShape(shape, matrix_manager.GetCurrent().first);
+        scene_builder.AddShape(shape, matrix_manager.GetCurrent().first);
       }
       for (const auto& light : shape_result.second) {
-        object_manager.AddAreaLight(std::get<0>(light),
-                                    matrix_manager.GetCurrent().first,
-                                    std::get<1>(light), std::get<2>(light));
+        scene_builder.AddAreaLight(std::get<0>(light),
+                                   matrix_manager.GetCurrent().first,
+                                   std::get<1>(light), std::get<2>(light));
       }
       continue;
     }

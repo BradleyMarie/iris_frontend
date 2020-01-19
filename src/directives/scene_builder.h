@@ -1,5 +1,5 @@
-#ifndef _SRC_COMMON_OBJECT_MANAGER_
-#define _SRC_COMMON_OBJECT_MANAGER_
+#ifndef _SRC_DIRECTIVES_SCENE_BUILDER_
+#define _SRC_DIRECTIVES_SCENE_BUILDER_
 
 #include <tuple>
 #include <vector>
@@ -10,12 +10,12 @@
 
 namespace iris {
 
-class ObjectManager {
+class SceneBuilder {
  public:
-  ObjectManager() : m_current(nullptr) {}
-  ObjectManager(const ObjectManager&) = delete;
-  ObjectManager& operator=(const ObjectManager&) = delete;
-  ~ObjectManager();
+  SceneBuilder() : m_current(nullptr) {}
+  SceneBuilder(const SceneBuilder&) = delete;
+  SceneBuilder& operator=(const SceneBuilder&) = delete;
+  ~SceneBuilder();
 
   void ObjectBegin(Tokenizer& tokenizer);
   void ObjectInstance(Tokenizer& tokenizer, const Matrix& matrix);
@@ -25,7 +25,7 @@ class ObjectManager {
   void AddAreaLight(const Shape& shape, const Matrix& matrix,
                     const EmissiveMaterial& material, uint32_t face_index);
 
-  std::pair<Scene, std::vector<Light>> AllocateScene();
+  std::pair<Scene, std::vector<Light>> Build();
 
  private:
   std::pair<std::vector<Shape>,
@@ -44,4 +44,4 @@ class ObjectManager {
 
 }  // namespace iris
 
-#endif  // _SRC_COMMON_OBJECT_MANAGER_
+#endif  // _SRC_DIRECTIVES_SCENE_BUILDER_

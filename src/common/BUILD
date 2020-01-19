@@ -79,20 +79,6 @@ cc_library(
 )
 
 cc_library(
-    name = "object_manager",
-    srcs = ["object_manager.cc"],
-    hdrs = ["object_manager.h"],
-    deps = [
-        ":error",
-        ":pointer_types",
-        ":quoted_string",
-        ":tokenizer",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:kd_tree_scene",
-        "@com_google_absl//absl/container:flat_hash_map",
-    ],
-)
-
-cc_library(
     name = "ostream",
     srcs = ["ostream.cc"],
     hdrs = ["ostream.h"],
