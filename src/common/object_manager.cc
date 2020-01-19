@@ -49,7 +49,8 @@ void ObjectManager::ObjectBegin(Tokenizer& tokenizer) {
   }
   std::string name(ParseNextQuotedString("ObjectBegin", tokenizer, "name"));
   m_current = &m_instanced_objects[name];
-  m_current->clear();
+  m_current->first.clear();
+  m_current->second.clear();
 }
 
 void ObjectManager::ObjectInstance(Tokenizer& tokenizer, const Matrix& matrix) {
@@ -67,9 +68,13 @@ void ObjectManager::ObjectInstance(Tokenizer& tokenizer, const Matrix& matrix) {
     exit(EXIT_FAILURE);
   }
 
-  for (const auto& entry : iter->second) {
-    AddShape(std::get<0>(entry), matrix, EmissiveMaterial(),
-             EmissiveMaterial());
+  for (const auto& entry : iter->second.first) {
+    AddShape(entry, matrix);
+  }
+
+  for (const auto& entry : iter->second.second) {
+    AddAreaLight(std::get<0>(entry), matrix, std::get<1>(entry),
+                 std::get<2>(entry));
   }
 }
 
@@ -82,9 +87,7 @@ void ObjectManager::ObjectEnd() {
   m_current = nullptr;
 }
 
-void ObjectManager::AddShape(const Shape& shape, const Matrix& matrix,
-                             const EmissiveMaterial& front,
-                             const EmissiveMaterial& back) {
+void ObjectManager::AddShape(const Shape& shape, const Matrix& matrix) {
   if (m_current) {
     if (matrix.get()) {
       std::cerr << "ERROR: Transformations not supported in instanced objects"
@@ -92,13 +95,7 @@ void ObjectManager::AddShape(const Shape& shape, const Matrix& matrix,
       exit(EXIT_FAILURE);
     }
 
-    if (front.get() || back.get()) {
-      std::cerr << "ERROR: Area lights not supported in instanced objects"
-                << std::endl;
-      exit(EXIT_FAILURE);
-    }
-
-    m_current->push_back(std::make_tuple(shape));
+    m_current->first.push_back(shape);
   } else {
     m_scene_shapes.push_back(shape.get());
     ShapeRetain(m_scene_shapes.back());
@@ -107,7 +104,27 @@ void ObjectManager::AddShape(const Shape& shape, const Matrix& matrix,
   }
 }
 
-Scene ObjectManager::AllocateScene() {
+void ObjectManager::AddAreaLight(const Shape& shape, const Matrix& matrix,
+                                 const EmissiveMaterial& material,
+                                 uint32_t face_index) {
+  if (m_current) {
+    if (matrix.get()) {
+      std::cerr << "ERROR: Transformations not supported in instanced objects"
+                << std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    m_current->second.push_back(std::make_tuple(shape, material, face_index));
+  } else {
+    Light light;
+    ISTATUS status = AreaLightAllocate(shape.get(), face_index, matrix.get(),
+                                       light.release_and_get_address());
+    SuccessOrOOM(status);
+    m_scene_lights.push_back(light);
+  }
+}
+
+std::pair<Scene, std::vector<Light>> ObjectManager::AllocateScene() {
   assert(m_scene_shapes.size() == m_scene_transforms.size());
 
   std::unique_ptr<bool[]> premultiplied(new bool[m_scene_shapes.size()]());
@@ -117,7 +134,7 @@ Scene ObjectManager::AllocateScene() {
       m_scene_shapes.size(), result.release_and_get_address());
   SuccessOrOOM(status);
 
-  return result;
+  return std::make_pair(result, m_scene_lights);
 }
 
 }  // namespace iris

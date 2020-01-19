@@ -660,30 +660,24 @@ ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
               << std::endl;
   }
 
-  std::vector<Light> lights;
+  std::vector<std::tuple<Shape, EmissiveMaterial, uint32_t>> emissive_faces;
   if (!front_emissive_material.get() && !back_emissive_material.get()) {
-    return std::make_pair(std::move(shapes), std::move(lights));
+    return std::make_pair(std::move(shapes), std::move(emissive_faces));
   }
 
   for (size_t i = 0; i < triangles_allocated; i++) {
     if (front_emissive_material.get()) {
-      Light light;
-      status = AreaLightAllocate(shapes[i].get(), TRIANGLE_MESH_FRONT_FACE,
-                                 light.release_and_get_address());
-      SuccessOrOOM(status);
-      lights.push_back(light);
+      emissive_faces.push_back(std::make_tuple(
+          shapes[i], front_emissive_material, TRIANGLE_MESH_FRONT_FACE));
     }
 
     if (back_emissive_material.get()) {
-      Light light;
-      status = AreaLightAllocate(shapes[i].get(), TRIANGLE_MESH_BACK_FACE,
-                                 light.release_and_get_address());
-      SuccessOrOOM(status);
-      lights.push_back(light);
+      emissive_faces.push_back(std::make_tuple(
+          shapes[i], front_emissive_material, TRIANGLE_MESH_BACK_FACE));
     }
   }
 
-  return std::make_pair(std::move(shapes), std::move(lights));
+  return std::make_pair(std::move(shapes), std::move(emissive_faces));
 }
 
 }  // namespace iris

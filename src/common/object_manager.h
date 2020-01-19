@@ -1,6 +1,7 @@
 #ifndef _SRC_COMMON_OBJECT_MANAGER_
 #define _SRC_COMMON_OBJECT_MANAGER_
 
+#include <tuple>
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
@@ -20,16 +21,23 @@ class ObjectManager {
   void ObjectInstance(Tokenizer& tokenizer, const Matrix& matrix);
   void ObjectEnd();
 
-  void AddShape(const Shape& shape, const Matrix& matrix,
-                const EmissiveMaterial& front, const EmissiveMaterial& back);
+  void AddShape(const Shape& shape, const Matrix& matrix);
+  void AddAreaLight(const Shape& shape, const Matrix& matrix,
+                    const EmissiveMaterial& material, uint32_t face_index);
 
-  Scene AllocateScene();
+  std::pair<Scene, std::vector<Light>> AllocateScene();
 
  private:
-  std::vector<std::tuple<Shape>>* m_current;
-  absl::flat_hash_map<std::string, std::vector<std::tuple<Shape>>>
+  std::pair<std::vector<Shape>,
+            std::vector<std::tuple<Shape, EmissiveMaterial, uint32_t>>>*
+      m_current;
+  absl::flat_hash_map<
+      std::string,
+      std::pair<std::vector<Shape>,
+                std::vector<std::tuple<Shape, EmissiveMaterial, uint32_t>>>>
       m_instanced_objects;
 
+  std::vector<Light> m_scene_lights;
   std::vector<PMATRIX> m_scene_transforms;
   std::vector<PSHAPE> m_scene_shapes;
 };

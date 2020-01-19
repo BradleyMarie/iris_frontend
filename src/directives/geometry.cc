@@ -146,7 +146,6 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
   matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
   matrix_manager.Identity();
 
-  std::vector<Light> lights;
   GraphicsStateManager graphics_state;
   MaterialManager material_manager;
   ObjectManager object_manager;
@@ -154,7 +153,7 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
 
   for (auto token = tokenizer.Next(); token; token = tokenizer.Next()) {
     if (token == "WorldEnd") {
-      return std::make_pair(object_manager.AllocateScene(), std::move(lights));
+      return object_manager.AllocateScene();
     }
 
     if (TryParseTransformDirectives(*token, tokenizer, matrix_manager)) {
@@ -241,12 +240,12 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
           ParseShape("Shape", tokenizer, materials.first, materials.second,
                      emissive_materials.first, emissive_materials.second);
       for (const auto& shape : shape_result.first) {
-        object_manager.AddShape(shape, matrix_manager.GetCurrent().first,
-                                emissive_materials.first,
-                                emissive_materials.second);
+        object_manager.AddShape(shape, matrix_manager.GetCurrent().first);
       }
       for (const auto& light : shape_result.second) {
-        lights.push_back(light);
+        object_manager.AddAreaLight(std::get<0>(light),
+                                    matrix_manager.GetCurrent().first,
+                                    std::get<1>(light), std::get<2>(light));
       }
       continue;
     }
