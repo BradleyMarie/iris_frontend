@@ -32,8 +32,8 @@ absl::string_view ParseNextQuotedString(const char* base_type_name,
 const static char* kTypeParameterName = "type";
 const static char* kMatteTypeName = "matte";
 
-typedef std::function<Material(
-    const char*, const char*, std::vector<Parameter>&, MaterialManager&,
+typedef std::function<MaterialResult(
+    const char*, const char*, std::vector<Parameter>&,
     const NamedTextureManager&, TextureManager&, SpectrumManager&)>
     MakeNamedMaterialFunction;
 
@@ -63,23 +63,19 @@ std::pair<const char*, MakeNamedMaterialFunction> ParseMaterialType(
 
 }  // namespace
 
-Material ParseMaterial(const char* base_type_name, Tokenizer& tokenizer,
-                       MaterialManager& material_manager,
-                       const NamedTextureManager& named_texture_manager,
-                       TextureManager& texture_manager,
-                       SpectrumManager& spectrum_manager) {
-  return CallDirective<Material, 1, MaterialManager&,
-                       const NamedTextureManager&, TextureManager&,
-                       SpectrumManager&>(
+MaterialResult ParseMaterial(const char* base_type_name, Tokenizer& tokenizer,
+                             const NamedTextureManager& named_texture_manager,
+                             TextureManager& texture_manager,
+                             SpectrumManager& spectrum_manager) {
+  return CallDirective<MaterialResult, 1, const NamedTextureManager&,
+                       TextureManager&, SpectrumManager&>(
       base_type_name, tokenizer, {std::make_pair(kMatteTypeName, ParseMatte)},
-      material_manager, named_texture_manager, texture_manager,
-      spectrum_manager);
+      named_texture_manager, texture_manager, spectrum_manager);
 }
 
-Material ParseMakeNamedMaterial(
+MaterialResult ParseMakeNamedMaterial(
     const char* base_type_name, Tokenizer& tokenizer,
     NamedMaterialManager& named_material_manager,
-    MaterialManager& material_manager,
     const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager) {
   std::string name(ParseNextQuotedString(base_type_name, tokenizer, "name"));
@@ -102,7 +98,7 @@ Material ParseMakeNamedMaterial(
   }
 
   auto material = name_and_function.second(
-      base_type_name, name_and_function.first, parameters, material_manager,
+      base_type_name, name_and_function.first, parameters,
       named_texture_manager, texture_manager, spectrum_manager);
 
   named_material_manager.SetMaterial(name, material);
@@ -110,7 +106,7 @@ Material ParseMakeNamedMaterial(
   return material;
 }
 
-Material ParseNamedMaterial(
+MaterialResult ParseNamedMaterial(
     const char* base_type_name, Tokenizer& tokenizer,
     const NamedMaterialManager& named_material_manager) {
   auto name = ParseNextQuotedString(base_type_name, tokenizer, "name");

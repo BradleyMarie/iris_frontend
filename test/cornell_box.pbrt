@@ -94,7 +94,15 @@ AttributeEnd
 # Green wall
 #
 
-Material "matte"
+Material "matte" # Test for override behavior
+
+Shape "trianglemesh"
+"integer indices" [ 0 1 2  2 3 0 ]
+"point P" [
+   0.0   0.0 559.2
+   0.0   0.0   0.0
+   0.0 548.8   0.0
+   0.0 548.8 559.2 ]
 "spectrum Kd" [
    400 0.092 404 0.096 408 0.098 412 0.097 416 0.098 420 0.095
    424 0.095 428 0.097 432 0.095 436 0.094 440 0.097 444 0.098
@@ -109,14 +117,6 @@ Material "matte"
    640 0.114 644 0.115 648 0.117 652 0.117 656 0.118 660 0.120
    664 0.122 668 0.128 672 0.132 676 0.139 680 0.144 684 0.146
    688 0.150 692 0.152 696 0.157 700 0.159]
-
-Shape "trianglemesh"
-"integer indices" [ 0 1 2  2 3 0 ]
-"point P" [
-   0.0   0.0 559.2
-   0.0   0.0   0.0
-   0.0 548.8   0.0
-   0.0 548.8 559.2 ]
 
 #
 # Floor, should ignore current material

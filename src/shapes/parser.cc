@@ -9,16 +9,22 @@
 namespace iris {
 
 ShapeResult ParseShape(const char* base_type_name, Tokenizer& tokenizer,
-                       const Material& front_material,
-                       const Material& back_material,
+                       MaterialManager& material_manager,
+                       const NamedTextureManager& named_texture_manager,
+                       TextureManager& texture_manager,
+                       SpectrumManager& spectrum_manager,
+                       const MaterialResult& material,
                        const EmissiveMaterial& front_emissive_material,
                        const EmissiveMaterial& back_emissive_material) {
-  return CallDirective<ShapeResult, 2, const Material&, const Material&,
+  return CallDirective<ShapeResult, 2, MaterialManager&,
+                       const NamedTextureManager&, TextureManager&,
+                       SpectrumManager&, const MaterialResult&,
                        const EmissiveMaterial&, const EmissiveMaterial&>(
       base_type_name, tokenizer,
       {std::make_pair("trianglemesh", ParseTriangleMesh),
        std::make_pair("plymesh", ParsePlyMesh)},
-      front_material, back_material, front_emissive_material,
+      material_manager, named_texture_manager, texture_manager,
+      spectrum_manager, material, front_emissive_material,
       back_emissive_material);
 }
 

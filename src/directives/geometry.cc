@@ -38,9 +38,8 @@ class GraphicsStateManager {
   void SetEmissiveMaterials(const EmissiveMaterial& front_emissive_material,
                             const EmissiveMaterial& back_emissive_material);
 
-  const std::pair<Material, Material>& GetMaterials();
-  void SetMaterial(const Material& front_material,
-                   const Material& back_material);
+  const MaterialResult& GetMaterials();
+  void SetMaterial(const MaterialResult& material);
 
   bool GetReverseOrientation() const;
   void FlipReverseOrientation();
@@ -48,7 +47,7 @@ class GraphicsStateManager {
  private:
   struct ShaderState {
     std::pair<EmissiveMaterial, EmissiveMaterial> emissive_materials;
-    std::pair<Material, Material> materials;
+    MaterialResult material;
     NamedTextureManager named_texture_manager;
     NamedMaterialManager named_material_manager;
     bool reverse_orientation;
@@ -135,14 +134,12 @@ void GraphicsStateManager::SetEmissiveMaterials(
       std::make_pair(front_emissive_material, back_emissive_material);
 }
 
-const std::pair<Material, Material>& GraphicsStateManager::GetMaterials() {
-  return m_shader_state.top().materials;
+const MaterialResult& GraphicsStateManager::GetMaterials() {
+  return m_shader_state.top().material;
 }
 
-void GraphicsStateManager::SetMaterial(const Material& front_material,
-                                       const Material& back_material) {
-  m_shader_state.top().materials =
-      std::make_pair(front_material, back_material);
+void GraphicsStateManager::SetMaterial(const MaterialResult& material) {
+  m_shader_state.top().material = material;
 }
 
 bool GraphicsStateManager::GetReverseOrientation() const {
@@ -242,36 +239,38 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     }
 
     if (token == "Material") {
-      auto material = ParseMaterial("Material", tokenizer, material_manager,
+      auto material = ParseMaterial("Material", tokenizer,
                                     graphics_state.GetNamedTextureManager(),
                                     texture_manager, spectrum_manager);
-      graphics_state.SetMaterial(material, material);
+      graphics_state.SetMaterial(material);
       continue;
     }
 
     if (token == "MakeNamedMaterial") {
-      auto material = ParseMakeNamedMaterial(
-          "MakeNamedMaterial", tokenizer,
-          graphics_state.GetNamedMaterialManager(), material_manager,
-          graphics_state.GetNamedTextureManager(), texture_manager,
-          spectrum_manager);
-      graphics_state.SetMaterial(material, material);
+      auto material =
+          ParseMakeNamedMaterial("MakeNamedMaterial", tokenizer,
+                                 graphics_state.GetNamedMaterialManager(),
+                                 graphics_state.GetNamedTextureManager(),
+                                 texture_manager, spectrum_manager);
+      graphics_state.SetMaterial(material);
       continue;
     }
 
     if (token == "NamedMaterial") {
       auto material = ParseNamedMaterial(
           "NamedMaterial", tokenizer, graphics_state.GetNamedMaterialManager());
-      graphics_state.SetMaterial(material, material);
+      graphics_state.SetMaterial(material);
       continue;
     }
 
     if (token == "Shape") {
-      auto materials = graphics_state.GetMaterials();
+      auto material = graphics_state.GetMaterials();
       auto emissive_materials = graphics_state.GetEmissiveMaterials();
       auto shape_result =
-          ParseShape("Shape", tokenizer, materials.first, materials.second,
-                     emissive_materials.first, emissive_materials.second);
+          ParseShape("Shape", tokenizer, material_manager,
+                     graphics_state.GetNamedTextureManager(), texture_manager,
+                     spectrum_manager, material, emissive_materials.first,
+                     emissive_materials.second);
       for (const auto& shape : shape_result.first) {
         scene_builder.AddShape(shape, matrix_manager.GetCurrent().first);
       }

@@ -623,13 +623,24 @@ PlyData ReadPlyFile(const std::string& file_name) {
 }  // namespace
 
 ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
-                         Tokenizer& tokenizer, const Material& front_material,
-                         const Material& back_material,
+                         Tokenizer& tokenizer,
+                         MaterialManager& material_manager,
+                         const NamedTextureManager& named_texture_manager,
+                         TextureManager& texture_manager,
+                         SpectrumManager& spectrum_manager,
+                         const MaterialResult& material,
                          const EmissiveMaterial& front_emissive_material,
                          const EmissiveMaterial& back_emissive_material) {
   SingleStringMatcher filename(base_type_name, type_name, "filename", true,
                                kPlyMeshDefaultFilename);
-  MatchParameters<1>(base_type_name, type_name, tokenizer, {&filename});
+
+  std::vector<Parameter> unused_parameters;
+  MatchParameters<1>(base_type_name, type_name, tokenizer, {&filename},
+                     &unused_parameters);
+
+  auto front_and_back_material = material.Build(
+      base_type_name, type_name, unused_parameters, material_manager,
+      named_texture_manager, texture_manager, spectrum_manager);
 
   PlyData fileData = ReadPlyFile(filename.Get());
 
@@ -643,9 +654,10 @@ ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
           : reinterpret_cast<const float_t(*)[2]>(fileData.GetUVs().data()),
       fileData.GetVertices().size(),
       reinterpret_cast<const size_t(*)[3]>(fileData.GetFaces().data()),
-      fileData.GetFaces().size(), front_material.get(), back_material.get(),
-      front_emissive_material.get(), back_emissive_material.get(),
-      reinterpret_cast<PSHAPE*>(shapes.data()), &triangles_allocated);
+      fileData.GetFaces().size(), front_and_back_material.get(),
+      front_and_back_material.get(), front_emissive_material.get(),
+      back_emissive_material.get(), reinterpret_cast<PSHAPE*>(shapes.data()),
+      &triangles_allocated);
 
   switch (status) {
     case ISTATUS_ALLOCATION_FAILED:

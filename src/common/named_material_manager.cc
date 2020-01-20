@@ -4,7 +4,7 @@
 
 namespace iris {
 
-const Material& NamedMaterialManager::GetMaterial(
+const MaterialResult& NamedMaterialManager::GetMaterial(
     absl::string_view name) const {
   auto iter = m_materials.find(name);
   if (iter == m_materials.end()) {
@@ -15,7 +15,7 @@ const Material& NamedMaterialManager::GetMaterial(
 }
 
 void NamedMaterialManager::SetMaterial(const absl::string_view name,
-                                       const Material& material) {
+                                       const MaterialResult& material) {
   m_materials[name] = material;
 }
 

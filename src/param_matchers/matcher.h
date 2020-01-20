@@ -59,7 +59,7 @@ void MatchParameters(
     ParameterForwardIterator parameters_end,
     SupportedParameterForwardIterator supported_parameters_begin,
     SupportedParameterForwardIterator supported_parameters_end,
-    std::vector<Parameter>& unhandled_parameters) {
+    std::vector<Parameter>* unhandled_parameters) {
   for (; parameters_current != parameters_end; ++parameters_current) {
     bool found = false;
     for (auto current = supported_parameters_begin;
@@ -70,30 +70,15 @@ void MatchParameters(
       }
     }
     if (!found) {
-      unhandled_parameters.push_back(*parameters_current);
+      if (!unhandled_parameters) {
+        std::cerr << "ERROR: Unrecognized or misconfigured parameter to "
+                  << type_name << " " << base_type_name << ": "
+                  << parameters_current->first << std::endl;
+        exit(EXIT_FAILURE);
+      }
+
+      unhandled_parameters->push_back(*parameters_current);
     }
-  }
-}
-
-template <typename ParameterForwardIterator,
-          typename SupportedParameterForwardIterator>
-void MatchParameters(
-    const char* base_type_name, const char* type_name,
-    ParameterForwardIterator parameters_current,
-    ParameterForwardIterator parameters_end,
-    SupportedParameterForwardIterator supported_parameters_begin,
-    SupportedParameterForwardIterator supported_parameters_end) {
-  std::vector<Parameter> unhandled_parameters;
-  MatchParameters<ParameterForwardIterator, SupportedParameterForwardIterator>(
-      base_type_name, type_name, parameters_current, parameters_end,
-      supported_parameters_begin, supported_parameters_end,
-      unhandled_parameters);
-
-  if (!unhandled_parameters.empty()) {
-    std::cerr << "ERROR: Unrecognized or misconfigured parameter to "
-              << type_name << " " << base_type_name << ": "
-              << unhandled_parameters[0].first << std::endl;
-    exit(EXIT_FAILURE);
   }
 }
 
@@ -101,7 +86,8 @@ template <typename SupportedParameterForwardIterator>
 void MatchParameters(
     const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
     SupportedParameterForwardIterator supported_parameters_begin,
-    SupportedParameterForwardIterator supported_parameters_end) {
+    SupportedParameterForwardIterator supported_parameters_end,
+    std::vector<Parameter>* unhandled_parameters) {
   class Iterator {
    public:
     Iterator(Tokenizer& tokenizer, bool initialize_value)
@@ -131,27 +117,29 @@ void MatchParameters(
   MatchParameters<Iterator, SupportedParameterForwardIterator>(
       base_type_name, type_name, Iterator(tokenizer, true),
       Iterator(tokenizer, false), supported_parameters_begin,
-      supported_parameters_end);
+      supported_parameters_end, unhandled_parameters);
 }
 
 template <size_t NumParams>
-void MatchParameters(
-    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
-    std::array<ParamMatcher*, NumParams> supported_parameters) {
+void MatchParameters(const char* base_type_name, const char* type_name,
+                     Tokenizer& tokenizer,
+                     std::array<ParamMatcher*, NumParams> supported_parameters,
+                     std::vector<Parameter>* unhandled_parameters = nullptr) {
   MatchParameters<typename std::array<ParamMatcher*, NumParams>::iterator>(
       base_type_name, type_name, tokenizer, supported_parameters.begin(),
-      supported_parameters.end());
+      supported_parameters.end(), unhandled_parameters);
 }
 
 template <size_t NumParams>
-void MatchParameters(
-    const char* base_type_name, const char* type_name,
-    std::vector<Parameter>& parameters,
-    std::array<ParamMatcher*, NumParams> supported_parameters) {
+void MatchParameters(const char* base_type_name, const char* type_name,
+                     std::vector<Parameter>& parameters,
+                     std::array<ParamMatcher*, NumParams> supported_parameters,
+                     std::vector<Parameter>* unhandled_parameters = nullptr) {
   MatchParameters<typename std::vector<Parameter>::iterator,
                   typename std::array<ParamMatcher*, NumParams>::iterator>(
       base_type_name, type_name, parameters.begin(), parameters.end(),
-      supported_parameters.begin(), supported_parameters.end());
+      supported_parameters.begin(), supported_parameters.end(),
+      unhandled_parameters);
 }
 
 }  // namespace iris

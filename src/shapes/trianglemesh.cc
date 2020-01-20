@@ -23,16 +23,25 @@ static const std::vector<int> kTriangleMeshDefaultIndices;
 
 ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
                               Tokenizer& tokenizer,
-                              const Material& front_material,
-                              const Material& back_material,
+                              MaterialManager& material_manager,
+                              const NamedTextureManager& named_texture_manager,
+                              TextureManager& texture_manager,
+                              SpectrumManager& spectrum_manager,
+                              const MaterialResult& material,
                               const EmissiveMaterial& front_emissive_material,
                               const EmissiveMaterial& back_emissive_material) {
   TriangleMeshPointListMatcher points(base_type_name, type_name, "P", true,
                                       kTriangleMeshDefaultPoints);
   TriangleMeshIndexListMatcher int_indices(base_type_name, type_name, "indices",
                                            true, kTriangleMeshDefaultIndices);
+
+  std::vector<Parameter> unused_parameters;
   MatchParameters<2>(base_type_name, type_name, tokenizer,
-                     {&points, &int_indices});
+                     {&points, &int_indices}, &unused_parameters);
+
+  auto front_and_back_material = material.Build(
+      base_type_name, type_name, unused_parameters, material_manager,
+      named_texture_manager, texture_manager, spectrum_manager);
 
   std::vector<size_t> indices;
   for (const auto& entry : int_indices.Get()) {
@@ -52,9 +61,9 @@ ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
   ISTATUS status = TriangleMeshAllocate(
       points.Get().data(), nullptr, nullptr, points.Get().size(),
       reinterpret_cast<const size_t(*)[3]>(indices.data()), indices.size() / 3,
-      front_material.get(), back_material.get(), front_emissive_material.get(),
-      back_emissive_material.get(), reinterpret_cast<PSHAPE*>(shapes.data()),
-      &triangles_allocated);
+      front_and_back_material.get(), front_and_back_material.get(),
+      front_emissive_material.get(), back_emissive_material.get(),
+      reinterpret_cast<PSHAPE*>(shapes.data()), &triangles_allocated);
   switch (status) {
     case ISTATUS_ALLOCATION_FAILED:
       ReportOOM();

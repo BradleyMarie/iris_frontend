@@ -7,24 +7,24 @@
 #include "src/common/spectrum_manager.h"
 #include "src/common/texture_manager.h"
 #include "src/common/tokenizer.h"
+#include "src/materials/result.h"
 
 namespace iris {
 
-Material ParseMaterial(const char* base_type_name, Tokenizer& tokenizer,
-                       MaterialManager& material_manager,
-                       const NamedTextureManager& named_texture_manager,
-                       TextureManager& texture_manager,
-                       SpectrumManager& spectrum_manager);
+MaterialResult ParseMaterial(const char* base_type_name, Tokenizer& tokenizer,
+                             const NamedTextureManager& named_texture_manager,
+                             TextureManager& texture_manager,
+                             SpectrumManager& spectrum_manager);
 
-Material ParseMakeNamedMaterial(
+MaterialResult ParseMakeNamedMaterial(
     const char* base_type_name, Tokenizer& tokenizer,
     NamedMaterialManager& named_material_manager,
-    MaterialManager& material_manager,
     const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager);
 
-Material ParseNamedMaterial(const char* base_type_name, Tokenizer& tokenizer,
-                            const NamedMaterialManager& named_material_manager);
+MaterialResult ParseNamedMaterial(
+    const char* base_type_name, Tokenizer& tokenizer,
+    const NamedMaterialManager& named_material_manager);
 
 }  // namespace iris
 
