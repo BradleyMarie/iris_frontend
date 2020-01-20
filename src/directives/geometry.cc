@@ -42,12 +42,16 @@ class GraphicsStateManager {
   void SetMaterial(const Material& front_material,
                    const Material& back_material);
 
+  bool GetReverseOrientation() const;
+  void FlipReverseOrientation();
+
  private:
   struct ShaderState {
     std::pair<EmissiveMaterial, EmissiveMaterial> emissive_materials;
     std::pair<Material, Material> materials;
     NamedTextureManager named_texture_manager;
     NamedMaterialManager named_material_manager;
+    bool reverse_orientation;
   };
 
   enum PushReason {
@@ -66,7 +70,9 @@ class GraphicsStateManager {
 };
 
 GraphicsStateManager::GraphicsStateManager() {
-  m_shader_state.push(ShaderState());
+  ShaderState shader_state;
+  shader_state.reverse_orientation = false;
+  m_shader_state.push(shader_state);
 }
 
 void GraphicsStateManager::TransformBegin(MatrixManager& matrix_manager) {
@@ -139,6 +145,15 @@ void GraphicsStateManager::SetMaterial(const Material& front_material,
       std::make_pair(front_material, back_material);
 }
 
+bool GraphicsStateManager::GetReverseOrientation() const {
+  return m_shader_state.top().reverse_orientation;
+}
+
+void GraphicsStateManager::FlipReverseOrientation() {
+  m_shader_state.top().reverse_orientation =
+      !m_shader_state.top().reverse_orientation;
+}
+
 }  // namespace
 
 std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
@@ -162,6 +177,11 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     }
 
     if (TryParseInclude(*token, tokenizer)) {
+      continue;
+    }
+
+    if (token == "ReverseOrientation") {
+      graphics_state.FlipReverseOrientation();
       continue;
     }
 
@@ -204,8 +224,13 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     if (token == "AreaLightSource") {
       auto light_state =
           ParseAreaLight("AreaLightSource", tokenizer, spectrum_manager);
-      graphics_state.SetEmissiveMaterials(std::get<0>(light_state),
-                                          std::get<1>(light_state));
+      if (graphics_state.GetReverseOrientation()) {
+        graphics_state.SetEmissiveMaterials(std::get<1>(light_state),
+                                            std::get<0>(light_state));
+      } else {
+        graphics_state.SetEmissiveMaterials(std::get<0>(light_state),
+                                            std::get<1>(light_state));
+      }
       continue;
     }
 
