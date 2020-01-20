@@ -24,6 +24,7 @@ cc_library(
     hdrs = ["parser.h"],
     visibility = ["//src:__subpackages__"],
     deps = [
+        ":distant",
         ":point",
         "//src/common:call_directive",
         "//src/common:pointer_types",
