@@ -13,18 +13,18 @@ ShapeResult ParseShape(const char* base_type_name, Tokenizer& tokenizer,
                        const NamedTextureManager& named_texture_manager,
                        TextureManager& texture_manager,
                        SpectrumManager& spectrum_manager,
-                       const MaterialResult& material,
+                       const MaterialFactory& material_factory,
                        const EmissiveMaterial& front_emissive_material,
                        const EmissiveMaterial& back_emissive_material) {
   return CallDirective<ShapeResult, 2, MaterialManager&,
                        const NamedTextureManager&, TextureManager&,
-                       SpectrumManager&, const MaterialResult&,
+                       SpectrumManager&, const MaterialFactory&,
                        const EmissiveMaterial&, const EmissiveMaterial&>(
       base_type_name, tokenizer,
       {std::make_pair("trianglemesh", ParseTriangleMesh),
        std::make_pair("plymesh", ParsePlyMesh)},
       material_manager, named_texture_manager, texture_manager,
-      spectrum_manager, material, front_emissive_material,
+      spectrum_manager, material_factory, front_emissive_material,
       back_emissive_material);
 }
 

@@ -9,18 +9,18 @@ namespace {
 static const float_t kMatteMaterialDefaultReflectance = (float_t)0.5;
 
 template <typename T>
-MaterialResult ParseMatte(const char* base_type_name, const char* type_name,
-                          T& parameters,
-                          const NamedTextureManager& named_texture_manager,
-                          TextureManager& texture_manager,
-                          SpectrumManager& spectrum_manager) {
+MaterialFactory ParseMatte(const char* base_type_name, const char* type_name,
+                           T& parameters,
+                           const NamedTextureManager& named_texture_manager,
+                           TextureManager& texture_manager,
+                           SpectrumManager& spectrum_manager) {
   ReflectorTextureMatcher kd = ReflectorTextureMatcher::FromUniformReflectance(
       base_type_name, type_name, "Kd", false, named_texture_manager,
       texture_manager, spectrum_manager, kMatteMaterialDefaultReflectance);
   MatchParameters<1>(base_type_name, type_name, parameters, {&kd});
 
   ReflectorTexture default_kd = kd.Get();
-  MaterialFactory result =
+  MaterialFactoryFn result =
       [default_kd](const char* base_type_name, const char* type_name,
                    std::vector<Parameter>& parameters,
                    MaterialManager& material_manager,
@@ -35,26 +35,27 @@ MaterialResult ParseMatte(const char* base_type_name, const char* type_name,
     return material_manager.AllocateMatteMaterial(kd.Get());
   };
 
-  return MaterialResult(std::move(result));
+  return MaterialFactory(std::move(result));
 }
 
 }  // namespace
 
-MaterialResult ParseMatte(const char* base_type_name, const char* type_name,
-                          Tokenizer& tokenizer,
-                          const NamedTextureManager& named_texture_manager,
-                          TextureManager& texture_manager,
-                          SpectrumManager& spectrum_manager) {
+MaterialFactory ParseMatte(const char* base_type_name, const char* type_name,
+                           Tokenizer& tokenizer,
+                           const NamedTextureManager& named_texture_manager,
+                           TextureManager& texture_manager,
+                           SpectrumManager& spectrum_manager) {
   return ParseMatte<Tokenizer>(base_type_name, type_name, tokenizer,
                                named_texture_manager, texture_manager,
                                spectrum_manager);
 }
 
-MaterialResult MakeNamedMatte(const char* base_type_name, const char* type_name,
-                              std::vector<Parameter>& parameters,
-                              const NamedTextureManager& named_texture_manager,
-                              TextureManager& texture_manager,
-                              SpectrumManager& spectrum_manager) {
+MaterialFactory MakeNamedMatte(const char* base_type_name,
+                               const char* type_name,
+                               std::vector<Parameter>& parameters,
+                               const NamedTextureManager& named_texture_manager,
+                               TextureManager& texture_manager,
+                               SpectrumManager& spectrum_manager) {
   return ParseMatte<typename std::vector<Parameter>>(
       base_type_name, type_name, parameters, named_texture_manager,
       texture_manager, spectrum_manager);

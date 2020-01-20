@@ -7,8 +7,7 @@ cc_library(
     srcs = ["matte.cc"],
     hdrs = ["matte.h"],
     deps = [
-        ":result",
-        "//src/common:material_manager",
+        "//src/common:material_factory",
         "//src/common:named_texture_manager",
         "//src/common:texture_manager",
         "//src/common:tokenizer",
@@ -24,25 +23,11 @@ cc_library(
     visibility = ["//src:__subpackages__"],
     deps = [
         ":matte",
-        ":result",
         "//src/common:call_directive",
-        "//src/common:material_manager",
+        "//src/common:material_factory",
         "//src/common:named_material_manager",
         "//src/common:named_texture_manager",
         "//src/common:texture_manager",
         "//src/common:tokenizer",
-    ],
-)
-
-cc_library(
-    name = "result",
-    hdrs = ["result.h"],
-    visibility = ["//src:__subpackages__"],
-    deps = [
-        "//src/common:material_manager",
-        "//src/common:named_texture_manager",
-        "//src/common:spectrum_manager",
-        "//src/common:texture_manager",
-        "//src/param_matchers:parser",
     ],
 )

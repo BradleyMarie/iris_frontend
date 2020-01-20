@@ -27,7 +27,7 @@ ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
                               const NamedTextureManager& named_texture_manager,
                               TextureManager& texture_manager,
                               SpectrumManager& spectrum_manager,
-                              const MaterialResult& material,
+                              const MaterialFactory& material_factory,
                               const EmissiveMaterial& front_emissive_material,
                               const EmissiveMaterial& back_emissive_material) {
   TriangleMeshPointListMatcher points(base_type_name, type_name, "P", true,
@@ -39,7 +39,7 @@ ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
   MatchParameters<2>(base_type_name, type_name, tokenizer,
                      {&points, &int_indices}, &unused_parameters);
 
-  auto front_and_back_material = material.Build(
+  auto material = material_factory.Build(
       base_type_name, type_name, unused_parameters, material_manager,
       named_texture_manager, texture_manager, spectrum_manager);
 
@@ -61,9 +61,9 @@ ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
   ISTATUS status = TriangleMeshAllocate(
       points.Get().data(), nullptr, nullptr, points.Get().size(),
       reinterpret_cast<const size_t(*)[3]>(indices.data()), indices.size() / 3,
-      front_and_back_material.get(), front_and_back_material.get(),
-      front_emissive_material.get(), back_emissive_material.get(),
-      reinterpret_cast<PSHAPE*>(shapes.data()), &triangles_allocated);
+      material.get(), material.get(), front_emissive_material.get(),
+      back_emissive_material.get(), reinterpret_cast<PSHAPE*>(shapes.data()),
+      &triangles_allocated);
   switch (status) {
     case ISTATUS_ALLOCATION_FAILED:
       ReportOOM();

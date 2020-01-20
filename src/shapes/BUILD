@@ -12,8 +12,8 @@ cc_library(
         ":result",
         ":trianglemesh",
         "//src/common:call_directive",
+        "//src/common:material_factory",
         "//src/common:tokenizer",
-        "//src/materials:result",
     ],
 )
 
@@ -32,9 +32,9 @@ cc_library(
     deps = [
         ":result",
         "//src/common:error",
+        "//src/common:material_factory",
         "//src/common:ostream",
         "//src/common:tokenizer",
-        "//src/materials:result",
         "//src/param_matchers:matcher",
         "//src/param_matchers:single",
         "//third_party/rply",
@@ -49,9 +49,9 @@ cc_library(
     deps = [
         ":result",
         "//src/common:error",
+        "//src/common:material_factory",
         "//src/common:ostream",
         "//src/common:tokenizer",
-        "//src/materials:result",
         "//src/param_matchers:list",
         "//src/param_matchers:matcher",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle_mesh",

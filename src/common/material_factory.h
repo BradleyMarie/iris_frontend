@@ -1,5 +1,5 @@
-#ifndef _SRC_MATERIALS_RESULT_
-#define _SRC_MATERIALS_RESULT_
+#ifndef _SRC_COMMON_MATERIAL_FACTORY_
+#define _SRC_COMMON_MATERIAL_FACTORY_
 
 #include <functional>
 #include <vector>
@@ -17,12 +17,13 @@ typedef std::function<Material(
     MaterialManager& material_manager,
     const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager)>
-    MaterialFactory;
+    MaterialFactoryFn;
 
-class MaterialResult {
+class MaterialFactory {
  public:
-  MaterialResult() = default;
-  MaterialResult(MaterialFactory&& factory) : m_factory(std::move(factory)) {}
+  MaterialFactory() = default;
+  MaterialFactory(MaterialFactoryFn&& factory)
+      : m_factory(std::move(factory)) {}
 
   Material Build(const char* base_type_name, const char* type_name,
                  std::vector<Parameter>& param_overrides,
@@ -40,9 +41,9 @@ class MaterialResult {
   }
 
  private:
-  MaterialFactory m_factory;
+  MaterialFactoryFn m_factory;
 };
 
 }  // namespace iris
 
-#endif  // _SRC_MATERIALS_RESULT_
+#endif  // _SRC_COMMON_MATERIAL_FACTORY_

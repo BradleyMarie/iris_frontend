@@ -33,6 +33,7 @@ cc_library(
         ":transform",
         "//src/area_lights:parser",
         "//src/common:error",
+        "//src/common:material_factory",
         "//src/common:matrix_manager",
         "//src/common:named_material_manager",
         "//src/common:named_texture_manager",

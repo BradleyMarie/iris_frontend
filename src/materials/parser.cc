@@ -32,7 +32,7 @@ absl::string_view ParseNextQuotedString(const char* base_type_name,
 const static char* kTypeParameterName = "type";
 const static char* kMatteTypeName = "matte";
 
-typedef std::function<MaterialResult(
+typedef std::function<MaterialFactory(
     const char*, const char*, std::vector<Parameter>&,
     const NamedTextureManager&, TextureManager&, SpectrumManager&)>
     MakeNamedMaterialFunction;
@@ -63,17 +63,17 @@ std::pair<const char*, MakeNamedMaterialFunction> ParseMaterialType(
 
 }  // namespace
 
-MaterialResult ParseMaterial(const char* base_type_name, Tokenizer& tokenizer,
-                             const NamedTextureManager& named_texture_manager,
-                             TextureManager& texture_manager,
-                             SpectrumManager& spectrum_manager) {
-  return CallDirective<MaterialResult, 1, const NamedTextureManager&,
+MaterialFactory ParseMaterial(const char* base_type_name, Tokenizer& tokenizer,
+                              const NamedTextureManager& named_texture_manager,
+                              TextureManager& texture_manager,
+                              SpectrumManager& spectrum_manager) {
+  return CallDirective<MaterialFactory, 1, const NamedTextureManager&,
                        TextureManager&, SpectrumManager&>(
       base_type_name, tokenizer, {std::make_pair(kMatteTypeName, ParseMatte)},
       named_texture_manager, texture_manager, spectrum_manager);
 }
 
-MaterialResult ParseMakeNamedMaterial(
+MaterialFactory ParseMakeNamedMaterial(
     const char* base_type_name, Tokenizer& tokenizer,
     NamedMaterialManager& named_material_manager,
     const NamedTextureManager& named_texture_manager,
@@ -106,7 +106,7 @@ MaterialResult ParseMakeNamedMaterial(
   return material;
 }
 
-MaterialResult ParseNamedMaterial(
+MaterialFactory ParseNamedMaterial(
     const char* base_type_name, Tokenizer& tokenizer,
     const NamedMaterialManager& named_material_manager) {
   auto name = ParseNextQuotedString(base_type_name, tokenizer, "name");
