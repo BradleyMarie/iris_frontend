@@ -57,12 +57,4 @@ void ParamMatcher::ElementRangeError [[noreturn]] () const {
   exit(EXIT_FAILURE);
 }
 
-void MatchParameters(const char* base_type_name, const char* type_name,
-                     Tokenizer& tokenizer,
-                     std::vector<ParamMatcher*>& supported_parameters) {
-  MatchParameters<typename std::vector<ParamMatcher*>::iterator>(
-      base_type_name, type_name, tokenizer, supported_parameters.begin(),
-      supported_parameters.end());
-}
-
 }  // namespace iris

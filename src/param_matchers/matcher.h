@@ -58,7 +58,8 @@ void MatchParameters(
     ParameterForwardIterator parameters_current,
     ParameterForwardIterator parameters_end,
     SupportedParameterForwardIterator supported_parameters_begin,
-    SupportedParameterForwardIterator supported_parameters_end) {
+    SupportedParameterForwardIterator supported_parameters_end,
+    std::vector<Parameter>& unhandled_parameters) {
   for (; parameters_current != parameters_end; ++parameters_current) {
     bool found = false;
     for (auto current = supported_parameters_begin;
@@ -68,13 +69,31 @@ void MatchParameters(
         break;
       }
     }
-
     if (!found) {
-      std::cerr << "ERROR: Unrecognized or misconfigured parameter to "
-                << type_name << " " << base_type_name << ": "
-                << parameters_current->first << std::endl;
-      exit(EXIT_FAILURE);
+      unhandled_parameters.push_back(*parameters_current);
     }
+  }
+}
+
+template <typename ParameterForwardIterator,
+          typename SupportedParameterForwardIterator>
+void MatchParameters(
+    const char* base_type_name, const char* type_name,
+    ParameterForwardIterator parameters_current,
+    ParameterForwardIterator parameters_end,
+    SupportedParameterForwardIterator supported_parameters_begin,
+    SupportedParameterForwardIterator supported_parameters_end) {
+  std::vector<Parameter> unhandled_parameters;
+  MatchParameters<ParameterForwardIterator, SupportedParameterForwardIterator>(
+      base_type_name, type_name, parameters_current, parameters_end,
+      supported_parameters_begin, supported_parameters_end,
+      unhandled_parameters);
+
+  if (!unhandled_parameters.empty()) {
+    std::cerr << "ERROR: Unrecognized or misconfigured parameter to "
+              << type_name << " " << base_type_name << ": "
+              << unhandled_parameters[0].first << std::endl;
+    exit(EXIT_FAILURE);
   }
 }
 
@@ -134,10 +153,6 @@ void MatchParameters(
       base_type_name, type_name, parameters.begin(), parameters.end(),
       supported_parameters.begin(), supported_parameters.end());
 }
-
-void MatchParameters(const char* base_type_name, const char* type_name,
-                     Tokenizer& tokenizer,
-                     std::vector<ParamMatcher*>& supported_parameters);
 
 }  // namespace iris
 
