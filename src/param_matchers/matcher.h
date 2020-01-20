@@ -1,7 +1,9 @@
 #ifndef _SRC_PARAM_MATCHER_MATCHER_
 #define _SRC_PARAM_MATCHER_MATCHER_
 
+#include <array>
 #include <type_traits>
+#include <vector>
 
 #include "src/param_matchers/parser.h"
 
@@ -53,10 +55,10 @@ template <typename ParameterForwardIterator,
           typename SupportedParameterForwardIterator>
 void MatchParameters(
     const char* base_type_name, const char* type_name,
-    ParameterForwardIterator& parameters_current,
-    const ParameterForwardIterator& parameters_end,
+    ParameterForwardIterator parameters_current,
+    ParameterForwardIterator parameters_end,
     SupportedParameterForwardIterator supported_parameters_begin,
-    const SupportedParameterForwardIterator& supported_parameters_end) {
+    SupportedParameterForwardIterator supported_parameters_end) {
   for (; parameters_current != parameters_end; ++parameters_current) {
     bool found = false;
     for (auto current = supported_parameters_begin;
@@ -76,10 +78,11 @@ void MatchParameters(
   }
 }
 
-template <size_t NumParams>
+template <typename SupportedParameterForwardIterator>
 void MatchParameters(
     const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
-    std::array<ParamMatcher*, NumParams> supported_parameters) {
+    SupportedParameterForwardIterator supported_parameters_begin,
+    SupportedParameterForwardIterator supported_parameters_end) {
   class Iterator {
    public:
     Iterator(Tokenizer& tokenizer, bool initialize_value)
@@ -106,15 +109,19 @@ void MatchParameters(
     std::reference_wrapper<Tokenizer> m_tokenizer;
   };
 
-  Iterator params_start(tokenizer, true);
-  Iterator params_end(tokenizer, false);
-  auto supported_start = supported_parameters.begin();
-  auto supported_end = supported_parameters.end();
+  MatchParameters<Iterator, SupportedParameterForwardIterator>(
+      base_type_name, type_name, Iterator(tokenizer, true),
+      Iterator(tokenizer, false), supported_parameters_begin,
+      supported_parameters_end);
+}
 
-  MatchParameters<Iterator,
-                  typename std::array<ParamMatcher*, NumParams>::iterator>(
-      base_type_name, type_name, params_start, params_end, supported_start,
-      supported_end);
+template <size_t NumParams>
+void MatchParameters(
+    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
+    std::array<ParamMatcher*, NumParams> supported_parameters) {
+  MatchParameters<typename std::array<ParamMatcher*, NumParams>::iterator>(
+      base_type_name, type_name, tokenizer, supported_parameters.begin(),
+      supported_parameters.end());
 }
 
 template <size_t NumParams>
@@ -122,16 +129,15 @@ void MatchParameters(
     const char* base_type_name, const char* type_name,
     std::vector<Parameter>& parameters,
     std::array<ParamMatcher*, NumParams> supported_parameters) {
-  auto params_start = parameters.begin();
-  auto params_end = parameters.end();
-  auto supported_start = supported_parameters.begin();
-  auto supported_end = supported_parameters.end();
-
   MatchParameters<typename std::vector<Parameter>::iterator,
                   typename std::array<ParamMatcher*, NumParams>::iterator>(
-      base_type_name, type_name, params_start, params_end, supported_start,
-      supported_end);
+      base_type_name, type_name, parameters.begin(), parameters.end(),
+      supported_parameters.begin(), supported_parameters.end());
 }
+
+void MatchParameters(const char* base_type_name, const char* type_name,
+                     Tokenizer& tokenizer,
+                     std::vector<ParamMatcher*>& supported_parameters);
 
 }  // namespace iris
 
