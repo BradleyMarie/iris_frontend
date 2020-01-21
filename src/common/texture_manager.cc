@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "iris_physx_toolkit/constant_texture.h"
+#include "iris_physx_toolkit/product_texture.h"
 #include "src/common/error.h"
 
 namespace iris {
@@ -36,6 +37,40 @@ FloatTexture TextureManager::AllocateConstantFloatTexture(float_t value) {
   SuccessOrOOM(status);
 
   m_constant_float_textures[value] = result;
+
+  return result;
+}
+
+ReflectorTexture TextureManager::AllocateProductReflectorTexture(
+    const ReflectorTexture& tex1, const ReflectorTexture& tex2) {
+  auto iter = m_product_reflector_textures.find(std::make_pair(tex1, tex2));
+  if (iter != m_product_reflector_textures.end()) {
+    return iter->second;
+  }
+
+  ReflectorTexture result;
+  ISTATUS status = ProductReflectorTextureAllocate(
+      tex1.get(), tex2.get(), result.release_and_get_address());
+  SuccessOrOOM(status);
+
+  m_product_reflector_textures[std::make_pair(tex1, tex2)] = result;
+
+  return result;
+}
+
+FloatTexture TextureManager::AllocateProductFloatTexture(
+    const FloatTexture& tex1, const FloatTexture& tex2) {
+  auto iter = m_product_float_textures.find(std::make_pair(tex1, tex2));
+  if (iter != m_product_float_textures.end()) {
+    return iter->second;
+  }
+
+  FloatTexture result;
+  ISTATUS status = ProductFloatTextureAllocate(
+      tex1.get(), tex2.get(), result.release_and_get_address());
+  SuccessOrOOM(status);
+
+  m_product_float_textures[std::make_pair(tex1, tex2)] = result;
 
   return result;
 }

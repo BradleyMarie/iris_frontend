@@ -22,8 +22,22 @@ cc_library(
     visibility = ["//src:__subpackages__"],
     deps = [
         ":constant",
+        ":scale",
         "//src/common:call_directive",
         "//src/common:texture_manager",
         "//src/common:tokenizer",
+    ],
+)
+
+cc_library(
+    name = "scale",
+    srcs = ["scale.cc"],
+    hdrs = ["scale.h"],
+    deps = [
+        "//src/common:texture_manager",
+        "//src/common:tokenizer",
+        "//src/param_matchers:float_texture",
+        "//src/param_matchers:matcher",
+        "//src/param_matchers:reflector_texture",
     ],
 )

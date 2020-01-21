@@ -4,6 +4,7 @@
 
 #include "src/common/call_directive.h"
 #include "src/textures/constant.h"
+#include "src/textures/scale.h"
 
 namespace iris {
 namespace {
@@ -39,10 +40,11 @@ void ParseTexture(const char* base_type_name, Tokenizer& tokenizer,
       ParseNextQuotedString(base_type_name, tokenizer, "format");
   if (format_name == "spectrum" || format_name == "color") {
     auto reflector_texture =
-        CallDirective<ReflectorTexture, 1, const NamedTextureManager&,
+        CallDirective<ReflectorTexture, 2, const NamedTextureManager&,
                       TextureManager&, SpectrumManager&>(
             base_type_name, tokenizer,
-            {std::make_pair("constant", ParseConstantReflector)},
+            {std::make_pair("constant", ParseConstantReflector),
+             std::make_pair("scale", ParseScaleReflector)},
             named_texture_manager, texture_manager, spectrum_manager);
     named_texture_manager.SetReflectorTexture(name, reflector_texture);
     return;
@@ -50,10 +52,11 @@ void ParseTexture(const char* base_type_name, Tokenizer& tokenizer,
 
   if (format_name == "float") {
     auto float_texture =
-        CallDirective<FloatTexture, 1, const NamedTextureManager&,
+        CallDirective<FloatTexture, 2, const NamedTextureManager&,
                       TextureManager&>(
             base_type_name, tokenizer,
-            {std::make_pair("constant", ParseConstantFloat)},
+            {std::make_pair("constant", ParseConstantFloat),
+             std::make_pair("scale", ParseScaleFloat)},
             named_texture_manager, texture_manager);
     named_texture_manager.SetFloatTexture(name, float_texture);
     return;

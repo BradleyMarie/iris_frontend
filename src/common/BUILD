@@ -150,6 +150,7 @@ cc_library(
         ":error",
         ":pointer_types",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_texture",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:product_texture",
     ],
 )
 
