@@ -17,6 +17,15 @@ class TextureManager {
   FloatTexture AllocateProductFloatTexture(const FloatTexture& tex1,
                                            const FloatTexture& tex2);
 
+  ReflectorTexture AllocateImageMapReflectorTexture(ReflectorMipmap mipmap,
+                                                    float_t u_delta,
+                                                    float_t v_delta,
+                                                    float_t u_scale,
+                                                    float_t v_scale);
+  FloatTexture AllocateImageMapFloatTexture(FloatMipmap mipmap, float_t u_delta,
+                                            float_t v_delta, float_t u_scale,
+                                            float_t v_scale);
+
  private:
   std::map<Reflector, ReflectorTexture> m_constant_reflector_textures;
   std::map<float_t, FloatTexture> m_constant_float_textures;

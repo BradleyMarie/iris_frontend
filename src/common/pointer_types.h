@@ -5,6 +5,7 @@
 #include "iris_physx/iris_physx.h"
 #include "iris_physx_toolkit/color_extrapolator.h"
 #include "iris_physx_toolkit/float_texture.h"
+#include "iris_physx_toolkit/mipmap.h"
 #include "iris_physx_toolkit/reflector_texture.h"
 #include "src/common/shared_ptr.h"
 #include "src/common/unique_ptr.h"
@@ -20,6 +21,7 @@ typedef SharedPtr<COLOR_INTEGRATOR, ColorIntegratorRetain,
 typedef SharedPtr<EMISSIVE_MATERIAL, EmissiveMaterialRetain,
                   EmissiveMaterialRelease>
     EmissiveMaterial;
+typedef UniquePtr<FLOAT_MIPMAP, FloatMipmapFree> FloatMipmap;
 typedef SharedPtr<FLOAT_TEXTURE, FloatTextureRetain, FloatTextureRelease>
     FloatTexture;
 typedef UniquePtr<FRAMEBUFFER, FramebufferFree> Framebuffer;
@@ -32,6 +34,7 @@ typedef SharedPtr<LIGHT_SAMPLER, LightSamplerRetain, LightSamplerRelease>
 typedef UniquePtr<PIXEL_SAMPLER, PixelSamplerFree> PixelSampler;
 typedef UniquePtr<RANDOM, RandomFree> Random;
 typedef SharedPtr<REFLECTOR, ReflectorRetain, ReflectorRelease> Reflector;
+typedef UniquePtr<REFLECTOR_MIPMAP, ReflectorMipmapFree> ReflectorMipmap;
 typedef SharedPtr<REFLECTOR_TEXTURE, ReflectorTextureRetain,
                   ReflectorTextureRelease>
     ReflectorTexture;

@@ -156,7 +156,8 @@ void GraphicsStateManager::FlipReverseOrientation() {
 
 std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     Tokenizer& tokenizer, MatrixManager& matrix_manager,
-    SpectrumManager& spectrum_manager, ColorIntegrator& color_integrator) {
+    SpectrumManager& spectrum_manager, ColorExtrapolator& color_extrapolator,
+    ColorIntegrator& color_integrator) {
   matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
   matrix_manager.Identity();
 
@@ -300,7 +301,7 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     if (token == "Texture") {
       ParseTexture("Texture", tokenizer,
                    graphics_state.GetNamedTextureManager(), texture_manager,
-                   spectrum_manager);
+                   spectrum_manager, color_extrapolator);
       continue;
     }
 

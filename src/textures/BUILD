@@ -16,12 +16,30 @@ cc_library(
 )
 
 cc_library(
+    name = "imagemap",
+    srcs = ["imagemap.cc"],
+    hdrs = ["imagemap.h"],
+    deps = [
+        "//src/common:texture_manager",
+        "//src/common:tokenizer",
+        "//src/param_matchers:float_single",
+        "//src/param_matchers:float_texture",
+        "//src/param_matchers:matcher",
+        "//src/param_matchers:reflector_texture",
+        "//src/param_matchers:single",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:png_mipmap",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "parser",
     srcs = ["parser.cc"],
     hdrs = ["parser.h"],
     visibility = ["//src:__subpackages__"],
     deps = [
         ":constant",
+        ":imagemap",
         ":scale",
         "//src/common:call_directive",
         "//src/common:texture_manager",

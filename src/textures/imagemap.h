@@ -1,5 +1,5 @@
-#ifndef _SRC_TEXTURES_SCALE_
-#define _SRC_TEXTURES_SCALE_
+#ifndef _SRC_TEXTURES_IMAGEMAP_
+#define _SRC_TEXTURES_IMAGEMAP_
 
 #include "src/common/named_texture_manager.h"
 #include "src/common/spectrum_manager.h"
@@ -8,17 +8,17 @@
 
 namespace iris {
 
-ReflectorTexture ParseScaleReflector(
+ReflectorTexture ParseImageMapReflector(
     const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
     const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager,
     ColorExtrapolator& color_extrapolator);
 
-FloatTexture ParseScaleFloat(const char* base_type_name, const char* type_name,
-                             Tokenizer& tokenizer,
-                             const NamedTextureManager& named_texture_manager,
-                             TextureManager& texture_manager);
+FloatTexture ParseImageMapFloat(
+    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
+    const NamedTextureManager& named_texture_manager,
+    TextureManager& texture_manager);
 
 }  // namespace iris
 
-#endif  // _SRC_TEXTURES_SCALE_
+#endif  // _SRC_TEXTURES_IMAGEMAP_

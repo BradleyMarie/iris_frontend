@@ -11,7 +11,8 @@ namespace iris {
 ReflectorTexture ParseConstantReflector(
     const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
     const NamedTextureManager& named_texture_manager,
-    TextureManager& texture_manager, SpectrumManager& spectrum_manager);
+    TextureManager& texture_manager, SpectrumManager& spectrum_manager,
+    ColorExtrapolator& color_extrapolator);
 
 FloatTexture ParseConstantFloat(
     const char* base_type_name, const char* type_name, Tokenizer& tokenizer,

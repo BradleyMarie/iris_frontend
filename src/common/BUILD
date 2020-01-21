@@ -110,6 +110,7 @@ cc_library(
         "@com_github_bradleymarie_iris//iris_physx",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:color_extrapolator",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:float_texture",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:mipmap",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:reflector_texture",
     ],
 )
@@ -150,6 +151,7 @@ cc_library(
         ":error",
         ":pointer_types",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_texture",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:image_texture",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:product_texture",
     ],
 )

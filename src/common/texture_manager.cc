@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "iris_physx_toolkit/constant_texture.h"
+#include "iris_physx_toolkit/image_texture.h"
 #include "iris_physx_toolkit/product_texture.h"
 #include "src/common/error.h"
 
@@ -71,6 +72,32 @@ FloatTexture TextureManager::AllocateProductFloatTexture(
   SuccessOrOOM(status);
 
   m_product_float_textures[std::make_pair(tex1, tex2)] = result;
+
+  return result;
+}
+
+ReflectorTexture TextureManager::AllocateImageMapReflectorTexture(
+    ReflectorMipmap mipmap, float_t v_scale, float_t u_delta, float_t u_scale,
+    float_t v_delta) {
+  ReflectorTexture result;
+  ISTATUS status =
+      ImageReflectorTextureAllocate(mipmap.detach(), u_delta, v_delta, u_scale,
+                                    v_scale, result.release_and_get_address());
+  SuccessOrOOM(status);
+
+  return result;
+}
+
+FloatTexture TextureManager::AllocateImageMapFloatTexture(FloatMipmap mipmap,
+                                                          float_t u_delta,
+                                                          float_t v_delta,
+                                                          float_t u_scale,
+                                                          float_t v_scale) {
+  FloatTexture result;
+  ISTATUS status =
+      ImageFloatTextureAllocate(mipmap.detach(), u_delta, v_delta, u_scale,
+                                v_scale, result.release_and_get_address());
+  SuccessOrOOM(status);
 
   return result;
 }

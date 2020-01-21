@@ -11,7 +11,8 @@ namespace iris {
 void ParseTexture(const char* base_type_name, Tokenizer& tokenizer,
                   NamedTextureManager& named_texture_manager,
                   TextureManager& texture_manager,
-                  SpectrumManager& spectrum_manager);
+                  SpectrumManager& spectrum_manager,
+                  ColorExtrapolator& color_extrapolator);
 
 }  // namespace iris
 
