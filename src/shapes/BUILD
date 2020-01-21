@@ -10,6 +10,7 @@ cc_library(
     deps = [
         ":plymesh",
         ":result",
+        ":sphere",
         ":trianglemesh",
         "//src/common:call_directive",
         "//src/common:material_factory",
@@ -39,6 +40,22 @@ cc_library(
         "//src/param_matchers:single",
         "//third_party/rply",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle_mesh",
+    ],
+)
+
+cc_library(
+    name = "sphere",
+    srcs = ["sphere.cc"],
+    hdrs = ["sphere.h"],
+    deps = [
+        ":result",
+        "//src/common:error",
+        "//src/common:material_factory",
+        "//src/common:ostream",
+        "//src/common:tokenizer",
+        "//src/param_matchers:float_single",
+        "//src/param_matchers:matcher",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:sphere",
     ],
 )
 
