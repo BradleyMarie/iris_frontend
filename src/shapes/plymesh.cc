@@ -309,12 +309,11 @@ static int PlyVertexIndiciesCallback(p_ply_argument argument) {
   long length, index;
   ply_get_argument_property(argument, NULL, &length, &index);
 
-  assert(0 <= index && index <= 3);
   if (index == -1) {
     return kRplySuccess;
   }
 
-  if (length != 3 || 4 != length) {
+  if (length != 3 && length != 4) {
     std::cerr << "ERROR: Only triangles and quads are currently supported by "
                  "plymesh Shapes, but PLY file contained a 'face' element "
                  "which contained a 'vertex_indices' of an unsupported length: "
@@ -654,7 +653,7 @@ ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
           : reinterpret_cast<const float_t(*)[2]>(fileData.GetUVs().data()),
       fileData.GetVertices().size(),
       reinterpret_cast<const size_t(*)[3]>(fileData.GetFaces().data()),
-      fileData.GetFaces().size(), material.get(), material.get(),
+      fileData.GetFaces().size() / 3, material.get(), material.get(),
       front_emissive_material.get(), back_emissive_material.get(),
       reinterpret_cast<PSHAPE*>(shapes.data()), &triangles_allocated);
 
@@ -669,6 +668,7 @@ ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
     std::cerr << "WARNING: PlyMesh contained degenerate triangles that "
                  "were ignored."
               << std::endl;
+    shapes.resize(triangles_allocated);
   }
 
   std::vector<std::tuple<Shape, EmissiveMaterial, uint32_t>> emissive_faces;

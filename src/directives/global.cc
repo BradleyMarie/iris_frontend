@@ -142,7 +142,7 @@ GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
       continue;
     }
 
-    if (token == "Filter") {
+    if (token == "PixelFilter") {
       // TODO
       continue;
     }

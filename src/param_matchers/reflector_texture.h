@@ -19,7 +19,7 @@ class ReflectorTextureMatcher : public ParamMatcher {
                           SpectrumManager& spectrum_manager,
                           ReflectorTexture default_value)
       : ParamMatcher(base_type_name, type_name, parameter_name, required,
-                     m_variant_indices, 3),
+                     m_variant_indices, 5),
         m_named_texture_manager(named_texture_manager),
         m_texture_manager(texture_manager),
         m_spectrum_manager(spectrum_manager),

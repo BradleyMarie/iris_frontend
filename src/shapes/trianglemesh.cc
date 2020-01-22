@@ -75,6 +75,7 @@ ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
     std::cerr << "WARNING: TriangleMesh contained degenerate triangles that "
                  "were ignored."
               << std::endl;
+    shapes.resize(triangles_allocated);
   }
 
   std::vector<std::tuple<Shape, EmissiveMaterial, uint32_t>> emissive_faces;
