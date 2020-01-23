@@ -38,10 +38,13 @@ void MatrixManager::Scale(const std::array<FiniteNonZeroFloatT, 3>& params) {
 }
 
 void MatrixManager::Rotate(const std::array<FiniteFloatT, 4>& params) {
+  const float_t to_radians =
+      (float_t)3.1415926535897932384626433832 / (float_t)180.0;
+
   Matrix rotation;
-  ISTATUS status = MatrixAllocateRotation(params[0].Get(), params[1].Get(),
-                                          params[2].Get(), params[3].Get(),
-                                          rotation.release_and_get_address());
+  ISTATUS status = MatrixAllocateRotation(
+      params[0].Get() * to_radians, params[1].Get(), params[2].Get(),
+      params[3].Get(), rotation.release_and_get_address());
 
   switch (status) {
     case ISTATUS_INVALID_ARGUMENT_COMBINATION_00:
