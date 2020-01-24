@@ -93,6 +93,7 @@ void MatrixManager::LookAt(const std::array<FiniteFloatT, 9>& params) {
     exit(EXIT_FAILURE);
   }
 
+  right = VectorNormalize(right, NULL, NULL);
   up = VectorCrossProduct(direction, right);
 
   Matrix inverse;
