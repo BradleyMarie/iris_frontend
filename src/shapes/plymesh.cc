@@ -643,7 +643,7 @@ ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
 
   PlyData fileData = ReadPlyFile(filename.Get());
 
-  std::vector<Shape> shapes(fileData.GetFaces().size());
+  std::vector<Shape> shapes(fileData.GetFaces().size() / 3);
   size_t triangles_allocated;
   ISTATUS status = TriangleMeshAllocate(
       fileData.GetVertices().data(),
@@ -664,7 +664,7 @@ ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
       assert(status == ISTATUS_SUCCESS);
   }
 
-  if (triangles_allocated != fileData.GetFaces().size()) {
+  if (triangles_allocated != fileData.GetFaces().size() / 3) {
     std::cerr << "WARNING: PlyMesh contained degenerate triangles that "
                  "were ignored."
               << std::endl;
