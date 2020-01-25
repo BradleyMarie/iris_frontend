@@ -65,7 +65,7 @@ class PlyData {
       exit(EXIT_FAILURE);
     }
 
-    m_vertices[index].y = value;
+    m_vertices[index].z = value;
   }
 
   void AllocateNormals() { m_normals.resize(m_vertices.size()); }
