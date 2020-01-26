@@ -77,12 +77,12 @@ FloatTexture TextureManager::AllocateProductFloatTexture(
 }
 
 ReflectorTexture TextureManager::AllocateImageMapReflectorTexture(
-    ReflectorMipmap mipmap, float_t v_scale, float_t u_delta, float_t u_scale,
-    float_t v_delta) {
+    ReflectorMipmap mipmap, float_t u_delta, float_t v_delta, float_t u_scale,
+    float_t v_scale) {
   ReflectorTexture result;
   ISTATUS status =
-      ImageReflectorTextureAllocate(mipmap.detach(), u_delta, v_delta, u_scale,
-                                    v_scale, result.release_and_get_address());
+      ImageReflectorTextureAllocate(mipmap.detach(), u_delta, -v_delta, u_scale,
+                                    -v_scale, result.release_and_get_address());
   SuccessOrOOM(status);
 
   return result;
@@ -95,8 +95,8 @@ FloatTexture TextureManager::AllocateImageMapFloatTexture(FloatMipmap mipmap,
                                                           float_t v_scale) {
   FloatTexture result;
   ISTATUS status =
-      ImageFloatTextureAllocate(mipmap.detach(), u_delta, v_delta, u_scale,
-                                v_scale, result.release_and_get_address());
+      ImageFloatTextureAllocate(mipmap.detach(), u_delta, -v_delta, u_scale,
+                                -v_scale, result.release_and_get_address());
   SuccessOrOOM(status);
 
   return result;
