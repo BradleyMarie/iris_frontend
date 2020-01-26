@@ -7,7 +7,7 @@
 namespace iris {
 
 ColorIntegrator ParseCie(const char* base_type_name, const char* type_name,
-                         Tokenizer& tokenizer);
+                         Tokenizer& tokenizer, bool spectrum_color_workaround);
 
 }  // namespace iris
 

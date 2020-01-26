@@ -17,7 +17,8 @@ typedef std::tuple<Camera, Matrix, PixelSampler, Framebuffer, Integrator,
     GlobalConfig;
 
 GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
-                                   MatrixManager& matrix_manager);
+                                   MatrixManager& matrix_manager,
+                                   bool spectrum_color_workaround);
 
 }  // namespace iris
 

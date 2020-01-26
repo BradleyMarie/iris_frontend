@@ -119,14 +119,15 @@ CreateTokenizerFromString(const std::string& string_to_parse) {
 static const float_t kEpsilon = (float_t)0.001;
 static const size_t kNumThreads = 1;
 static const bool kSpectral = false;
+static const bool kSpectrumColorWorkaround = false;
 
 }  // namespace
 
 TEST(RenderTests, CornellBox) {
   auto tokenizer =
       Tokenizer::CreateFromFile(kSearchDir, "test/cornell_box.pbrt");
-  auto render_result =
-      RenderToFramebuffer(*tokenizer, kEpsilon, kNumThreads, kSpectral);
+  auto render_result = RenderToFramebuffer(*tokenizer, kEpsilon, kNumThreads,
+                                           kSpectral, kSpectrumColorWorkaround);
   CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.1);
 }
 
@@ -134,6 +135,7 @@ TEST(RenderTests, IncludeCornellBox) {
   auto tokenizer =
       CreateTokenizerFromString("Include \"test/cornell_box.pbrt\"");
   auto render_result =
-      RenderToFramebuffer(*tokenizer.first, kEpsilon, kNumThreads, kSpectral);
+      RenderToFramebuffer(*tokenizer.first, kEpsilon, kNumThreads, kSpectral,
+                          kSpectrumColorWorkaround);
   CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.1);
 }

@@ -14,7 +14,8 @@ typedef std::tuple<Scene, LightSampler, Camera, Matrix, PixelSampler,
                    OutputWriter>
     RenderConfiguration;
 
-RenderConfiguration ParseDirectives(Tokenizer& tokenizer);
+RenderConfiguration ParseDirectives(Tokenizer& tokenizer,
+                                    bool spectrum_color_workaround);
 
 }  // namespace iris
 

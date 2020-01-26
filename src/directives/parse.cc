@@ -5,9 +5,11 @@
 
 namespace iris {
 
-RenderConfiguration ParseDirectives(Tokenizer& tokenizer) {
+RenderConfiguration ParseDirectives(Tokenizer& tokenizer,
+                                    bool spectrum_color_workaround) {
   MatrixManager matrix_manager;
-  auto global_config = ParseGlobalDirectives(tokenizer, matrix_manager);
+  auto global_config = ParseGlobalDirectives(tokenizer, matrix_manager,
+                                             spectrum_color_workaround);
   SpectrumManager spectrum_manager(std::get<6>(global_config));
   auto geometry_config = ParseGeometryDirectives(
       tokenizer, matrix_manager, spectrum_manager, std::get<6>(global_config),

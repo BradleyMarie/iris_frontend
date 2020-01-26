@@ -9,14 +9,13 @@
 
 namespace iris {
 
-std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(Tokenizer& tokenizer,
-                                                         float_t epsilon,
-                                                         size_t num_threads,
-                                                         bool spectral) {
+std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(
+    Tokenizer& tokenizer, float_t epsilon, size_t num_threads, bool spectral,
+    bool spectrum_color_workaround) {
   assert(isfinite(epsilon) && (float_t)0.0 <= epsilon);
   assert(num_threads != 0);
 
-  auto render_config = ParseDirectives(tokenizer);
+  auto render_config = ParseDirectives(tokenizer, spectrum_color_workaround);
 
   ISTATUS status = IntegratorPrepare(
       std::get<5>(render_config).get(), std::get<0>(render_config).get(),
@@ -58,9 +57,9 @@ std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(Tokenizer& tokenizer,
 }
 
 void RenderToOutput(Tokenizer& tokenizer, float_t epsilon, size_t num_threads,
-                    bool spectral) {
-  auto render_result =
-      RenderToFramebuffer(tokenizer, epsilon, num_threads, spectral);
+                    bool spectral, bool spectrum_color_workaround) {
+  auto render_result = RenderToFramebuffer(tokenizer, epsilon, num_threads,
+                                           spectral, spectrum_color_workaround);
   render_result.second->Write(render_result.first);
 }
 

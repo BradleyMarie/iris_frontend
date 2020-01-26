@@ -16,6 +16,13 @@ ABSL_FLAG(uint32_t, num_threads, 0,
           "number of threads will equal the number of processors in the "
           "system.");
 
+ABSL_FLAG(bool, spectrum_color_workaround, true,
+          "Replicates an erratum in pbrt-v3 which incorrectly scales the color "
+          "computed for emissive spectral power distributions by the integral "
+          "of the CIE Y function. If false, the workaround is disabled and "
+          "output. If false, iris the workaround is disabled and the output "
+          "of iris will not match that of pbrt.");
+
 ABSL_FLAG(bool, spectral, false,
           "Controls whether rendering should be fully spectral or approximate. "
           "If false, XYZ colors instead of SPD samples will be used in shading "
@@ -64,7 +71,8 @@ int main(int argc, char** argv) {
   while (tokenizer->Peek()) {
     iris::RenderToOutput(*tokenizer, absl::GetFlag(FLAGS_epsilon),
                          absl::GetFlag(FLAGS_num_threads),
-                         absl::GetFlag(FLAGS_spectral));
+                         absl::GetFlag(FLAGS_spectral),
+                         absl::GetFlag(FLAGS_spectrum_color_workaround));
   }
 
   return EXIT_SUCCESS;

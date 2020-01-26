@@ -7,9 +7,10 @@
 namespace iris {
 
 ColorIntegrator ParseColorIntegrator(const char* base_type_name,
-                                     Tokenizer& tokenizer);
+                                     Tokenizer& tokenizer,
+                                     bool spectrum_color_workaround);
 
-ColorIntegrator CreateDefaultColorIntegrator();
+ColorIntegrator CreateDefaultColorIntegrator(bool spectrum_color_workaround);
 
 }  // namespace iris
 

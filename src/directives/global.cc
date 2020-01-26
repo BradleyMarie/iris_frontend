@@ -22,7 +22,7 @@ GlobalConfig CreateGlobalConfig(
     absl::optional<CameraFactory>&& camera_factory,
     absl::optional<ColorExtrapolator>&& color_extrapolator,
     absl::optional<ColorIntegrator>&& color_integrator,
-    absl::optional<Random>&& random) {
+    absl::optional<Random>&& random, bool spectrum_color_workaround) {
   if (!pixel_sampler) {
     pixel_sampler = CreateDefaultSampler();
   }
@@ -44,7 +44,7 @@ GlobalConfig CreateGlobalConfig(
   }
 
   if (!color_integrator) {
-    color_integrator = CreateDefaultColorIntegrator();
+    color_integrator = CreateDefaultColorIntegrator(spectrum_color_workaround);
   }
 
   if (!random) {
@@ -88,7 +88,8 @@ bool CallOnce(const char* base_type_name, absl::string_view token,
 }  // namespace
 
 GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
-                                   MatrixManager& matrix_manager) {
+                                   MatrixManager& matrix_manager,
+                                   bool spectrum_color_workaround) {
   matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
   matrix_manager.Identity();
 
@@ -106,7 +107,8 @@ GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
           std::move(camera_to_world), std::move(pixel_sampler),
           std::move(film_result), std::move(integrator_result),
           std::move(camera_factory), std::move(color_extrapolator),
-          std::move(color_integrator), std::move(random));
+          std::move(color_integrator), std::move(random),
+          spectrum_color_workaround);
     }
 
     if (TryParseTransformDirectives(*token, tokenizer, matrix_manager)) {
@@ -129,8 +131,9 @@ GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
       continue;
     }
 
-    if (CallOnce<ColorIntegrator>("ColorIntegrator", *token, color_integrator,
-                                  ParseColorIntegrator, tokenizer)) {
+    if (CallOnce<ColorIntegrator, bool>("ColorIntegrator", *token,
+                                        color_integrator, ParseColorIntegrator,
+                                        tokenizer, spectrum_color_workaround)) {
       continue;
     }
 
