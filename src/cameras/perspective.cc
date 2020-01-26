@@ -76,12 +76,8 @@ CameraFactory ParsePerspective(const char* base_type_name,
     half_fov = kDefaultHalfFov;
   }
 
-  Matrix camera_to_world;
-  *camera_to_world.release_and_get_address() =
-      MatrixGetInverse(matrix_manager.GetCurrent().first.get());
-
-  return CreatePerspectiveCameraFactory(camera_to_world, frameaspectratio.Get(),
-                                        half_fov);
+  return CreatePerspectiveCameraFactory(matrix_manager.GetCurrent().first,
+                                        frameaspectratio.Get(), half_fov);
 }
 
 }  // namespace iris

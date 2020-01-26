@@ -18,13 +18,13 @@ const std::pair<Matrix, Matrix>& MatrixManager::GetCurrent() {
 void MatrixManager::Identity() { Set(Matrix()); }
 
 void MatrixManager::Translate(const std::array<FiniteFloatT, 3>& params) {
-  Matrix translation;
-  ISTATUS status = MatrixAllocateTranslation(
-      params[0].Get(), params[1].Get(), params[2].Get(),
-      translation.release_and_get_address());
+  Matrix scalar;
+  ISTATUS status = MatrixAllocateTranslation(params[0].Get(), params[1].Get(),
+                                             params[2].Get(),
+                                             scalar.release_and_get_address());
   SuccessOrOOM(status);
 
-  Transform(translation);
+  Transform(scalar);
 }
 
 void MatrixManager::Scale(const std::array<FiniteNonZeroFloatT, 3>& params) {
@@ -96,11 +96,11 @@ void MatrixManager::LookAt(const std::array<FiniteFloatT, 9>& params) {
   right = VectorNormalize(right, NULL, NULL);
   up = VectorCrossProduct(direction, right);
 
-  Matrix inverse;
+  Matrix transform;
   ISTATUS status = MatrixAllocate(
       right.x, up.x, direction.x, pos.x, right.y, up.y, direction.y, pos.y,
       right.z, up.z, direction.z, pos.z, (float_t)0.0, (float_t)0.0,
-      (float_t)0.0, (float_t)1.0, inverse.release_and_get_address());
+      (float_t)0.0, (float_t)1.0, transform.release_and_get_address());
 
   switch (status) {
     case ISTATUS_ARITHMETIC_ERROR:
@@ -111,9 +111,6 @@ void MatrixManager::LookAt(const std::array<FiniteFloatT, 9>& params) {
     default:
       assert(status == ISTATUS_SUCCESS);
   }
-
-  Matrix transform;
-  *transform.release_and_get_address() = MatrixGetInverse(inverse.get());
 
   Transform(transform);
 }
