@@ -19,27 +19,28 @@ std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(Tokenizer& tokenizer,
   auto render_config = ParseDirectives(tokenizer);
 
   ISTATUS status = IntegratorPrepare(
-      std::get<4>(render_config).get(), std::get<0>(render_config).get(),
-      std::get<1>(render_config).get(), std::get<5>(render_config).get(),
+      std::get<5>(render_config).get(), std::get<0>(render_config).get(),
+      std::get<1>(render_config).get(), std::get<6>(render_config).get(),
       spectral);
   SuccessOrOOM(status);
 
   SampleTracer sample_tracer;
   if (spectral) {
     status = PhysxSpectralSampleTracerAllocate(
-        std::get<4>(render_config).detach(),
+        std::get<5>(render_config).detach(),
         sample_tracer.release_and_get_address());
     SuccessOrOOM(status);
   } else {
-    status = PhysxSampleTracerAllocate(std::get<4>(render_config).detach(),
+    status = PhysxSampleTracerAllocate(std::get<5>(render_config).detach(),
                                        sample_tracer.release_and_get_address());
     SuccessOrOOM(status);
   }
 
   status = IrisCameraRender(
       std::get<2>(render_config).get(), std::get<3>(render_config).get(),
-      sample_tracer.get(), std::get<6>(render_config).get(),
-      std::get<7>(render_config).get(), epsilon, num_threads);
+      std::get<4>(render_config).get(), sample_tracer.get(),
+      std::get<7>(render_config).get(), std::get<8>(render_config).get(),
+      epsilon, num_threads);
 
   switch (status) {
     case ISTATUS_SUCCESS:
@@ -52,8 +53,8 @@ std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(Tokenizer& tokenizer,
       exit(EXIT_FAILURE);
   }
 
-  return std::make_pair(std::move(std::get<7>(render_config)),
-                        std::move(std::get<8>(render_config)));
+  return std::make_pair(std::move(std::get<8>(render_config)),
+                        std::move(std::get<9>(render_config)));
 }
 
 void RenderToOutput(Tokenizer& tokenizer, float_t epsilon, size_t num_threads,

@@ -11,7 +11,7 @@
 
 namespace iris {
 
-typedef std::tuple<Camera, PixelSampler, Framebuffer, Integrator,
+typedef std::tuple<Camera, Matrix, PixelSampler, Framebuffer, Integrator,
                    LightSamplerFactory, ColorExtrapolator, ColorIntegrator,
                    OutputWriter, Random>
     GlobalConfig;

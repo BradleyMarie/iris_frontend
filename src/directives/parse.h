@@ -9,8 +9,9 @@
 
 namespace iris {
 
-typedef std::tuple<Scene, LightSampler, Camera, PixelSampler, Integrator,
-                   ColorIntegrator, Random, Framebuffer, OutputWriter>
+typedef std::tuple<Scene, LightSampler, Camera, Matrix, PixelSampler,
+                   Integrator, ColorIntegrator, Random, Framebuffer,
+                   OutputWriter>
     RenderConfiguration;
 
 RenderConfiguration ParseDirectives(Tokenizer& tokenizer);

@@ -16,7 +16,7 @@ namespace iris {
 namespace {
 
 GlobalConfig CreateGlobalConfig(
-    const Matrix& camera_to_world, absl::optional<PixelSampler>&& pixel_sampler,
+    Matrix camera_to_world, absl::optional<PixelSampler>&& pixel_sampler,
     absl::optional<FilmResult>&& film_result,
     absl::optional<IntegratorResult>&& integrator_result,
     absl::optional<CameraFactory>&& camera_factory,
@@ -54,6 +54,7 @@ GlobalConfig CreateGlobalConfig(
   auto camera = (*camera_factory)(film_result->first);
 
   return {std::move(camera),
+          std::move(camera_to_world),
           std::move(*pixel_sampler),
           std::move(film_result->first),
           std::move(integrator_result->first),
@@ -98,10 +99,11 @@ GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
   absl::optional<ColorExtrapolator> color_extrapolator;
   absl::optional<ColorIntegrator> color_integrator;
   absl::optional<Random> random;
+  Matrix camera_to_world;
   for (auto token = tokenizer.Next(); token; token = tokenizer.Next()) {
     if (token == "WorldBegin") {
       return CreateGlobalConfig(
-          matrix_manager.GetCurrent().first, std::move(pixel_sampler),
+          std::move(camera_to_world), std::move(pixel_sampler),
           std::move(film_result), std::move(integrator_result),
           std::move(camera_factory), std::move(color_extrapolator),
           std::move(color_integrator), std::move(random));
@@ -115,9 +117,9 @@ GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
       continue;
     }
 
-    if (CallOnce<CameraFactory, MatrixManager&>("Camera", *token,
-                                                camera_factory, ParseCamera,
-                                                tokenizer, matrix_manager)) {
+    if (CallOnce<CameraFactory>("Camera", *token, camera_factory, ParseCamera,
+                                tokenizer)) {
+      camera_to_world = matrix_manager.GetCurrent().first;
       continue;
     }
 

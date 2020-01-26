@@ -3,15 +3,6 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 package(default_visibility = ["//visibility:private"])
 
 cc_library(
-    name = "math",
-    srcs = ["math.cc"],
-    hdrs = ["math.h"],
-    deps = [
-        "//src/common:pointer_types",
-    ],
-)
-
-cc_library(
     name = "parser",
     srcs = ["parser.cc"],
     hdrs = ["parser.h"],
@@ -20,7 +11,6 @@ cc_library(
         ":perspective",
         ":result",
         "//src/common:call_directive",
-        "//src/common:matrix_manager",
         "//src/common:tokenizer",
     ],
 )
@@ -30,10 +20,8 @@ cc_library(
     srcs = ["perspective.cc"],
     hdrs = ["perspective.h"],
     deps = [
-        ":math",
         ":result",
         "//src/common:error",
-        "//src/common:matrix_manager",
         "//src/common:tokenizer",
         "//src/param_matchers:float_single",
         "//src/param_matchers:matcher",
