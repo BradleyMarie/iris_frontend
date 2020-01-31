@@ -39,22 +39,24 @@ std::array<float_t, 3> XyzToRgb(const COLOR3& color) {
   return {r, g, b};
 }
 
-COLOR3 RgbToXyz(const std::array<float_t, 3>& rgb) {
-  float_t x = (float_t)0.412453f * rgb[0] + (float_t)0.357580f * rgb[1] +
-              (float_t)0.180423f * rgb[2];
-  float_t y = (float_t)0.212671f * rgb[0] + (float_t)0.715160f * rgb[1] +
-              (float_t)0.072169f * rgb[2];
-  float_t z = (float_t)0.019334f * rgb[0] + (float_t)0.119193f * rgb[1] +
-              (float_t)0.950227f * rgb[2];
+}  // namespace
 
-  x = std::max((float_t)0.0, x);
-  y = std::max((float_t)0.0, y);
-  z = std::max((float_t)0.0, z);
-
-  return ColorCreate(x, y, z);
+SpectrumManager::SpectrumManager(ColorExtrapolator color_extrapolator,
+                                 ColorIntegrator color_integrator,
+                                 bool spectral)
+    : m_color_extrapolator(std::move(color_extrapolator)),
+      m_color_integrator(std::move(color_integrator)),
+      m_spectral(spectral) {
+  if (!spectral) {
+    ISTATUS status = XyzColorExtrapolatorAllocate(
+        m_color_extrapolator.release_and_get_address());
+    SuccessOrOOM(status);
+  }
 }
 
-}  // namespace
+ColorExtrapolator& SpectrumManager::GetColorExtrapolator() {
+  return m_color_extrapolator;
+}
 
 ColorIntegrator SpectrumManager::GetColorIntegrator() const {
   if (m_spectral) {
@@ -108,8 +110,12 @@ absl::optional<Spectrum> SpectrumManager::AllocateInterpolatedSpectrum(
 absl::optional<Spectrum> SpectrumManager::AllocateRgbSpectrum(
     const std::array<float_t, 3>& rgb) {
   if (!m_spectral) {
-    COLOR3 color = RgbToXyz(rgb);
-    return AllocateXyzSpectrum(color);
+    Spectrum result;
+    ISTATUS status =
+        ColorExtrapolatorComputeSpectrum(m_color_extrapolator.get(), rgb.data(),
+                                         result.release_and_get_address());
+    SuccessOrOOM(status);
+    return result;
   }
 
   Spectrum result;
@@ -179,8 +185,12 @@ absl::optional<Reflector> SpectrumManager::AllocateInterpolatedReflector(
 absl::optional<Reflector> SpectrumManager::AllocateRgbReflector(
     const std::array<float_t, 3>& rgb) {
   if (!m_spectral) {
-    COLOR3 color = RgbToXyz(rgb);
-    return AllocateXyzReflector(color);
+    Reflector result;
+    ISTATUS status = ColorExtrapolatorComputeReflector(
+        m_color_extrapolator.get(), rgb.data(),
+        result.release_and_get_address());
+    SuccessOrOOM(status);
+    return result;
   }
 
   Reflector result;

@@ -10,11 +10,12 @@ RenderConfiguration ParseDirectives(Tokenizer& tokenizer, bool spectral,
   MatrixManager matrix_manager;
   auto global_config = ParseGlobalDirectives(tokenizer, matrix_manager,
                                              spectrum_color_workaround);
-  SpectrumManager spectrum_manager(std::get<6>(global_config),
-                                   std::get<7>(global_config), spectral);
+  SpectrumManager spectrum_manager(std::move(std::get<6>(global_config)),
+                                   std::move(std::get<7>(global_config)),
+                                   spectral);
   auto geometry_config = ParseGeometryDirectives(
-      tokenizer, matrix_manager, spectrum_manager, std::get<6>(global_config),
-      std::get<7>(global_config));
+      tokenizer, matrix_manager, spectrum_manager,
+      spectrum_manager.GetColorExtrapolator(), std::get<7>(global_config));
   return {
       std::move(geometry_config.first),
       std::move(std::get<5>(global_config)(geometry_config.second)),
