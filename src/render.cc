@@ -15,7 +15,8 @@ std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(
   assert(isfinite(epsilon) && (float_t)0.0 <= epsilon);
   assert(num_threads != 0);
 
-  auto render_config = ParseDirectives(tokenizer, spectrum_color_workaround);
+  auto render_config =
+      ParseDirectives(tokenizer, spectral, spectrum_color_workaround);
 
   ISTATUS status = IntegratorPrepare(
       std::get<5>(render_config).get(), std::get<0>(render_config).get(),
@@ -24,16 +25,9 @@ std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(
   SuccessOrOOM(status);
 
   SampleTracer sample_tracer;
-  if (spectral) {
-    status = PhysxSpectralSampleTracerAllocate(
-        std::get<5>(render_config).detach(),
-        sample_tracer.release_and_get_address());
-    SuccessOrOOM(status);
-  } else {
-    status = PhysxSampleTracerAllocate(std::get<5>(render_config).detach(),
-                                       sample_tracer.release_and_get_address());
-    SuccessOrOOM(status);
-  }
+  status = PhysxSampleTracerAllocate(std::get<5>(render_config).detach(),
+                                     sample_tracer.release_and_get_address());
+  SuccessOrOOM(status);
 
   status = IrisCameraRender(
       std::get<2>(render_config).get(), std::get<3>(render_config).get(),
