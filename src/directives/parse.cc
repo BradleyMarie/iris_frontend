@@ -16,7 +16,7 @@ RenderConfiguration ParseDirectives(Tokenizer& tokenizer, bool spectral,
   auto geometry_config = ParseGeometryDirectives(
       tokenizer, matrix_manager, spectrum_manager,
       spectrum_manager.GetColorExtrapolator(), std::get<7>(global_config));
-  return {
+  return std::make_tuple(
       std::move(geometry_config.first),
       std::move(std::get<5>(global_config)(geometry_config.second)),
       std::move(std::get<0>(global_config)),
@@ -26,8 +26,7 @@ RenderConfiguration ParseDirectives(Tokenizer& tokenizer, bool spectral,
       std::move(spectrum_manager.GetColorIntegrator()),
       std::move(std::get<9>(global_config)),
       std::move(std::get<3>(global_config)),
-      std::move(std::get<8>(global_config)),
-  };
+      std::move(std::get<8>(global_config)));
 }
 
 }  // namespace iris

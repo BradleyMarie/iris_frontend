@@ -53,16 +53,12 @@ GlobalConfig CreateGlobalConfig(
 
   auto camera = (*camera_factory)(film_result->first);
 
-  return {std::move(camera),
-          std::move(camera_to_world),
-          std::move(*pixel_sampler),
-          std::move(film_result->first),
-          std::move(integrator_result->first),
-          std::move(integrator_result->second),
-          std::move(*color_extrapolator),
-          std::move(*color_integrator),
-          std::move(film_result->second),
-          std::move(*random)};
+  return std::make_tuple(
+      std::move(camera), std::move(camera_to_world), std::move(*pixel_sampler),
+      std::move(film_result->first), std::move(integrator_result->first),
+      std::move(integrator_result->second), std::move(*color_extrapolator),
+      std::move(*color_integrator), std::move(film_result->second),
+      std::move(*random));
 }
 
 template <typename Result, typename... Args>

@@ -7,8 +7,17 @@ template <typename Type, void (*Retain)(Type*), void (*Release)(Type*)>
 class SharedPtr {
  public:
   SharedPtr() : m_ptr(nullptr) {}
+  SharedPtr(SharedPtr&& other) : m_ptr(other.m_ptr) { other.m_ptr = nullptr; }
   SharedPtr(const SharedPtr& other) : m_ptr(other.m_ptr) { Retain(m_ptr); }
   ~SharedPtr() { Release(m_ptr); }
+  SharedPtr& operator=(SharedPtr&& other) {
+    if (this != &other) {
+      Release(m_ptr);
+      m_ptr = other.m_ptr;
+      other.m_ptr = nullptr;
+    }
+    return *this;
+  }
   SharedPtr& operator=(const SharedPtr& other) {
     if (this != &other) {
       Release(m_ptr);
