@@ -35,8 +35,22 @@ class SpectrumManager {
   ColorIntegrator m_color_integrator;
   bool m_spectral;
 
+  struct ColorComparator {
+    bool operator()(const COLOR3& lhs, const COLOR3& rhs) const {
+      if (lhs.x != rhs.x) {
+        return lhs.x < rhs.x;
+      }
+      if (lhs.y != rhs.y) {
+        return lhs.y < rhs.y;
+      }
+      return lhs.z < rhs.z;
+    }
+  };
+
   std::map<std::vector<float_t>, Spectrum> m_interpolated_spectra;
   std::map<std::vector<float_t>, Reflector> m_interpolated_reflectors;
+  std::map<COLOR3, Spectrum, ColorComparator> m_xyz_spectra;
+  std::map<COLOR3, Reflector, ColorComparator> m_xyz_reflectors;
   std::map<float_t, Reflector> m_uniform_reflector;
 };
 

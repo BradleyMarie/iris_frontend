@@ -124,16 +124,27 @@ absl::optional<Spectrum> SpectrumManager::AllocateRgbSpectrum(
 
 absl::optional<Spectrum> SpectrumManager::AllocateXyzSpectrum(
     const COLOR3& color) {
-  if (!m_spectral) {
-    Spectrum result;
-    ISTATUS status = XyzSpectrumAllocate(color.x, color.y, color.z,
-                                         result.release_and_get_address());
-    SuccessOrOOM(status);
-    return result;
+  if (m_spectral) {
+    auto rgb = XyzToRgb(color);
+    return AllocateRgbSpectrum(rgb);
   }
 
-  auto rgb = XyzToRgb(color);
-  return AllocateRgbSpectrum(rgb);
+  auto iter = m_xyz_spectra.find(color);
+  if (iter != m_xyz_spectra.end()) {
+    return iter->second;
+  }
+
+  Spectrum result;
+  ISTATUS status = XyzSpectrumAllocate(color.x, color.y, color.z,
+                                       result.release_and_get_address());
+  if (status != ISTATUS_SUCCESS) {
+    if (status == ISTATUS_ALLOCATION_FAILED) {
+      ReportOOM();
+    }
+    return absl::nullopt;
+  }
+
+  return result;
 }
 
 absl::optional<Reflector> SpectrumManager::AllocateInterpolatedReflector(
@@ -190,16 +201,27 @@ absl::optional<Reflector> SpectrumManager::AllocateRgbReflector(
 
 absl::optional<Reflector> SpectrumManager::AllocateXyzReflector(
     const COLOR3& color) {
-  if (!m_spectral) {
-    Reflector result;
-    ISTATUS status = XyzReflectorAllocate(color.x, color.y, color.z,
-                                          result.release_and_get_address());
-    SuccessOrOOM(status);
-    return result;
+  if (m_spectral) {
+    auto rgb = XyzToRgb(color);
+    return AllocateRgbReflector(rgb);
   }
 
-  auto rgb = XyzToRgb(color);
-  return AllocateRgbReflector(rgb);
+  auto iter = m_xyz_reflectors.find(color);
+  if (iter != m_xyz_reflectors.end()) {
+    return iter->second;
+  }
+
+  Reflector result;
+  ISTATUS status = XyzReflectorAllocate(color.x, color.y, color.z,
+                                        result.release_and_get_address());
+  if (status != ISTATUS_SUCCESS) {
+    if (status == ISTATUS_ALLOCATION_FAILED) {
+      ReportOOM();
+    }
+    return absl::nullopt;
+  }
+
+  return result;
 }
 
 absl::optional<Reflector> SpectrumManager::AllocateUniformReflector(
