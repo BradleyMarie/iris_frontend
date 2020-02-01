@@ -23,8 +23,7 @@ static const char* kImageMapDefaultWrap = "repeat";
 ReflectorTexture ParseImageMapReflector(
     const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
     const NamedTextureManager& named_texture_manager,
-    TextureManager& texture_manager, SpectrumManager& spectrum_manager,
-    ColorExtrapolator& color_extrapolator) {
+    TextureManager& texture_manager, SpectrumManager& spectrum_manager) {
   SingleFloatMatcher u_scale(base_type_name, type_name, "uscale", false, false,
                              -std::numeric_limits<float_t>::infinity(),
                              std::numeric_limits<float_t>::infinity(),
@@ -68,9 +67,10 @@ ReflectorTexture ParseImageMapReflector(
   }
 
   ReflectorMipmap mipmap;
-  ISTATUS status = PngReflectorMipmapAllocate(filename.Get().c_str(), wrap_mode,
-                                              color_extrapolator.get(),
-                                              mipmap.release_and_get_address());
+  ISTATUS status =
+      PngReflectorMipmapAllocate(filename.Get().c_str(), wrap_mode,
+                                 spectrum_manager.GetColorExtrapolator().get(),
+                                 mipmap.release_and_get_address());
   SuccessOrOOM(status);
 
   return texture_manager.AllocateImageMapReflectorTexture(

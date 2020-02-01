@@ -14,8 +14,7 @@ static const float_t kConstantTextureDefaultValue = (float_t)1.0;
 ReflectorTexture ParseConstantReflector(
     const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
     const NamedTextureManager& named_texture_manager,
-    TextureManager& texture_manager, SpectrumManager& spectrum_manager,
-    ColorExtrapolator& color_extrapolator) {
+    TextureManager& texture_manager, SpectrumManager& spectrum_manager) {
   ReflectorTextureMatcher value =
       ReflectorTextureMatcher::FromUniformReflectance(
           base_type_name, type_name, "value", false, named_texture_manager,

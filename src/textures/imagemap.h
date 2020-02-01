@@ -11,8 +11,7 @@ namespace iris {
 ReflectorTexture ParseImageMapReflector(
     const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
     const NamedTextureManager& named_texture_manager,
-    TextureManager& texture_manager, SpectrumManager& spectrum_manager,
-    ColorExtrapolator& color_extrapolator);
+    TextureManager& texture_manager, SpectrumManager& spectrum_manager);
 
 FloatTexture ParseImageMapFloat(
     const char* base_type_name, const char* type_name, Tokenizer& tokenizer,

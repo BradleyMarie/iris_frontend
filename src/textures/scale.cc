@@ -14,8 +14,7 @@ static const float_t kScaleTextureDefaultValue = (float_t)1.0;
 ReflectorTexture ParseScaleReflector(
     const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
     const NamedTextureManager& named_texture_manager,
-    TextureManager& texture_manager, SpectrumManager& spectrum_manager,
-    ColorExtrapolator& color_extrapolator) {
+    TextureManager& texture_manager, SpectrumManager& spectrum_manager) {
   ReflectorTextureMatcher tex1 =
       ReflectorTextureMatcher::FromUniformReflectance(
           base_type_name, type_name, "tex1", false, named_texture_manager,
