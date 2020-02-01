@@ -109,15 +109,6 @@ absl::optional<Spectrum> SpectrumManager::AllocateInterpolatedSpectrum(
 
 absl::optional<Spectrum> SpectrumManager::AllocateRgbSpectrum(
     const std::array<float_t, 3>& rgb) {
-  if (!m_spectral) {
-    Spectrum result;
-    ISTATUS status =
-        ColorExtrapolatorComputeSpectrum(m_color_extrapolator.get(), rgb.data(),
-                                         result.release_and_get_address());
-    SuccessOrOOM(status);
-    return result;
-  }
-
   Spectrum result;
   ISTATUS status = ColorExtrapolatorComputeSpectrum(
       m_color_extrapolator.get(), rgb.data(), result.release_and_get_address());
@@ -184,15 +175,6 @@ absl::optional<Reflector> SpectrumManager::AllocateInterpolatedReflector(
 
 absl::optional<Reflector> SpectrumManager::AllocateRgbReflector(
     const std::array<float_t, 3>& rgb) {
-  if (!m_spectral) {
-    Reflector result;
-    ISTATUS status = ColorExtrapolatorComputeReflector(
-        m_color_extrapolator.get(), rgb.data(),
-        result.release_and_get_address());
-    SuccessOrOOM(status);
-    return result;
-  }
-
   Reflector result;
   ISTATUS status = ColorExtrapolatorComputeReflector(
       m_color_extrapolator.get(), rgb.data(), result.release_and_get_address());
