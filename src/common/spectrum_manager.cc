@@ -1,8 +1,8 @@
 #include "src/common/spectrum_manager.h"
 
 #include "iris_physx_toolkit/interpolated_spectrum.h"
+#include "iris_physx_toolkit/rgb_spectra.h"
 #include "iris_physx_toolkit/uniform_reflector.h"
-#include "iris_physx_toolkit/xyz_spectra.h"
 #include "src/common/error.h"
 
 namespace iris {
@@ -48,7 +48,7 @@ SpectrumManager::SpectrumManager(ColorExtrapolator color_extrapolator,
       m_color_integrator(std::move(color_integrator)),
       m_spectral(spectral) {
   if (!spectral) {
-    ISTATUS status = XyzColorExtrapolatorAllocate(
+    ISTATUS status = RgbColorExtrapolatorAllocate(
         m_color_extrapolator.release_and_get_address());
     SuccessOrOOM(status);
   }
@@ -64,7 +64,7 @@ ColorIntegrator SpectrumManager::GetColorIntegrator() const {
   }
 
   ColorIntegrator result;
-  ISTATUS status = XyzColorIntegratorAllocate(result.release_and_get_address());
+  ISTATUS status = RgbColorIntegratorAllocate(result.release_and_get_address());
   SuccessOrOOM(status);
 
   return result;
@@ -98,7 +98,12 @@ absl::optional<Spectrum> SpectrumManager::AllocateInterpolatedSpectrum(
     COLOR3 color;
     status = ColorIntegratorComputeSpectrumColor(m_color_integrator.get(),
                                                  result.get(), &color);
-    SuccessOrOOM(status);
+    if (status != ISTATUS_SUCCESS) {
+      if (status == ISTATUS_ALLOCATION_FAILED) {
+        ReportOOM();
+      }
+      return absl::nullopt;
+    }
 
     result = AllocateXyzSpectrum(color).value();
   }
@@ -124,27 +129,8 @@ absl::optional<Spectrum> SpectrumManager::AllocateRgbSpectrum(
 
 absl::optional<Spectrum> SpectrumManager::AllocateXyzSpectrum(
     const COLOR3& color) {
-  if (m_spectral) {
-    auto rgb = XyzToRgb(color);
-    return AllocateRgbSpectrum(rgb);
-  }
-
-  auto iter = m_xyz_spectra.find(color);
-  if (iter != m_xyz_spectra.end()) {
-    return iter->second;
-  }
-
-  Spectrum result;
-  ISTATUS status = XyzSpectrumAllocate(color.x, color.y, color.z,
-                                       result.release_and_get_address());
-  if (status != ISTATUS_SUCCESS) {
-    if (status == ISTATUS_ALLOCATION_FAILED) {
-      ReportOOM();
-    }
-    return absl::nullopt;
-  }
-
-  return result;
+  auto rgb = XyzToRgb(color);
+  return AllocateRgbSpectrum(rgb);
 }
 
 absl::optional<Reflector> SpectrumManager::AllocateInterpolatedReflector(
@@ -175,7 +161,12 @@ absl::optional<Reflector> SpectrumManager::AllocateInterpolatedReflector(
     COLOR3 color;
     status = ColorIntegratorComputeReflectorColor(m_color_integrator.get(),
                                                   result.get(), &color);
-    SuccessOrOOM(status);
+    if (status != ISTATUS_SUCCESS) {
+      if (status == ISTATUS_ALLOCATION_FAILED) {
+        ReportOOM();
+      }
+      return absl::nullopt;
+    }
 
     result = AllocateXyzReflector(color).value();
   }
@@ -201,27 +192,12 @@ absl::optional<Reflector> SpectrumManager::AllocateRgbReflector(
 
 absl::optional<Reflector> SpectrumManager::AllocateXyzReflector(
     const COLOR3& color) {
-  if (m_spectral) {
-    auto rgb = XyzToRgb(color);
-    return AllocateRgbReflector(rgb);
-  }
+  auto rgb = XyzToRgb(color);
+  rgb[0] = std::min(rgb[0], (float_t)1.0);
+  rgb[1] = std::min(rgb[1], (float_t)1.0);
+  rgb[2] = std::min(rgb[2], (float_t)1.0);
 
-  auto iter = m_xyz_reflectors.find(color);
-  if (iter != m_xyz_reflectors.end()) {
-    return iter->second;
-  }
-
-  Reflector result;
-  ISTATUS status = XyzReflectorAllocate(color.x, color.y, color.z,
-                                        result.release_and_get_address());
-  if (status != ISTATUS_SUCCESS) {
-    if (status == ISTATUS_ALLOCATION_FAILED) {
-      ReportOOM();
-    }
-    return absl::nullopt;
-  }
-
-  return result;
+  return AllocateRgbReflector(rgb);
 }
 
 absl::optional<Reflector> SpectrumManager::AllocateUniformReflector(
@@ -239,6 +215,20 @@ absl::optional<Reflector> SpectrumManager::AllocateUniformReflector(
       ReportOOM();
     }
     return absl::nullopt;
+  }
+
+  if (!m_spectral) {
+    COLOR3 color;
+    status = ColorIntegratorComputeReflectorColor(m_color_integrator.get(),
+                                                  result.get(), &color);
+    if (status != ISTATUS_SUCCESS) {
+      if (status == ISTATUS_ALLOCATION_FAILED) {
+        ReportOOM();
+      }
+      return absl::nullopt;
+    }
+
+    result = AllocateXyzReflector(color).value();
   }
 
   m_uniform_reflector[reflectance] = result;
