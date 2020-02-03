@@ -11,7 +11,7 @@ cc_library(
         "//src/common:pointer_types",
         "//src/common:tokenizer",
         "//src/param_matchers:matcher",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:rgb_color_extrapolator",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:smits_color_extrapolator",
     ],
 )
 

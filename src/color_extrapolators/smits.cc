@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "iris_physx_toolkit/rgb_color_extrapolator.h"
+#include "iris_physx_toolkit/smits_color_extrapolator.h"
 #include "src/common/error.h"
 #include "src/param_matchers/matcher.h"
 
@@ -18,7 +18,7 @@ ColorExtrapolator ParseSmits(const char* base_type_name, const char* type_name,
   }
 
   ColorExtrapolator result;
-  ISTATUS status = RgbColorExtrapolatorAllocate(
+  ISTATUS status = SmitsColorExtrapolatorAllocate(
       wavelengths.data(), wavelengths.size(), result.release_and_get_address());
   SuccessOrOOM(status);
 
