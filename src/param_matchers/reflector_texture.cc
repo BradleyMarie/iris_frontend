@@ -63,9 +63,9 @@ ReflectorTexture ReflectorTextureMatcher::Match(
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
   }
-  if (ValidateFloat(parameter.data[0].values[0]) ||
-      ValidateFloat(parameter.data[0].values[1]) ||
-      ValidateFloat(parameter.data[0].values[2])) {
+  if (!ValidateFloat(parameter.data[0].values[0]) ||
+      !ValidateFloat(parameter.data[0].values[1]) ||
+      !ValidateFloat(parameter.data[0].values[2])) {
     ElementRangeError();
   }
   Reflector reflector =
