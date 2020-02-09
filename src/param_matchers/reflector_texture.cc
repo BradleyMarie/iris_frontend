@@ -18,12 +18,11 @@ ReflectorTexture ReflectorFromUniformReflectance(
 
 }  // namespace
 
-const size_t ReflectorTextureMatcher::m_variant_indices[5] = {
+const size_t ReflectorTextureMatcher::m_variant_indices[4] = {
     GetIndex<FloatParameter, ParameterData>(),
-    GetIndex<RgbParameter, ParameterData>(),
+    GetIndex<ColorParameter, ParameterData>(),
     GetIndex<SpectrumParameter, ParameterData>(),
-    GetIndex<TextureParameter, ParameterData>(),
-    GetIndex<XyzParameter, ParameterData>()};
+    GetIndex<TextureParameter, ParameterData>()};
 
 ReflectorTextureMatcher ReflectorTextureMatcher::FromUniformReflectance(
     const char* base_type_name, const char* type_name,
@@ -59,18 +58,18 @@ ReflectorTexture ReflectorTextureMatcher::Match(
                                          parameter.data[0]);
 }
 
-ReflectorTexture ReflectorTextureMatcher::Match(const RgbParameter& parameter) {
+ReflectorTexture ReflectorTextureMatcher::Match(
+    const ColorParameter& parameter) {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
   }
-  if (!ValidateFloat(parameter.data[0][0]) ||
-      !ValidateFloat(parameter.data[0][1]) ||
-      !ValidateFloat(parameter.data[0][2])) {
+  if (ValidateFloat(parameter.data[0].values[0]) ||
+      ValidateFloat(parameter.data[0].values[1]) ||
+      ValidateFloat(parameter.data[0].values[2])) {
     ElementRangeError();
   }
-  COLOR3 color = ColorCreate(COLOR_SPACE_LINEAR_SRGB, parameter.data[0].data());
   Reflector reflector =
-      m_spectrum_manager.AllocateColorReflector(color).value();
+      m_spectrum_manager.AllocateColorReflector(parameter.data[0]).value();
   return m_texture_manager.AllocateConstantReflectorTexture(reflector);
 }
 
@@ -129,26 +128,15 @@ ReflectorTexture ReflectorTextureMatcher::Match(
   return m_named_texture_manager.GetReflectorTexture(parameter.data[0]);
 }
 
-ReflectorTexture ReflectorTextureMatcher::Match(const XyzParameter& parameter) {
-  if (parameter.data.size() != 1) {
-    NumberOfElementsError();
-  }
-  Reflector reflector =
-      m_spectrum_manager.AllocateColorReflector(parameter.data[0]).value();
-  return m_texture_manager.AllocateConstantReflectorTexture(reflector);
-}
-
 void ReflectorTextureMatcher::Match(ParameterData& data) {
   if (absl::holds_alternative<FloatParameter>(data)) {
     m_value = Match(absl::get<FloatParameter>(data));
-  } else if (absl::holds_alternative<RgbParameter>(data)) {
-    m_value = Match(absl::get<RgbParameter>(data));
+  } else if (absl::holds_alternative<ColorParameter>(data)) {
+    m_value = Match(absl::get<ColorParameter>(data));
   } else if (absl::holds_alternative<SpectrumParameter>(data)) {
     m_value = Match(absl::get<SpectrumParameter>(data));
-  } else if (absl::holds_alternative<TextureParameter>(data)) {
-    m_value = Match(absl::get<TextureParameter>(data));
   } else {
-    m_value = Match(absl::get<XyzParameter>(data));
+    m_value = Match(absl::get<TextureParameter>(data));
   }
 }
 

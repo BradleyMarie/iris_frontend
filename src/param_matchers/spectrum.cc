@@ -1,32 +1,32 @@
 #include "src/param_matchers/spectrum.h"
 
 #include "absl/strings/str_join.h"
+#include "src/param_matchers/flags.h"
 #include "src/param_matchers/spd_file.h"
 
 namespace iris {
 
-const size_t SpectrumMatcher::m_variant_indices[3] = {
-    GetIndex<RgbParameter, ParameterData>(),
-    GetIndex<SpectrumParameter, ParameterData>(),
-    GetIndex<XyzParameter, ParameterData>()};
+const size_t SpectrumMatcher::m_variant_indices[2] = {
+    GetIndex<ColorParameter, ParameterData>(),
+    GetIndex<SpectrumParameter, ParameterData>()};
 
 SpectrumMatcher SpectrumMatcher::FromRgb(
     const char* base_type_name, const char* type_name,
     const char* parameter_name, bool required,
     SpectrumManager& spectrum_manager,
     const std::array<float_t, 3>& default_rgb) {
-  COLOR3 color = ColorCreate(COLOR_SPACE_LINEAR_SRGB, default_rgb.data());
+  COLOR3 color =
+      ColorCreate(absl::GetFlag(FLAGS_rgb_color_space), default_rgb.data());
   return SpectrumMatcher(base_type_name, type_name, parameter_name, required,
                          spectrum_manager,
                          spectrum_manager.AllocateColorSpectrum(color).value());
 }
 
-Spectrum SpectrumMatcher::Match(const RgbParameter& parameter) {
+Spectrum SpectrumMatcher::Match(const ColorParameter& parameter) {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
   }
-  COLOR3 color = ColorCreate(COLOR_SPACE_LINEAR_SRGB, parameter.data[0].data());
-  return m_spectrum_manager.AllocateColorSpectrum(color).value();
+  return m_spectrum_manager.AllocateColorSpectrum(parameter.data[0]).value();
 }
 
 Spectrum SpectrumMatcher::Match(const std::vector<std::string>& files) {
@@ -71,20 +71,11 @@ Spectrum SpectrumMatcher::Match(const SpectrumParameter& parameter) {
   }
 }
 
-Spectrum SpectrumMatcher::Match(const XyzParameter& parameter) {
-  if (parameter.data.size() != 1) {
-    NumberOfElementsError();
-  }
-  return m_spectrum_manager.AllocateColorSpectrum(parameter.data[0]).value();
-}
-
 void SpectrumMatcher::Match(ParameterData& data) {
-  if (absl::holds_alternative<RgbParameter>(data)) {
-    m_value = Match(absl::get<RgbParameter>(data));
-  } else if (absl::holds_alternative<SpectrumParameter>(data)) {
-    m_value = Match(absl::get<SpectrumParameter>(data));
+  if (absl::holds_alternative<ColorParameter>(data)) {
+    m_value = Match(absl::get<ColorParameter>(data));
   } else {
-    m_value = Match(absl::get<XyzParameter>(data));
+    m_value = Match(absl::get<SpectrumParameter>(data));
   }
 }
 

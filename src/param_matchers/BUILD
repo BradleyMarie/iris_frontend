@@ -3,6 +3,16 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 package(default_visibility = ["//src:__subpackages__"])
 
 cc_library(
+    name = "flags",
+    srcs = ["flags.cc"],
+    hdrs = ["flags.h"],
+    deps = [
+        "@com_github_bradleymarie_iris//iris_advanced",
+        "@com_google_absl//absl/flags:flag",
+    ],
+)
+
+cc_library(
     name = "float_single",
     srcs = ["float_single.cc"],
     hdrs = ["float_single.h"],
@@ -54,6 +64,7 @@ cc_library(
     srcs = ["parser.cc"],
     hdrs = ["parser.h"],
     deps = [
+        ":flags",
         "//src/common:pointer_types",
         "//src/common:quoted_string",
         "//src/common:tokenizer",
@@ -102,6 +113,7 @@ cc_library(
     srcs = ["spectrum.cc"],
     hdrs = ["spectrum.h"],
     deps = [
+        ":flags",
         ":matcher",
         ":spd_file",
         "//src/common:pointer_types",

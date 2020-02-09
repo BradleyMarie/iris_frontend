@@ -19,7 +19,7 @@ class ReflectorTextureMatcher : public ParamMatcher {
                           SpectrumManager& spectrum_manager,
                           ReflectorTexture default_value)
       : ParamMatcher(base_type_name, type_name, parameter_name, required,
-                     m_variant_indices, 5),
+                     m_variant_indices, 4),
         m_named_texture_manager(named_texture_manager),
         m_texture_manager(texture_manager),
         m_spectrum_manager(spectrum_manager),
@@ -39,10 +39,9 @@ class ReflectorTextureMatcher : public ParamMatcher {
 
  private:
   ReflectorTexture Match(const FloatParameter& parameter);
-  ReflectorTexture Match(const RgbParameter& parameter);
+  ReflectorTexture Match(const ColorParameter& parameter);
   ReflectorTexture Match(const SpectrumParameter& parameter);
   ReflectorTexture Match(const TextureParameter& parameter);
-  ReflectorTexture Match(const XyzParameter& parameter);
 
   ReflectorTexture Match(const std::vector<std::string>& files);
   ReflectorTexture Match(
@@ -51,7 +50,7 @@ class ReflectorTextureMatcher : public ParamMatcher {
   static bool ValidateFloat(float_t value);
 
  private:
-  static const size_t m_variant_indices[5];
+  static const size_t m_variant_indices[4];
   const NamedTextureManager& m_named_texture_manager;
   TextureManager& m_texture_manager;
   SpectrumManager& m_spectrum_manager;

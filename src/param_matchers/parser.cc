@@ -7,6 +7,7 @@
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_split.h"
 #include "src/common/quoted_string.h"
+#include "src/param_matchers/flags.h"
 
 namespace iris {
 namespace {
@@ -156,29 +157,21 @@ static NormalParameter ParseNormal(Tokenizer& tokenizer) {
   return NormalParameter{std::move(data)};
 }
 
-static std::array<float_t, 3> MakeRgb(float_t x, float_t y, float_t z) {
-  return {x, y, z};
+static COLOR3 MakeColor(float_t x, float_t y, float_t z) {
+  float_t values[3] = {x, y, z};
+  return ColorCreate(absl::GetFlag(FLAGS_rgb_color_space), values);
 }
 
-static bool ValidateRgb(std::array<float_t, 3> value) {
-  if (!isfinite(value[0]) || value[0] < (float_t)0.0 || !isfinite(value[1]) ||
-      value[1] < (float_t)0.0 || !isfinite(value[2]) ||
-      value[2] < (float_t)0.0) {
-    return false;
-  }
-  return true;
-}
-
-static RgbParameter ParseColor(Tokenizer& tokenizer) {
-  auto data = ParseFloatTuple<std::array<float_t, 3>, MakeRgb, ValidateRgb>(
+static ColorParameter ParseColor(Tokenizer& tokenizer) {
+  auto data = ParseFloatTuple<COLOR3, MakeColor, ColorValidate>(
       tokenizer, "Color", "color");
-  return RgbParameter{std::move(data)};
+  return ColorParameter{std::move(data)};
 }
 
-static RgbParameter ParseRgb(Tokenizer& tokenizer) {
-  auto data = ParseFloatTuple<std::array<float_t, 3>, MakeRgb, ValidateRgb>(
-      tokenizer, "Rgb", "rgb");
-  return RgbParameter{std::move(data)};
+static ColorParameter ParseRgb(Tokenizer& tokenizer) {
+  auto data = ParseFloatTuple<COLOR3, MakeColor, ColorValidate>(tokenizer,
+                                                                "Rgb", "rgb");
+  return ColorParameter{std::move(data)};
 }
 
 static StringParameter ParseString(Tokenizer& tokenizer) {
@@ -198,10 +191,10 @@ static COLOR3 MakeXyz(float_t x, float_t y, float_t z) {
   return ColorCreate(COLOR_SPACE_XYZ, values);
 }
 
-static XyzParameter ParseXyz(Tokenizer& tokenizer) {
+static ColorParameter ParseXyz(Tokenizer& tokenizer) {
   auto data =
       ParseFloatTuple<COLOR3, MakeXyz, ColorValidate>(tokenizer, "Xyz", "xyz");
-  return XyzParameter{std::move(data)};
+  return ColorParameter{std::move(data)};
 }
 
 static std::vector<std::string> ParseSpectrumFilenames(
@@ -244,21 +237,21 @@ ParserCallback ToCallback(std::function<Result(Tokenizer&)> func) {
 static const std::map<absl::string_view, ParserCallback> kParsers = {
     // blackbody
     {"bool", ToCallback<BoolParameter>(ParseBool)},
-    {"color", ToCallback<RgbParameter>(ParseColor)},
+    {"color", ToCallback<ColorParameter>(ParseColor)},
     {"float", ToCallback<FloatParameter>(ParseFloat)},
     {"integer", ToCallback<IntParameter>(ParseInt)},
     {"normal", ToCallback<NormalParameter>(ParseNormal)},
     {"point", ToCallback<Point3Parameter>(ParsePoint)},
     // point2
     {"point3", ToCallback<Point3Parameter>(ParsePoint3)},
-    {"rgb", ToCallback<RgbParameter>(ParseRgb)},
+    {"rgb", ToCallback<ColorParameter>(ParseRgb)},
     {"spectrum", ToCallback<SpectrumParameter>(ParseSpectrum)},
     {"string", ToCallback<StringParameter>(ParseString)},
     {"texture", ToCallback<TextureParameter>(ParseTexture)},
     {"vector", ToCallback<Vector3Parameter>(ParseVector)},
     // vector2
     {"vector3", ToCallback<Vector3Parameter>(ParseVector3)},
-    {"xyz", ToCallback<XyzParameter>(ParseXyz)},
+    {"xyz", ToCallback<ColorParameter>(ParseXyz)},
 };
 
 }  // namespace

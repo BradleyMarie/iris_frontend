@@ -43,8 +43,8 @@ struct NormalParameter {
   std::vector<VECTOR3> data;
 };
 
-struct RgbParameter {
-  std::vector<std::array<float_t, 3>> data;
+struct ColorParameter {
+  std::vector<COLOR3> data;
 };
 
 struct StringParameter {
@@ -55,14 +55,10 @@ struct TextureParameter {
   std::vector<std::string> data;
 };
 
-struct XyzParameter {
-  std::vector<COLOR3> data;
-};
-
 typedef absl::variant<BoolParameter, IntParameter, FloatParameter,
                       SpectrumParameter, Point3Parameter, Vector3Parameter,
-                      NormalParameter, RgbParameter, StringParameter,
-                      TextureParameter, XyzParameter>
+                      NormalParameter, ColorParameter, StringParameter,
+                      TextureParameter>
     ParameterData;
 
 typedef std::pair<std::string, ParameterData> Parameter;
