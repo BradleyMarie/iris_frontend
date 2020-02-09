@@ -3,12 +3,12 @@
 #include <iostream>
 
 #include "src/cameras/parser.h"
-#include "src/color_extrapolators/parser.h"
 #include "src/color_integrators/parser.h"
 #include "src/directives/include.h"
 #include "src/directives/transform.h"
 #include "src/films/parser.h"
 #include "src/integrators/parser.h"
+#include "src/light_propagation/parser.h"
 #include "src/randoms/parser.h"
 #include "src/samplers/parser.h"
 
@@ -20,9 +20,10 @@ GlobalConfig CreateGlobalConfig(
     absl::optional<FilmResult>&& film_result,
     absl::optional<IntegratorResult>&& integrator_result,
     absl::optional<CameraFactory>&& camera_factory,
-    absl::optional<ColorExtrapolator>&& color_extrapolator,
+    absl::optional<LightPropagationResult>&& light_propagation,
     absl::optional<ColorIntegrator>&& color_integrator,
-    absl::optional<Random>&& random, bool spectrum_color_workaround) {
+    absl::optional<Random>&& random, bool spectral,
+    bool spectrum_color_workaround) {
   if (!pixel_sampler) {
     pixel_sampler = CreateDefaultSampler();
   }
@@ -39,8 +40,8 @@ GlobalConfig CreateGlobalConfig(
     camera_factory = CreateDefaultCamera();
   }
 
-  if (!color_extrapolator) {
-    color_extrapolator = CreateDefaultColorExtrapolator();
+  if (!light_propagation) {
+    light_propagation = CreateDefaultLightPropagation(spectral);
   }
 
   if (!color_integrator) {
@@ -51,14 +52,17 @@ GlobalConfig CreateGlobalConfig(
     random = CreateDefaultRandom();
   }
 
-  auto camera = (*camera_factory)(film_result->first);
+  auto camera = camera_factory.value()(film_result->first);
+  auto light_propagation_params =
+      light_propagation.value()(color_integrator.value());
 
   return std::make_tuple(
-      std::move(camera), std::move(camera_to_world), std::move(*pixel_sampler),
-      std::move(film_result->first), std::move(integrator_result->first),
-      std::move(integrator_result->second), std::move(*color_extrapolator),
-      std::move(*color_integrator), std::move(film_result->second),
-      std::move(*random));
+      std::move(camera), std::move(camera_to_world),
+      std::move(pixel_sampler.value()), std::move(film_result->first),
+      std::move(integrator_result->first), std::move(integrator_result->second),
+      std::move(light_propagation_params.first),
+      std::move(light_propagation_params.second),
+      std::move(film_result->second), std::move(random.value()));
 }
 
 template <typename Result, typename... Args>
@@ -84,7 +88,7 @@ bool CallOnce(const char* base_type_name, absl::string_view token,
 }  // namespace
 
 GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
-                                   MatrixManager& matrix_manager,
+                                   MatrixManager& matrix_manager, bool spectral,
                                    bool spectrum_color_workaround) {
   matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
   matrix_manager.Identity();
@@ -93,7 +97,7 @@ GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
   absl::optional<FilmResult> film_result;
   absl::optional<IntegratorResult> integrator_result;
   absl::optional<CameraFactory> camera_factory;
-  absl::optional<ColorExtrapolator> color_extrapolator;
+  absl::optional<LightPropagationResult> light_propagation;
   absl::optional<ColorIntegrator> color_integrator;
   absl::optional<Random> random;
   Matrix camera_to_world;
@@ -102,8 +106,8 @@ GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
       return CreateGlobalConfig(
           std::move(camera_to_world), std::move(pixel_sampler),
           std::move(film_result), std::move(integrator_result),
-          std::move(camera_factory), std::move(color_extrapolator),
-          std::move(color_integrator), std::move(random),
+          std::move(camera_factory), std::move(light_propagation),
+          std::move(color_integrator), std::move(random), spectral,
           spectrum_color_workaround);
     }
 
@@ -118,12 +122,6 @@ GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
     if (CallOnce<CameraFactory>("Camera", *token, camera_factory, ParseCamera,
                                 tokenizer)) {
       camera_to_world = matrix_manager.GetCurrent().first;
-      continue;
-    }
-
-    if (CallOnce<ColorExtrapolator>("ColorExtrapolator", *token,
-                                    color_extrapolator, ParseColorExtrapolator,
-                                    tokenizer)) {
       continue;
     }
 
@@ -169,6 +167,12 @@ GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
       std::cerr << "ERROR: Invalid directive before WorldBegin: " << *token
                 << std::endl;
       exit(EXIT_FAILURE);
+      continue;
+    }
+
+    if (CallOnce<LightPropagationResult>("LightPropagation", *token,
+                                         light_propagation,
+                                         ParseLightPropagation, tokenizer)) {
       continue;
     }
 

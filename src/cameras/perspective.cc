@@ -85,7 +85,7 @@ CameraFactory ParsePerspective(const char* base_type_name,
                      {&halffov, &fov, &frameaspectratio});
 
   if (halffov.Get() && fov.Get()) {
-    std::cerr << "ERROR: Only one of halffov or fov may be specified "
+    std::cerr << "ERROR: Only one of halffov or fov may be specified"
               << std::endl;
     exit(EXIT_FAILURE);
   }

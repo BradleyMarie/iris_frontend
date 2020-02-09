@@ -11,10 +11,15 @@ namespace iris {
 
 class SpectrumManager {
  public:
-  SpectrumManager(ColorExtrapolator color_extrapolator,
-                  ColorIntegrator color_integrator, bool spectral);
+  SpectrumManager(ColorExtrapolator color_extrapolator)
+      : m_color_extrapolator(std::move(color_extrapolator)) {}
 
-  ColorIntegrator GetColorIntegrator() const;
+  SpectrumManager(ColorExtrapolator color_extrapolator,
+                  ColorIntegrator intermediate_color_integrator)
+      : m_color_extrapolator(std::move(color_extrapolator)),
+        m_intermediate_color_integrator(
+            std::move(intermediate_color_integrator)) {}
+
   ColorExtrapolator& GetColorExtrapolator();
 
   absl::optional<Spectrum> AllocateInterpolatedSpectrum(
@@ -28,8 +33,7 @@ class SpectrumManager {
 
  private:
   ColorExtrapolator m_color_extrapolator;
-  ColorIntegrator m_color_integrator;
-  bool m_spectral;
+  ColorIntegrator m_intermediate_color_integrator;
 
   std::map<std::vector<float_t>, Spectrum> m_interpolated_spectra;
   std::map<std::vector<float_t>, Reflector> m_interpolated_reflectors;

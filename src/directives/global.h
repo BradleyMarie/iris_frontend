@@ -5,6 +5,7 @@
 
 #include "src/common/matrix_manager.h"
 #include "src/common/pointer_types.h"
+#include "src/common/spectrum_manager.h"
 #include "src/common/tokenizer.h"
 #include "src/films/output_writers/result.h"
 #include "src/integrators/lightstrategy/result.h"
@@ -12,12 +13,13 @@
 namespace iris {
 
 typedef std::tuple<Camera, Matrix, PixelSampler, Framebuffer, Integrator,
-                   LightSamplerFactory, ColorExtrapolator, ColorIntegrator,
+                   LightSamplerFactory, SpectrumManager, ColorIntegrator,
                    OutputWriter, Random>
     GlobalConfig;
 
 GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
                                    MatrixManager& matrix_manager,
+                                   bool spectral,
                                    bool spectrum_color_workaround);
 
 }  // namespace iris
