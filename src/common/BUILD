@@ -137,8 +137,8 @@ cc_library(
     deps = [
         ":error",
         ":pointer_types",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:color_spectra",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:interpolated_spectrum",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:rgb_spectra",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:uniform_reflector",
         "@com_google_absl//absl/types:optional",
     ],

@@ -1,7 +1,7 @@
 #include "src/common/spectrum_manager.h"
 
+#include "iris_physx_toolkit/color_spectra.h"
 #include "iris_physx_toolkit/interpolated_spectrum.h"
-#include "iris_physx_toolkit/rgb_spectra.h"
 #include "iris_physx_toolkit/uniform_reflector.h"
 #include "src/common/error.h"
 
@@ -22,23 +22,6 @@ std::pair<std::vector<float_t>, std::vector<float_t>> UnswizzleFloats(
   return std::make_pair(std::move(first), std::move(second));
 }
 
-std::array<float_t, 3> XyzToRgb(const COLOR3& color) {
-  float_t r = (float_t)3.2404542 * color.x - (float_t)1.5371385 * color.y -
-              (float_t)0.4985314 * color.z;
-
-  float_t g = (float_t)-0.969266 * color.x + (float_t)1.8760108 * color.y +
-              (float_t)0.0415560 * color.z;
-
-  float_t b = (float_t)0.0556434 * color.x - (float_t)0.2040259 * color.y +
-              (float_t)1.0572252 * color.z;
-
-  r = std::max((float_t)0.0, r);
-  g = std::max((float_t)0.0, g);
-  b = std::max((float_t)0.0, b);
-
-  return {r, g, b};
-}
-
 }  // namespace
 
 SpectrumManager::SpectrumManager(ColorExtrapolator color_extrapolator,
@@ -48,7 +31,8 @@ SpectrumManager::SpectrumManager(ColorExtrapolator color_extrapolator,
       m_color_integrator(std::move(color_integrator)),
       m_spectral(spectral) {
   if (!spectral) {
-    ISTATUS status = RgbColorExtrapolatorAllocate(
+    ISTATUS status = ColorColorExtrapolatorAllocate(
+        COLOR_SPACE_LINEAR_SRGB,
         m_color_extrapolator.release_and_get_address());
     SuccessOrOOM(status);
   }
@@ -64,7 +48,8 @@ ColorIntegrator SpectrumManager::GetColorIntegrator() const {
   }
 
   ColorIntegrator result;
-  ISTATUS status = RgbColorIntegratorAllocate(result.release_and_get_address());
+  ISTATUS status = ColorColorIntegratorAllocate(
+      COLOR_SPACE_LINEAR_SRGB, result.release_and_get_address());
   SuccessOrOOM(status);
 
   return result;
@@ -105,18 +90,18 @@ absl::optional<Spectrum> SpectrumManager::AllocateInterpolatedSpectrum(
       return absl::nullopt;
     }
 
-    result = AllocateXyzSpectrum(color).value();
+    result = AllocateColorSpectrum(color).value();
   }
 
   m_interpolated_spectra[wavelengths_and_intensities] = result;
   return result;
 }
 
-absl::optional<Spectrum> SpectrumManager::AllocateRgbSpectrum(
-    const std::array<float_t, 3>& rgb) {
+absl::optional<Spectrum> SpectrumManager::AllocateColorSpectrum(
+    const COLOR3& color) {
   Spectrum result;
   ISTATUS status = ColorExtrapolatorComputeSpectrum(
-      m_color_extrapolator.get(), rgb.data(), result.release_and_get_address());
+      m_color_extrapolator.get(), color, result.release_and_get_address());
   if (status != ISTATUS_SUCCESS) {
     if (status == ISTATUS_ALLOCATION_FAILED) {
       ReportOOM();
@@ -125,12 +110,6 @@ absl::optional<Spectrum> SpectrumManager::AllocateRgbSpectrum(
   }
 
   return result;
-}
-
-absl::optional<Spectrum> SpectrumManager::AllocateXyzSpectrum(
-    const COLOR3& color) {
-  auto rgb = XyzToRgb(color);
-  return AllocateRgbSpectrum(rgb);
 }
 
 absl::optional<Reflector> SpectrumManager::AllocateInterpolatedReflector(
@@ -168,18 +147,18 @@ absl::optional<Reflector> SpectrumManager::AllocateInterpolatedReflector(
       return absl::nullopt;
     }
 
-    result = AllocateXyzReflector(color).value();
+    result = AllocateColorReflector(color).value();
   }
 
   m_interpolated_reflectors[wavelengths_and_reflectances] = result;
   return result;
 }
 
-absl::optional<Reflector> SpectrumManager::AllocateRgbReflector(
-    const std::array<float_t, 3>& rgb) {
+absl::optional<Reflector> SpectrumManager::AllocateColorReflector(
+    const COLOR3& color) {
   Reflector result;
   ISTATUS status = ColorExtrapolatorComputeReflector(
-      m_color_extrapolator.get(), rgb.data(), result.release_and_get_address());
+      m_color_extrapolator.get(), color, result.release_and_get_address());
   if (status != ISTATUS_SUCCESS) {
     if (status == ISTATUS_ALLOCATION_FAILED) {
       ReportOOM();
@@ -188,16 +167,6 @@ absl::optional<Reflector> SpectrumManager::AllocateRgbReflector(
   }
 
   return result;
-}
-
-absl::optional<Reflector> SpectrumManager::AllocateXyzReflector(
-    const COLOR3& color) {
-  auto rgb = XyzToRgb(color);
-  rgb[0] = std::min(rgb[0], (float_t)1.0);
-  rgb[1] = std::min(rgb[1], (float_t)1.0);
-  rgb[2] = std::min(rgb[2], (float_t)1.0);
-
-  return AllocateRgbReflector(rgb);
 }
 
 absl::optional<Reflector> SpectrumManager::AllocateUniformReflector(
@@ -228,7 +197,7 @@ absl::optional<Reflector> SpectrumManager::AllocateUniformReflector(
       return absl::nullopt;
     }
 
-    result = AllocateXyzReflector(color).value();
+    result = AllocateColorReflector(color).value();
   }
 
   m_uniform_reflector[reflectance] = result;

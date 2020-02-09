@@ -19,15 +19,11 @@ class SpectrumManager {
 
   absl::optional<Spectrum> AllocateInterpolatedSpectrum(
       const std::vector<float_t>& wavelengths_and_intensities);
-  absl::optional<Spectrum> AllocateRgbSpectrum(
-      const std::array<float_t, 3>& rgb);
-  absl::optional<Spectrum> AllocateXyzSpectrum(const COLOR3& color);
+  absl::optional<Spectrum> AllocateColorSpectrum(const COLOR3& color);
 
   absl::optional<Reflector> AllocateInterpolatedReflector(
       const std::vector<float_t>& wavelengths_and_reflectances);
-  absl::optional<Reflector> AllocateRgbReflector(
-      const std::array<float_t, 3>& rgb);
-  absl::optional<Reflector> AllocateXyzReflector(const COLOR3& color);
+  absl::optional<Reflector> AllocateColorReflector(const COLOR3& color);
   absl::optional<Reflector> AllocateUniformReflector(float_t reflectance);
 
  private:

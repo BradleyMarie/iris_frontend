@@ -33,8 +33,8 @@ PfmWriter::PfmWriter(std::string path)
 void PfmWriter::Write(const Framebuffer& framebuffer) {
   m_lock_file.reset();
 
-  ISTATUS status =
-      WriteToPfmFile(framebuffer.get(), m_path.c_str(), PFM_PIXEL_FORMAT_SRGB);
+  ISTATUS status = WriteToPfmFile(framebuffer.get(), m_path.c_str(),
+                                  COLOR_SPACE_LINEAR_SRGB);
   switch (status) {
     case ISTATUS_IO_ERROR:
       std::cerr << "ERROR: Failed to write to output file: " << m_path

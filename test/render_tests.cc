@@ -80,27 +80,17 @@ void CheckEquals(const char* expected, const iris::Framebuffer& actual,
         SwapBytes(&subpixels[2], sizeof(float));
       }
 
-      COLOR3 pixel_color;
-      FramebufferGetPixel(actual.get(), x, actual_yres - 1 - y, &pixel_color);
-      float r = 3.2404542f * (float)pixel_color.x -
-                1.5371385f * (float)pixel_color.y -
-                0.4985314f * (float)pixel_color.z;
+      float_t values[3] = {(float_t)subpixels[0], (float_t)subpixels[1],
+                           (float_t)subpixels[2]};
+      COLOR3 expected_color = ColorCreate(COLOR_SPACE_LINEAR_SRGB, values);
 
-      float g = -0.969266f * (float)pixel_color.x +
-                1.8760108f * (float)pixel_color.y +
-                0.0415560f * (float)pixel_color.z;
+      COLOR3 actual_color;
+      FramebufferGetPixel(actual.get(), x, actual_yres - 1 - y, &actual_color);
+      actual_color = ColorConvert(actual_color, expected_color.color_space);
 
-      float b = 0.0556434f * (float)pixel_color.x -
-                0.2040259f * (float)pixel_color.y +
-                1.0572252f * (float)pixel_color.z;
-
-      r = fmaxf(0.0f, r);
-      g = fmaxf(0.0f, g);
-      b = fmaxf(0.0f, b);
-
-      EXPECT_NEAR(subpixels[0], r, epsilon);
-      EXPECT_NEAR(subpixels[1], g, epsilon);
-      EXPECT_NEAR(subpixels[2], b, epsilon);
+      EXPECT_NEAR(expected_color.values[0], actual_color.values[0], epsilon);
+      EXPECT_NEAR(expected_color.values[1], actual_color.values[1], epsilon);
+      EXPECT_NEAR(expected_color.values[2], actual_color.values[2], epsilon);
     }
   }
 

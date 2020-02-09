@@ -68,8 +68,9 @@ ReflectorTexture ReflectorTextureMatcher::Match(const RgbParameter& parameter) {
       !ValidateFloat(parameter.data[0][2])) {
     ElementRangeError();
   }
+  COLOR3 color = ColorCreate(COLOR_SPACE_LINEAR_SRGB, parameter.data[0].data());
   Reflector reflector =
-      m_spectrum_manager.AllocateRgbReflector(parameter.data[0]).value();
+      m_spectrum_manager.AllocateColorReflector(color).value();
   return m_texture_manager.AllocateConstantReflectorTexture(reflector);
 }
 
@@ -132,13 +133,8 @@ ReflectorTexture ReflectorTextureMatcher::Match(const XyzParameter& parameter) {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
   }
-  if (!ValidateFloat(parameter.data[0].x) ||
-      !ValidateFloat(parameter.data[0].y) ||
-      !ValidateFloat(parameter.data[0].z)) {
-    ElementRangeError();
-  }
   Reflector reflector =
-      m_spectrum_manager.AllocateXyzReflector(parameter.data[0]).value();
+      m_spectrum_manager.AllocateColorReflector(parameter.data[0]).value();
   return m_texture_manager.AllocateConstantReflectorTexture(reflector);
 }
 

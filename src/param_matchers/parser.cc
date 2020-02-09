@@ -193,9 +193,14 @@ static TextureParameter ParseTexture(Tokenizer& tokenizer) {
   return TextureParameter{std::move(data)};
 }
 
+static COLOR3 MakeXyz(float_t x, float_t y, float_t z) {
+  float_t values[3] = {x, y, z};
+  return ColorCreate(COLOR_SPACE_XYZ, values);
+}
+
 static XyzParameter ParseXyz(Tokenizer& tokenizer) {
-  auto data = ParseFloatTuple<COLOR3, ColorCreate, ColorValidate>(tokenizer,
-                                                                  "Xyz", "xyz");
+  auto data =
+      ParseFloatTuple<COLOR3, MakeXyz, ColorValidate>(tokenizer, "Xyz", "xyz");
   return XyzParameter{std::move(data)};
 }
 
@@ -209,8 +214,8 @@ static std::vector<std::string> ParseSpectrumFilenames(
   return result;
 }
 
-static std::pair<std::vector<std::string>, std::vector<float_t>> ParseSpectrumSamples(
-    const std::vector<std::string>& samples) {
+static std::pair<std::vector<std::string>, std::vector<float_t>>
+ParseSpectrumSamples(const std::vector<std::string>& samples) {
   std::vector<float_t> result;
   for (const auto& sample : samples) {
     ParseSingle<float_t, absl::SimpleAtof>(sample, "spectrum", &result);

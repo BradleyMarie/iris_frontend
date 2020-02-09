@@ -15,16 +15,18 @@ SpectrumMatcher SpectrumMatcher::FromRgb(
     const char* parameter_name, bool required,
     SpectrumManager& spectrum_manager,
     const std::array<float_t, 3>& default_rgb) {
-  return SpectrumMatcher(
-      base_type_name, type_name, parameter_name, required, spectrum_manager,
-      spectrum_manager.AllocateRgbSpectrum(default_rgb).value());
+  COLOR3 color = ColorCreate(COLOR_SPACE_LINEAR_SRGB, default_rgb.data());
+  return SpectrumMatcher(base_type_name, type_name, parameter_name, required,
+                         spectrum_manager,
+                         spectrum_manager.AllocateColorSpectrum(color).value());
 }
 
 Spectrum SpectrumMatcher::Match(const RgbParameter& parameter) {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
   }
-  return m_spectrum_manager.AllocateRgbSpectrum(parameter.data[0]).value();
+  COLOR3 color = ColorCreate(COLOR_SPACE_LINEAR_SRGB, parameter.data[0].data());
+  return m_spectrum_manager.AllocateColorSpectrum(color).value();
 }
 
 Spectrum SpectrumMatcher::Match(const std::vector<std::string>& files) {
@@ -73,7 +75,7 @@ Spectrum SpectrumMatcher::Match(const XyzParameter& parameter) {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
   }
-  return m_spectrum_manager.AllocateXyzSpectrum(parameter.data[0]).value();
+  return m_spectrum_manager.AllocateColorSpectrum(parameter.data[0]).value();
 }
 
 void SpectrumMatcher::Match(ParameterData& data) {
