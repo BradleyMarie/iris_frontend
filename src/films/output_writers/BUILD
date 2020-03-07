@@ -3,6 +3,18 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 package(default_visibility = ["//visibility:private"])
 
 cc_library(
+    name = "exr",
+    srcs = ["exr.cc"],
+    hdrs = ["exr.h"],
+    deps = [
+        ":lock_file",
+        ":result",
+        "//third_party/tinyexr",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "lock_file",
     srcs = ["lock_file.cc"],
     hdrs = ["lock_file.h"],
@@ -14,6 +26,7 @@ cc_library(
     hdrs = ["parser.h"],
     visibility = ["//src/films:__subpackages__"],
     deps = [
+        ":exr",
         ":pfm",
         ":result",
         "@com_google_absl//absl/flags:flag",

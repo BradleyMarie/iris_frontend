@@ -9,6 +9,6 @@ cc_library(
     srcs = ["tinyexr.cc"],
     hdrs = ["tinyexr.h"],
     visibility = [
-        "//src/films:__pkg__",
+        "//src/films/output_writers:__pkg__",
     ],
 )
