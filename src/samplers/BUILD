@@ -8,10 +8,25 @@ cc_library(
     hdrs = ["parser.h"],
     visibility = ["//src:__subpackages__"],
     deps = [
+        ":sobol",
         ":stratified",
         "//src/common:call_directive",
         "//src/common:pointer_types",
         "//src/common:tokenizer",
+    ],
+)
+
+cc_library(
+    name = "sobol",
+    srcs = ["sobol.cc"],
+    hdrs = ["sobol.h"],
+    deps = [
+        "//src/common:error",
+        "//src/common:pointer_types",
+        "//src/common:tokenizer",
+        "//src/param_matchers:integral_single",
+        "//src/param_matchers:matcher",
+        "@com_github_bradleymarie_iris//iris_camera_toolkit:sobol_image_sampler",
     ],
 )
 
