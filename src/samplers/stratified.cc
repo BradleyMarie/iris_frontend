@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "iris_camera_toolkit/grid_pixel_sampler.h"
+#include "iris_camera_toolkit/grid_image_sampler.h"
 #include "src/common/error.h"
 #include "src/param_matchers/integral_single.h"
 #include "src/param_matchers/matcher.h"
@@ -17,7 +17,7 @@ static const uint16_t kStratifiedSamplerDefaultYSamples = 2;
 
 }  // namespace
 
-PixelSampler ParseStratified(const char* base_type_name, const char* type_name,
+Sampler ParseStratified(const char* base_type_name, const char* type_name,
                              Tokenizer& tokenizer) {
   SingleBoolMatcher jitter(base_type_name, type_name, "jitter", false,
                            kStratifiedSamplerDefaultJitter);
@@ -28,9 +28,9 @@ PixelSampler ParseStratified(const char* base_type_name, const char* type_name,
   MatchParameters<3>(base_type_name, type_name, tokenizer,
                      {&jitter, &xsamples, &ysamples});
 
-  PixelSampler result;
+  Sampler result;
   ISTATUS status =
-      GridPixelSamplerAllocate(xsamples.Get(), ysamples.Get(), jitter.Get(), 1,
+      GridImageSamplerAllocate(xsamples.Get(), ysamples.Get(), jitter.Get(), 1,
                                1, false, result.release_and_get_address());
   SuccessOrOOM(status);
 

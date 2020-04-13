@@ -6,8 +6,8 @@
 
 namespace iris {
 
-PixelSampler ParseStratified(const char* base_type_name, const char* type_name,
-                             Tokenizer& tokenizer);
+Sampler ParseStratified(const char* base_type_name, const char* type_name,
+                        Tokenizer& tokenizer);
 
 }  // namespace iris
 

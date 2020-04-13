@@ -12,14 +12,13 @@
 
 namespace iris {
 
-typedef std::tuple<Camera, Matrix, PixelSampler, Framebuffer, Integrator,
+typedef std::tuple<Camera, Matrix, Sampler, Framebuffer, Integrator,
                    LightSamplerFactory, SpectrumManager, ColorIntegrator,
                    OutputWriter, Random>
     GlobalConfig;
 
 GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
-                                   MatrixManager& matrix_manager,
-                                   bool spectral,
+                                   MatrixManager& matrix_manager, bool spectral,
                                    bool spectrum_color_workaround);
 
 }  // namespace iris

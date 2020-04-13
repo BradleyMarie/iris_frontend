@@ -7,13 +7,13 @@
 
 namespace iris {
 
-PixelSampler ParseSampler(const char* base_type_name, Tokenizer& tokenizer) {
-  return CallDirective<PixelSampler, 1>(
+Sampler ParseSampler(const char* base_type_name, Tokenizer& tokenizer) {
+  return CallDirective<Sampler, 1>(
       base_type_name, tokenizer,
       {std::make_pair("stratified", ParseStratified)});
 }
 
-PixelSampler CreateDefaultSampler() {
+Sampler CreateDefaultSampler() {
   Tokenizer tokenizer("");
   return ParseStratified("Unused", "Unused", tokenizer);
 }

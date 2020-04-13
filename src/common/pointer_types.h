@@ -31,13 +31,13 @@ typedef SharedPtr<MATRIX, MatrixRetain, MatrixRelease> Matrix;
 typedef SharedPtr<LIGHT, LightRetain, LightRelease> Light;
 typedef SharedPtr<LIGHT_SAMPLER, LightSamplerRetain, LightSamplerRelease>
     LightSampler;
-typedef UniquePtr<PIXEL_SAMPLER, PixelSamplerFree> PixelSampler;
 typedef UniquePtr<RANDOM, RandomFree> Random;
 typedef SharedPtr<REFLECTOR, ReflectorRetain, ReflectorRelease> Reflector;
 typedef UniquePtr<REFLECTOR_MIPMAP, ReflectorMipmapFree> ReflectorMipmap;
 typedef SharedPtr<REFLECTOR_TEXTURE, ReflectorTextureRetain,
                   ReflectorTextureRelease>
     ReflectorTexture;
+typedef UniquePtr<IMAGE_SAMPLER, ImageSamplerFree> Sampler;
 typedef UniquePtr<SAMPLE_TRACER, SampleTracerFree> SampleTracer;
 typedef SharedPtr<SCENE, SceneRetain, SceneRelease> Scene;
 typedef SharedPtr<SHAPE, ShapeRetain, ShapeRelease> Shape;

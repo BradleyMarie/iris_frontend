@@ -6,9 +6,9 @@
 
 namespace iris {
 
-PixelSampler ParseSampler(const char* base_type_name, Tokenizer& tokenizer);
+Sampler ParseSampler(const char* base_type_name, Tokenizer& tokenizer);
 
-PixelSampler CreateDefaultSampler();
+Sampler CreateDefaultSampler();
 
 }  // namespace iris
 

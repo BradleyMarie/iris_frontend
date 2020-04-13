@@ -26,6 +26,6 @@ cc_library(
         "//src/param_matchers:integral_single",
         "//src/param_matchers:matcher",
         "//src/param_matchers:single",
-        "@com_github_bradleymarie_iris//iris_camera_toolkit:grid_pixel_sampler",
+        "@com_github_bradleymarie_iris//iris_camera_toolkit:grid_image_sampler",
     ],
 )

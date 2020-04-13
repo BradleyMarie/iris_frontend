@@ -16,7 +16,7 @@ namespace iris {
 namespace {
 
 GlobalConfig CreateGlobalConfig(
-    Matrix camera_to_world, absl::optional<PixelSampler>&& pixel_sampler,
+    Matrix camera_to_world, absl::optional<Sampler>&& sampler,
     absl::optional<FilmResult>&& film_result,
     absl::optional<IntegratorResult>&& integrator_result,
     absl::optional<CameraFactory>&& camera_factory,
@@ -24,8 +24,8 @@ GlobalConfig CreateGlobalConfig(
     absl::optional<ColorIntegrator>&& color_integrator,
     absl::optional<Random>&& random, bool spectral,
     bool spectrum_color_workaround) {
-  if (!pixel_sampler) {
-    pixel_sampler = CreateDefaultSampler();
+  if (!sampler) {
+    sampler = CreateDefaultSampler();
   }
 
   if (!film_result) {
@@ -57,9 +57,9 @@ GlobalConfig CreateGlobalConfig(
       light_propagation.value()(color_integrator.value());
 
   return std::make_tuple(
-      std::move(camera), std::move(camera_to_world),
-      std::move(pixel_sampler.value()), std::move(film_result->first),
-      std::move(integrator_result->first), std::move(integrator_result->second),
+      std::move(camera), std::move(camera_to_world), std::move(sampler.value()),
+      std::move(film_result->first), std::move(integrator_result->first),
+      std::move(integrator_result->second),
       std::move(light_propagation_params.first),
       std::move(light_propagation_params.second),
       std::move(film_result->second), std::move(random.value()));
@@ -93,7 +93,7 @@ GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
   matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
   matrix_manager.Identity();
 
-  absl::optional<PixelSampler> pixel_sampler;
+  absl::optional<Sampler> sampler;
   absl::optional<FilmResult> film_result;
   absl::optional<IntegratorResult> integrator_result;
   absl::optional<CameraFactory> camera_factory;
@@ -104,7 +104,7 @@ GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
   for (auto token = tokenizer.Next(); token; token = tokenizer.Next()) {
     if (token == "WorldBegin") {
       return CreateGlobalConfig(
-          std::move(camera_to_world), std::move(pixel_sampler),
+          std::move(camera_to_world), std::move(sampler),
           std::move(film_result), std::move(integrator_result),
           std::move(camera_factory), std::move(light_propagation),
           std::move(color_integrator), std::move(random), spectral,
@@ -131,8 +131,8 @@ GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
       continue;
     }
 
-    if (CallOnce<PixelSampler>("Sampler", *token, pixel_sampler, ParseSampler,
-                               tokenizer)) {
+    if (CallOnce<Sampler>("Sampler", *token, sampler, ParseSampler,
+                          tokenizer)) {
       continue;
     }
 

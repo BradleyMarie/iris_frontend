@@ -9,7 +9,7 @@
 
 namespace iris {
 
-typedef std::tuple<Scene, LightSampler, Camera, Matrix, PixelSampler,
+typedef std::tuple<Scene, LightSampler, Camera, Matrix, Sampler,
                    Integrator, ColorIntegrator, Random, Framebuffer,
                    OutputWriter>
     RenderConfiguration;
