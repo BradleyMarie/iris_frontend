@@ -4,11 +4,13 @@
 
 #include "src/cameras/parser.h"
 #include "src/color_integrators/parser.h"
+#include "src/common/quoted_string.h"
 #include "src/directives/include.h"
 #include "src/directives/transform.h"
 #include "src/films/parser.h"
 #include "src/integrators/parser.h"
 #include "src/light_propagation/parser.h"
+#include "src/param_matchers/parser.h"
 #include "src/randoms/parser.h"
 #include "src/samplers/parser.h"
 
@@ -85,6 +87,42 @@ bool CallOnce(const char* base_type_name, absl::string_view token,
   return true;
 }
 
+bool SkipDirectiveOnce(const char* base_type_name, absl::string_view token,
+                       bool called_once, Tokenizer& tokenizer) {
+  if (token != base_type_name) {
+    return false;
+  }
+
+  if (called_once) {
+    std::cerr << "ERROR: Invalid " << base_type_name
+              << " specified more than once before WorldBegin" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  auto quoted_subtype = tokenizer.Next();
+  if (!quoted_subtype) {
+    std::cerr << "ERROR: " << base_type_name << " type not specified"
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  auto subtype = UnquoteToken(*quoted_subtype);
+  if (!subtype) {
+    std::cerr << "ERROR: Invalid " << base_type_name
+              << " specified: " << *subtype << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  while (ParseNextParam(tokenizer)) {
+    // Do Nothing
+  }
+
+  std::cerr << "WARNING: Directive " << base_type_name
+            << " is not implemented and was ignored." << std::endl;
+
+  return true;
+}
+
 }  // namespace
 
 GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
@@ -93,6 +131,8 @@ GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
   matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
   matrix_manager.Identity();
 
+  bool set_pixel_filter = false;
+  bool set_accelerator = false;
   absl::optional<Sampler> sampler;
   absl::optional<FilmResult> film_result;
   absl::optional<IntegratorResult> integrator_result;
@@ -141,8 +181,8 @@ GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
       continue;
     }
 
-    if (token == "PixelFilter") {
-      // TODO
+    if (SkipDirectiveOnce("PixelFilter", *token, set_pixel_filter, tokenizer)) {
+      set_pixel_filter = true;
       continue;
     }
 
@@ -151,8 +191,8 @@ GlobalConfig ParseGlobalDirectives(Tokenizer& tokenizer,
       continue;
     }
 
-    if (token == "Accelerator") {
-      // Ignored
+    if (SkipDirectiveOnce("Accelerator", *token, set_accelerator, tokenizer)) {
+      set_accelerator = true;
       continue;
     }
 
