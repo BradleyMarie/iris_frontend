@@ -7,18 +7,14 @@
 
 namespace iris {
 
-Material MaterialManager::AllocateMatteMaterial(const ReflectorTexture& kd) {
-  auto iter = m_matte_materials.find(kd);
-  if (iter != m_matte_materials.end()) {
-    return iter->second;
+const Material& MaterialManager::AllocateMatteMaterial(
+    const ReflectorTexture& kd) {
+  Material& result = m_matte_materials[kd];
+  if (!result.get()) {
+    ISTATUS status =
+        MatteMaterialAllocate(kd.get(), result.release_and_get_address());
+    SuccessOrOOM(status);
   }
-
-  Material result;
-  ISTATUS status =
-      MatteMaterialAllocate(kd.get(), result.release_and_get_address());
-  SuccessOrOOM(status);
-
-  m_matte_materials[kd] = result;
 
   return result;
 }

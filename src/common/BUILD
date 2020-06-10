@@ -51,6 +51,7 @@ cc_library(
     deps = [
         ":material_manager",
         ":named_texture_manager",
+        ":normal_map_manager",
         ":spectrum_manager",
         ":texture_manager",
         "//src/param_matchers:parser",
@@ -88,6 +89,17 @@ cc_library(
         ":pointer_types",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "normal_map_manager",
+    srcs = ["normal_map_manager.cc"],
+    hdrs = ["normal_map_manager.h"],
+    deps = [
+        ":error",
+        ":pointer_types",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:bump_map",
     ],
 )
 

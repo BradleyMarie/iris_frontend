@@ -625,6 +625,7 @@ ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
                          Tokenizer& tokenizer,
                          MaterialManager& material_manager,
                          const NamedTextureManager& named_texture_manager,
+                         NormalMapManager& normal_map_manager,
                          TextureManager& texture_manager,
                          SpectrumManager& spectrum_manager,
                          const MaterialFactory& material_factory,
@@ -639,7 +640,8 @@ ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
 
   auto material = material_factory.Build(
       base_type_name, type_name, unused_parameters, material_manager,
-      named_texture_manager, texture_manager, spectrum_manager);
+      named_texture_manager, normal_map_manager, texture_manager,
+      spectrum_manager);
 
   PlyData fileData = ReadPlyFile(filename.Get());
 
@@ -653,9 +655,10 @@ ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
           : reinterpret_cast<const float_t(*)[2]>(fileData.GetUVs().data()),
       fileData.GetVertices().size(),
       reinterpret_cast<const size_t(*)[3]>(fileData.GetFaces().data()),
-      fileData.GetFaces().size() / 3, material.get(), material.get(),
-      front_emissive_material.get(), back_emissive_material.get(),
-      reinterpret_cast<PSHAPE*>(shapes.data()), &triangles_allocated);
+      fileData.GetFaces().size() / 3, material.first.get(),
+      material.first.get(), front_emissive_material.get(),
+      back_emissive_material.get(), reinterpret_cast<PSHAPE*>(shapes.data()),
+      &triangles_allocated);
 
   switch (status) {
     case ISTATUS_ALLOCATION_FAILED:

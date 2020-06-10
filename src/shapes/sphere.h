@@ -10,6 +10,7 @@ namespace iris {
 ShapeResult ParseSphere(const char* base_type_name, const char* type_name,
                         Tokenizer& tokenizer, MaterialManager& material_manager,
                         const NamedTextureManager& named_texture_manager,
+                        NormalMapManager& normal_map_manager,
                         TextureManager& texture_manager,
                         SpectrumManager& spectrum_manager,
                         const MaterialFactory& material_factory,

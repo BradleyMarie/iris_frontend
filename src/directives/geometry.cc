@@ -10,6 +10,7 @@
 #include "src/common/material_manager.h"
 #include "src/common/named_material_manager.h"
 #include "src/common/named_texture_manager.h"
+#include "src/common/normal_map_manager.h"
 #include "src/common/texture_manager.h"
 #include "src/directives/include.h"
 #include "src/directives/scene_builder.h"
@@ -162,6 +163,7 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
 
   GraphicsStateManager graphics_state;
   MaterialManager material_manager;
+  NormalMapManager normal_map_manager;
   SceneBuilder scene_builder;
   TextureManager texture_manager;
 
@@ -240,19 +242,19 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     }
 
     if (token == "Material") {
-      auto material = ParseMaterial("Material", tokenizer,
-                                    graphics_state.GetNamedTextureManager(),
-                                    texture_manager, spectrum_manager);
+      auto material = ParseMaterial(
+          "Material", tokenizer, graphics_state.GetNamedTextureManager(),
+          normal_map_manager, texture_manager, spectrum_manager);
       graphics_state.SetMaterial(material);
       continue;
     }
 
     if (token == "MakeNamedMaterial") {
-      auto material =
-          ParseMakeNamedMaterial("MakeNamedMaterial", tokenizer,
-                                 graphics_state.GetNamedMaterialManager(),
-                                 graphics_state.GetNamedTextureManager(),
-                                 texture_manager, spectrum_manager);
+      auto material = ParseMakeNamedMaterial(
+          "MakeNamedMaterial", tokenizer,
+          graphics_state.GetNamedMaterialManager(),
+          graphics_state.GetNamedTextureManager(), normal_map_manager,
+          texture_manager, spectrum_manager);
       graphics_state.SetMaterial(material);
       continue;
     }
@@ -267,11 +269,11 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     if (token == "Shape") {
       auto material = graphics_state.GetMaterials();
       auto emissive_materials = graphics_state.GetEmissiveMaterials();
-      auto shape_result =
-          ParseShape("Shape", tokenizer, material_manager,
-                     graphics_state.GetNamedTextureManager(), texture_manager,
-                     spectrum_manager, material, emissive_materials.first,
-                     emissive_materials.second);
+      auto shape_result = ParseShape(
+          "Shape", tokenizer, material_manager,
+          graphics_state.GetNamedTextureManager(), normal_map_manager,
+          texture_manager, spectrum_manager, material, emissive_materials.first,
+          emissive_materials.second);
       for (const auto& shape : shape_result.first) {
         scene_builder.AddShape(shape, matrix_manager.GetCurrent().first);
       }

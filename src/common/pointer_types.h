@@ -28,6 +28,7 @@ typedef UniquePtr<FRAMEBUFFER, FramebufferFree> Framebuffer;
 typedef UniquePtr<INTEGRATOR, IntegratorFree> Integrator;
 typedef SharedPtr<MATERIAL, MaterialRetain, MaterialRelease> Material;
 typedef SharedPtr<MATRIX, MatrixRetain, MatrixRelease> Matrix;
+typedef SharedPtr<NORMAL_MAP, NormalMapRetain, NormalMapRelease> NormalMap;
 typedef SharedPtr<LIGHT, LightRetain, LightRelease> Light;
 typedef SharedPtr<LIGHT_SAMPLER, LightSamplerRetain, LightSamplerRelease>
     LightSampler;

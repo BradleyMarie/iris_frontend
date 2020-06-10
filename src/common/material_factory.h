@@ -2,20 +2,22 @@
 #define _SRC_COMMON_MATERIAL_FACTORY_
 
 #include <functional>
+#include <utility>
 #include <vector>
 
 #include "src/common/material_manager.h"
 #include "src/common/named_texture_manager.h"
+#include "src/common/normal_map_manager.h"
 #include "src/common/spectrum_manager.h"
 #include "src/common/texture_manager.h"
 #include "src/param_matchers/parser.h"
 
 namespace iris {
 
-typedef std::function<Material(
+typedef std::function<std::pair<Material, NormalMap>(
     const char* base_type_name, const char* type_name, std::vector<Parameter>&,
     MaterialManager& material_manager,
-    const NamedTextureManager& named_texture_manager,
+    const NamedTextureManager& named_texture_manager, NormalMapManager&,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager)>
     MaterialFactoryFn;
 
@@ -25,19 +27,20 @@ class MaterialFactory {
   MaterialFactory(MaterialFactoryFn&& factory)
       : m_factory(std::move(factory)) {}
 
-  Material Build(const char* base_type_name, const char* type_name,
-                 std::vector<Parameter>& param_overrides,
-                 MaterialManager& material_manager,
-                 const NamedTextureManager& named_texture_manager,
-                 TextureManager& texture_manager,
-                 SpectrumManager& spectrum_manager) const {
+  std::pair<Material, NormalMap> Build(
+      const char* base_type_name, const char* type_name,
+      std::vector<Parameter>& param_overrides,
+      MaterialManager& material_manager,
+      const NamedTextureManager& named_texture_manager,
+      NormalMapManager& normal_map_manager, TextureManager& texture_manager,
+      SpectrumManager& spectrum_manager) const {
     if (!m_factory) {
-      return Material();
+      return std::pair<Material, NormalMap>();
     }
 
     return m_factory(base_type_name, type_name, param_overrides,
-                     material_manager, named_texture_manager, texture_manager,
-                     spectrum_manager);
+                     material_manager, named_texture_manager,
+                     normal_map_manager, texture_manager, spectrum_manager);
   }
 
  private:

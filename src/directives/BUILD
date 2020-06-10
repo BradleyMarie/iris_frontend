@@ -39,6 +39,7 @@ cc_library(
         "//src/common:matrix_manager",
         "//src/common:named_material_manager",
         "//src/common:named_texture_manager",
+        "//src/common:normal_map_manager",
         "//src/common:pointer_types",
         "//src/common:texture_manager",
         "//src/common:tokenizer",

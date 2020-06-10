@@ -9,7 +9,7 @@ namespace iris {
 
 class MaterialManager {
  public:
-  Material AllocateMatteMaterial(const ReflectorTexture& kd);
+  const Material& AllocateMatteMaterial(const ReflectorTexture& kd);
 
  private:
   std::map<ReflectorTexture, Material> m_matte_materials;

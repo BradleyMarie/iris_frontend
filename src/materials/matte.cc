@@ -1,5 +1,6 @@
 #include "src/materials/matte.h"
 
+#include "src/param_matchers/float_texture.h"
 #include "src/param_matchers/matcher.h"
 #include "src/param_matchers/reflector_texture.h"
 
@@ -7,32 +8,42 @@ namespace iris {
 namespace {
 
 static const float_t kMatteMaterialDefaultReflectance = (float_t)0.5;
+static const FloatTexture kMatteMaterialDefaultBumpMap;
 
 template <typename T>
 MaterialFactory ParseMatte(const char* base_type_name, const char* type_name,
                            T& parameters,
                            const NamedTextureManager& named_texture_manager,
+                           NormalMapManager& normal_map_manager,
                            TextureManager& texture_manager,
                            SpectrumManager& spectrum_manager) {
   ReflectorTextureMatcher kd = ReflectorTextureMatcher::FromUniformReflectance(
       base_type_name, type_name, "Kd", false, named_texture_manager,
       texture_manager, spectrum_manager, kMatteMaterialDefaultReflectance);
-  MatchParameters<1>(base_type_name, type_name, parameters, {&kd});
+  FloatTextureMatcher bumpmap(base_type_name, type_name, "bumpmap", false, true,
+                              (float_t)0.0, (float_t)1.0, named_texture_manager,
+                              texture_manager, kMatteMaterialDefaultBumpMap);
+  MatchParameters<2>(base_type_name, type_name, parameters, {&kd, &bumpmap});
 
   ReflectorTexture default_kd = kd.Get();
+  FloatTexture default_bumpmap = bumpmap.Get();
   MaterialFactoryFn result =
-      [default_kd](const char* base_type_name, const char* type_name,
-                   std::vector<Parameter>& parameters,
-                   MaterialManager& material_manager,
-                   const NamedTextureManager& named_texture_manager,
-                   TextureManager& texture_manager,
-                   SpectrumManager& spectrum_manager) -> Material {
+      [default_kd, default_bumpmap](
+          const char* base_type_name, const char* type_name,
+          std::vector<Parameter>& parameters, MaterialManager& material_manager,
+          const NamedTextureManager& named_texture_manager,
+          NormalMapManager& normal_map_manager, TextureManager& texture_manager,
+          SpectrumManager& spectrum_manager) -> std::pair<Material, NormalMap> {
     ReflectorTextureMatcher kd(base_type_name, type_name, "Kd", false,
                                named_texture_manager, texture_manager,
                                spectrum_manager, default_kd);
-    MatchParameters<1>(base_type_name, type_name, parameters, {&kd});
+    FloatTextureMatcher bumpmap(
+        base_type_name, type_name, "bumpmap", false, true, (float_t)0.0,
+        (float_t)1.0, named_texture_manager, texture_manager, default_bumpmap);
+    MatchParameters<2>(base_type_name, type_name, parameters, {&kd, &bumpmap});
 
-    return material_manager.AllocateMatteMaterial(kd.Get());
+    return std::make_pair(material_manager.AllocateMatteMaterial(kd.Get()),
+                          normal_map_manager.AllocateBumpMap(bumpmap.Get()));
   };
 
   return MaterialFactory(std::move(result));
@@ -43,22 +54,24 @@ MaterialFactory ParseMatte(const char* base_type_name, const char* type_name,
 MaterialFactory ParseMatte(const char* base_type_name, const char* type_name,
                            Tokenizer& tokenizer,
                            const NamedTextureManager& named_texture_manager,
+                           NormalMapManager& normal_map_manager,
                            TextureManager& texture_manager,
                            SpectrumManager& spectrum_manager) {
   return ParseMatte<Tokenizer>(base_type_name, type_name, tokenizer,
-                               named_texture_manager, texture_manager,
-                               spectrum_manager);
+                               named_texture_manager, normal_map_manager,
+                               texture_manager, spectrum_manager);
 }
 
 MaterialFactory MakeNamedMatte(const char* base_type_name,
                                const char* type_name,
                                std::vector<Parameter>& parameters,
                                const NamedTextureManager& named_texture_manager,
+                               NormalMapManager& normal_map_manager,
                                TextureManager& texture_manager,
                                SpectrumManager& spectrum_manager) {
   return ParseMatte<typename std::vector<Parameter>>(
       base_type_name, type_name, parameters, named_texture_manager,
-      texture_manager, spectrum_manager);
+      normal_map_manager, texture_manager, spectrum_manager);
 }
 
 }  // namespace iris

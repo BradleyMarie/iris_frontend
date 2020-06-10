@@ -9,8 +9,10 @@ cc_library(
     deps = [
         "//src/common:material_factory",
         "//src/common:named_texture_manager",
+        "//src/common:normal_map_manager",
         "//src/common:texture_manager",
         "//src/common:tokenizer",
+        "//src/param_matchers:float_texture",
         "//src/param_matchers:matcher",
         "//src/param_matchers:reflector_texture",
     ],
@@ -27,6 +29,7 @@ cc_library(
         "//src/common:material_factory",
         "//src/common:named_material_manager",
         "//src/common:named_texture_manager",
+        "//src/common:normal_map_manager",
         "//src/common:texture_manager",
         "//src/common:tokenizer",
     ],

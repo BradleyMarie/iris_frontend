@@ -19,6 +19,7 @@ static const float_t kSphereDefaultRadius = (float_t)1.0;
 ShapeResult ParseSphere(const char* base_type_name, const char* type_name,
                         Tokenizer& tokenizer, MaterialManager& material_manager,
                         const NamedTextureManager& named_texture_manager,
+                        NormalMapManager& normal_map_manager,
                         TextureManager& texture_manager,
                         SpectrumManager& spectrum_manager,
                         const MaterialFactory& material_factory,
@@ -34,11 +35,12 @@ ShapeResult ParseSphere(const char* base_type_name, const char* type_name,
 
   auto material = material_factory.Build(
       base_type_name, type_name, unused_parameters, material_manager,
-      named_texture_manager, texture_manager, spectrum_manager);
+      named_texture_manager, normal_map_manager, texture_manager,
+      spectrum_manager);
 
   Shape shape;
   ISTATUS status = EmissiveSphereAllocate(
-      kSphereOrigin, *radius.Get(), material.get(), material.get(),
+      kSphereOrigin, *radius.Get(), material.first.get(), material.first.get(),
       front_emissive_material.get(), back_emissive_material.get(),
       shape.release_and_get_address());
   SuccessOrOOM(status);

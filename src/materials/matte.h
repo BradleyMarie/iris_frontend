@@ -3,6 +3,7 @@
 
 #include "src/common/material_factory.h"
 #include "src/common/named_texture_manager.h"
+#include "src/common/normal_map_manager.h"
 #include "src/common/spectrum_manager.h"
 #include "src/common/texture_manager.h"
 #include "src/common/tokenizer.h"
@@ -13,6 +14,7 @@ namespace iris {
 MaterialFactory ParseMatte(const char* base_type_name, const char* type_name,
                            Tokenizer& tokenizer,
                            const NamedTextureManager& named_texture_manager,
+                           NormalMapManager& normal_map_manager,
                            TextureManager& texture_manager,
                            SpectrumManager& spectrum_manager);
 
@@ -20,6 +22,7 @@ MaterialFactory MakeNamedMatte(const char* base_type_name,
                                const char* type_name,
                                std::vector<Parameter>& parameters,
                                const NamedTextureManager& named_texture_manager,
+                               NormalMapManager& normal_map_manager,
                                TextureManager& texture_manager,
                                SpectrumManager& spectrum_manager);
 

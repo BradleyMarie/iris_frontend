@@ -34,7 +34,8 @@ const static char* kMatteTypeName = "matte";
 
 typedef std::function<MaterialFactory(
     const char*, const char*, std::vector<Parameter>&,
-    const NamedTextureManager&, TextureManager&, SpectrumManager&)>
+    const NamedTextureManager&, NormalMapManager&, TextureManager&,
+    SpectrumManager&)>
     MakeNamedMaterialFunction;
 
 std::pair<const char*, MakeNamedMaterialFunction> ParseMaterialType(
@@ -65,19 +66,22 @@ std::pair<const char*, MakeNamedMaterialFunction> ParseMaterialType(
 
 MaterialFactory ParseMaterial(const char* base_type_name, Tokenizer& tokenizer,
                               const NamedTextureManager& named_texture_manager,
+                              NormalMapManager& normal_map_manager,
                               TextureManager& texture_manager,
                               SpectrumManager& spectrum_manager) {
   return CallDirective<MaterialFactory, 1, const NamedTextureManager&,
-                       TextureManager&, SpectrumManager&>(
+                       NormalMapManager&, TextureManager&, SpectrumManager&>(
       base_type_name, tokenizer, {std::make_pair(kMatteTypeName, ParseMatte)},
-      named_texture_manager, texture_manager, spectrum_manager);
+      named_texture_manager, normal_map_manager, texture_manager,
+      spectrum_manager);
 }
 
 MaterialFactory ParseMakeNamedMaterial(
     const char* base_type_name, Tokenizer& tokenizer,
     NamedMaterialManager& named_material_manager,
     const NamedTextureManager& named_texture_manager,
-    TextureManager& texture_manager, SpectrumManager& spectrum_manager) {
+    NormalMapManager& normal_map_manager, TextureManager& texture_manager,
+    SpectrumManager& spectrum_manager) {
   std::string name(ParseNextQuotedString(base_type_name, tokenizer, "name"));
 
   std::vector<Parameter> parameters;
@@ -99,7 +103,8 @@ MaterialFactory ParseMakeNamedMaterial(
 
   auto material = name_and_function.second(
       base_type_name, name_and_function.first, parameters,
-      named_texture_manager, texture_manager, spectrum_manager);
+      named_texture_manager, normal_map_manager, texture_manager,
+      spectrum_manager);
 
   named_material_manager.SetMaterial(name, material);
 
