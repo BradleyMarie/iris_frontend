@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "iris_physx_toolkit/triangle_mesh.h"
+#include "iris_physx_toolkit/triangle_mesh_normal_map.h"
 #include "src/common/error.h"
 #include "src/common/ostream.h"
 #include "src/param_matchers/matcher.h"
@@ -645,27 +646,32 @@ ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
 
   PlyData fileData = ReadPlyFile(filename.Get());
 
+  NormalMap front_normal_map, back_normal_map;
+  if (material.second.get()) {
+    front_normal_map = material.second;
+    back_normal_map = material.second;
+  } else if (!fileData.GetNormals().empty()) {
+    ISTATUS status = TriangleMeshNormalMapAllocate(
+        fileData.GetNormals().data(), fileData.GetVertices().size(),
+        front_normal_map.release_and_get_address(),
+        back_normal_map.release_and_get_address());
+    SuccessOrOOM(status);
+  }
+
   std::vector<Shape> shapes(fileData.GetFaces().size() / 3);
   size_t triangles_allocated;
   ISTATUS status = TriangleMeshAllocate(
       fileData.GetVertices().data(),
-      fileData.GetNormals().empty() ? nullptr : fileData.GetNormals().data(),
       fileData.GetUVs().empty()
           ? nullptr
           : reinterpret_cast<const float_t(*)[2]>(fileData.GetUVs().data()),
       fileData.GetVertices().size(),
       reinterpret_cast<const size_t(*)[3]>(fileData.GetFaces().data()),
-      fileData.GetFaces().size() / 3, material.first.get(),
-      material.first.get(), front_emissive_material.get(),
-      back_emissive_material.get(), reinterpret_cast<PSHAPE*>(shapes.data()),
-      &triangles_allocated);
-
-  switch (status) {
-    case ISTATUS_ALLOCATION_FAILED:
-      ReportOOM();
-    default:
-      assert(status == ISTATUS_SUCCESS);
-  }
+      fileData.GetFaces().size() / 3, front_normal_map.get(),
+      back_normal_map.get(), material.first.get(), material.first.get(),
+      front_emissive_material.get(), back_emissive_material.get(),
+      reinterpret_cast<PSHAPE*>(shapes.data()), &triangles_allocated);
+  SuccessOrOOM(status);
 
   if (triangles_allocated != fileData.GetFaces().size() / 3) {
     std::cerr << "WARNING: PlyMesh contained degenerate triangles that "

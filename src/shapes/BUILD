@@ -40,6 +40,7 @@ cc_library(
         "//src/param_matchers:single",
         "//third_party/rply",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle_mesh",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle_mesh_normal_map",
     ],
 )
 

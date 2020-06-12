@@ -61,11 +61,11 @@ ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
   std::vector<Shape> shapes(indices.size() / 3);
   size_t triangles_allocated;
   ISTATUS status = TriangleMeshAllocate(
-      points.Get().data(), nullptr, nullptr, points.Get().size(),
+      points.Get().data(), nullptr, points.Get().size(),
       reinterpret_cast<const size_t(*)[3]>(indices.data()), indices.size() / 3,
-      material.first.get(), material.first.get(), front_emissive_material.get(),
-      back_emissive_material.get(), reinterpret_cast<PSHAPE*>(shapes.data()),
-      &triangles_allocated);
+      nullptr, nullptr, material.first.get(), material.first.get(),
+      front_emissive_material.get(), back_emissive_material.get(),
+      reinterpret_cast<PSHAPE*>(shapes.data()), &triangles_allocated);
   switch (status) {
     case ISTATUS_ALLOCATION_FAILED:
       ReportOOM();
