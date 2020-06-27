@@ -9,13 +9,14 @@ namespace iris {
 
 class TextureManager {
  public:
-  ReflectorTexture AllocateConstantReflectorTexture(const Reflector& reflector);
-  FloatTexture AllocateConstantFloatTexture(float_t value);
+  const ReflectorTexture& AllocateConstantReflectorTexture(
+      const Reflector& reflector);
+  const FloatTexture& AllocateConstantFloatTexture(float_t value);
 
-  ReflectorTexture AllocateProductReflectorTexture(
+  const ReflectorTexture& AllocateProductReflectorTexture(
       const ReflectorTexture& tex1, const ReflectorTexture& tex2);
-  FloatTexture AllocateProductFloatTexture(const FloatTexture& tex1,
-                                           const FloatTexture& tex2);
+  const FloatTexture& AllocateProductFloatTexture(const FloatTexture& tex1,
+                                                  const FloatTexture& tex2);
 
   ReflectorTexture AllocateImageMapReflectorTexture(ReflectorMipmap mipmap,
                                                     float_t u_delta,
