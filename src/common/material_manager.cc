@@ -8,11 +8,11 @@
 namespace iris {
 
 const Material& MaterialManager::AllocateMatteMaterial(
-    const ReflectorTexture& kd) {
-  Material& result = m_matte_materials[kd];
+    const ReflectorTexture& kd, const FloatTexture& sigma) {
+  Material& result = m_matte_materials[std::make_pair(kd, sigma)];
   if (!result.get()) {
-    ISTATUS status =
-        MatteMaterialAllocate(kd.get(), result.release_and_get_address());
+    ISTATUS status = MatteMaterialAllocate(kd.get(), sigma.get(),
+                                           result.release_and_get_address());
     SuccessOrOOM(status);
   }
 
