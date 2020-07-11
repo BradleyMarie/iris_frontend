@@ -4,6 +4,7 @@
 
 #include "src/common/call_directive.h"
 #include "src/materials/matte.h"
+#include "src/materials/plastic.h"
 #include "src/param_matchers/parser.h"
 
 namespace iris {
@@ -31,6 +32,7 @@ absl::string_view ParseNextQuotedString(const char* base_type_name,
 
 const static char* kTypeParameterName = "type";
 const static char* kMatteTypeName = "matte";
+const static char* kPlasticTypeName = "plastic";
 
 typedef std::function<MaterialFactory(
     const char*, const char*, std::vector<Parameter>&,
@@ -57,6 +59,10 @@ std::pair<const char*, MakeNamedMaterialFunction> ParseMaterialType(
     return std::make_pair(kMatteTypeName, MakeNamedMatte);
   }
 
+  if (absl::get<StringParameter>(param.second).data[0] == kPlasticTypeName) {
+    return std::make_pair(kPlasticTypeName, MakeNamedPlastic);
+  }
+
   std::cerr << "ERROR: Invalid MakeNamedMaterial type specified: "
             << param.first << std::endl;
   exit(EXIT_FAILURE);
@@ -69,9 +75,11 @@ MaterialFactory ParseMaterial(const char* base_type_name, Tokenizer& tokenizer,
                               NormalMapManager& normal_map_manager,
                               TextureManager& texture_manager,
                               SpectrumManager& spectrum_manager) {
-  return CallDirective<MaterialFactory, 1, const NamedTextureManager&,
+  return CallDirective<MaterialFactory, 2, const NamedTextureManager&,
                        NormalMapManager&, TextureManager&, SpectrumManager&>(
-      base_type_name, tokenizer, {std::make_pair(kMatteTypeName, ParseMatte)},
+      base_type_name, tokenizer,
+      {std::make_pair(kMatteTypeName, ParseMatte),
+       std::make_pair(kPlasticTypeName, ParsePlastic)},
       named_texture_manager, normal_map_manager, texture_manager,
       spectrum_manager);
 }

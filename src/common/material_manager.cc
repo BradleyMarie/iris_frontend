@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "iris_physx_toolkit/matte_material.h"
+#include "iris_physx_toolkit/plastic_material.h"
 #include "src/common/error.h"
 
 namespace iris {
@@ -13,6 +14,21 @@ const Material& MaterialManager::AllocateMatteMaterial(
   if (!result.get()) {
     ISTATUS status = MatteMaterialAllocate(kd.get(), sigma.get(),
                                            result.release_and_get_address());
+    SuccessOrOOM(status);
+  }
+
+  return result;
+}
+
+const Material& MaterialManager::AllocatePlasticMaterial(
+    const ReflectorTexture& kd, const ReflectorTexture& ks,
+    const FloatTexture& roughness, bool remap_roughness) {
+  Material& result =
+      m_plastic_materials[std::make_tuple(kd, ks, roughness, remap_roughness)];
+  if (!result.get()) {
+    ISTATUS status = PlasticMaterialAllocate(kd.get(), ks.get(),
+                                             roughness.get(), remap_roughness,
+                                             result.release_and_get_address());
     SuccessOrOOM(status);
   }
 

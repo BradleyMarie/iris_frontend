@@ -25,6 +25,7 @@ cc_library(
     visibility = ["//src:__subpackages__"],
     deps = [
         ":matte",
+        ":plastic",
         "//src/common:call_directive",
         "//src/common:material_factory",
         "//src/common:named_material_manager",
@@ -32,5 +33,22 @@ cc_library(
         "//src/common:normal_map_manager",
         "//src/common:texture_manager",
         "//src/common:tokenizer",
+    ],
+)
+
+cc_library(
+    name = "plastic",
+    srcs = ["plastic.cc"],
+    hdrs = ["plastic.h"],
+    deps = [
+        "//src/common:material_factory",
+        "//src/common:named_texture_manager",
+        "//src/common:normal_map_manager",
+        "//src/common:texture_manager",
+        "//src/common:tokenizer",
+        "//src/param_matchers:float_texture",
+        "//src/param_matchers:matcher",
+        "//src/param_matchers:reflector_texture",
+        "//src/param_matchers:single",
     ],
 )
