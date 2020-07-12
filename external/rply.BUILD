@@ -1,8 +1,6 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
-package(default_visibility = ["//visibility:private"])
-
-licenses(["notice"])
+package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "rply",
@@ -11,7 +9,5 @@ cc_library(
         "rply.h",
         "rplyfile.h",
     ],
-    visibility = [
-        "//src/shapes:__pkg__",
-    ],
+    copts = ["-Wno-maybe-uninitialized"],
 )

@@ -19,6 +19,13 @@ git_repository(
 )
 
 new_git_repository(
+    name = "rply",
+    build_file = "rply.BUILD",
+    remote = "https://github.com/diegonehab/rply.git",
+    tag = "v1.1.4",
+)
+
+new_git_repository(
     name = "tinyexr",
     build_file = "tinyexr.BUILD",
     commit = "569b35454bebf9e70185303bb66d78ca07606b9e",

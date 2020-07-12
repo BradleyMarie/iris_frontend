@@ -6,12 +6,12 @@
 
 #include "iris_physx_toolkit/triangle_mesh.h"
 #include "iris_physx_toolkit/triangle_mesh_normal_map.h"
+#include "rply.h"
+#include "rplyfile.h"
 #include "src/common/error.h"
 #include "src/common/ostream.h"
 #include "src/param_matchers/matcher.h"
 #include "src/param_matchers/single.h"
-#include "third_party/rply/rply.h"
-#include "third_party/rply/rplyfile.h"
 
 namespace iris {
 namespace {
