@@ -1,4 +1,4 @@
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
 
 git_repository(
     name = "com_github_bradleymarie_iris",
@@ -16,4 +16,11 @@ git_repository(
     name = "com_google_googletest",
     remote = "https://github.com/google/googletest",
     tag = "release-1.8.1",
+)
+
+new_git_repository(
+    name = "tinyexr",
+    build_file = "tinyexr.BUILD",
+    commit = "569b35454bebf9e70185303bb66d78ca07606b9e",
+    remote = "https://github.com/syoyo/tinyexr.git",
 )

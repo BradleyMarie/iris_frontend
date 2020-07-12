@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "src/films/output_writers/lock_file.h"
-#include "third_party/tinyexr/tinyexr.h"
+#include "tinyexr.h"
 
 namespace iris {
 namespace {

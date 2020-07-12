@@ -9,8 +9,8 @@ cc_library(
     deps = [
         ":lock_file",
         ":result",
-        "//third_party/tinyexr",
         "@com_google_absl//absl/strings",
+        "@tinyexr",
     ],
 )
 
