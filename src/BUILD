@@ -16,6 +16,21 @@ cc_binary(
     ],
 )
 
+cc_binary(
+    name = "iris_instrumented",
+    srcs = ["iris.cc"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":render",
+        "//src/common:tokenizer",
+        "@com_google_absl//absl/flags:config",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/flags:usage",
+        "@gperftools//:libtcmalloc_and_profiler",
+    ],
+)
+
 cc_library(
     name = "render",
     srcs = ["render.cc"],

@@ -19,6 +19,13 @@ git_repository(
 )
 
 new_git_repository(
+    name = "gperftools",
+    build_file = "gperftools.BUILD",
+    remote = "https://github.com/gperftools/gperftools.git",
+    tag = "gperftools-2.8",
+)
+
+new_git_repository(
     name = "rply",
     build_file = "rply.BUILD",
     remote = "https://github.com/diegonehab/rply.git",
