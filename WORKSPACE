@@ -31,3 +31,19 @@ new_git_repository(
     commit = "569b35454bebf9e70185303bb66d78ca07606b9e",
     remote = "https://github.com/syoyo/tinyexr.git",
 )
+
+# From Iris
+
+new_git_repository(
+    name = "pcg_c_basic",
+    build_file = "pcg_c_basic.BUILD",
+    commit = "bc39cd76ac3d541e618606bcc6e1e5ba5e5e6aa3",
+    remote = "https://github.com/imneme/pcg-c-basic.git",
+)
+
+new_git_repository(
+    name = "stb",
+    build_file = "stb.BUILD",
+    commit = "f54acd4e13430c5122cab4ca657705c84aa61b08",
+    remote = "https://github.com/nothings/stb.git",
+)
