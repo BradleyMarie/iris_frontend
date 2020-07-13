@@ -8,8 +8,11 @@
 
 namespace iris {
 
-typedef std::pair<std::vector<Shape>,
-                  std::vector<std::tuple<Shape, EmissiveMaterial, uint32_t>>>
+enum class ShapeCoordinateSystem { Model, World };
+
+typedef std::tuple<std::vector<Shape>,
+                   std::vector<std::tuple<Shape, EmissiveMaterial, uint32_t>>,
+                   ShapeCoordinateSystem>
     ShapeResult;
 
 }  // namespace iris

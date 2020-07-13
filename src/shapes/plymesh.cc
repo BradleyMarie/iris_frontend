@@ -169,9 +169,9 @@ class PlyData {
 
   void SetVName(const std::string& v_name) { m_v_name = v_name; }
 
-  const std::vector<POINT3>& GetVertices() const { return m_vertices; }
+  std::vector<POINT3>& GetVertices() { return m_vertices; }
 
-  const std::vector<VECTOR3>& GetNormals() const { return m_normals; }
+  std::vector<VECTOR3>& GetNormals() { return m_normals; }
 
   const std::vector<std::pair<float_t, float_t>>& GetUVs() const {
     return m_uvs;
@@ -623,7 +623,7 @@ PlyData ReadPlyFile(const std::string& file_name) {
 }  // namespace
 
 ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
-                         Tokenizer& tokenizer,
+                         Tokenizer& tokenizer, const Matrix& model_to_world,
                          MaterialManager& material_manager,
                          const NamedTextureManager& named_texture_manager,
                          NormalMapManager& normal_map_manager,
@@ -645,6 +645,16 @@ ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
       spectrum_manager);
 
   PlyData fileData = ReadPlyFile(filename.Get());
+
+  for (auto& point : fileData.GetVertices()) {
+    point = PointMatrixMultiply(model_to_world.get(), point);
+  }
+
+  for (auto& normal : fileData.GetNormals()) {
+    normal =
+        VectorMatrixInverseTransposedMultiply(model_to_world.get(), normal);
+    normal = VectorNormalize(normal, nullptr, nullptr);
+  }
 
   NormalMap front_normal_map, back_normal_map;
   if (material.second.get()) {
@@ -682,7 +692,8 @@ ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
 
   std::vector<std::tuple<Shape, EmissiveMaterial, uint32_t>> emissive_faces;
   if (!front_emissive_material.get() && !back_emissive_material.get()) {
-    return std::make_pair(std::move(shapes), std::move(emissive_faces));
+    return std::make_tuple(std::move(shapes), std::move(emissive_faces),
+                           ShapeCoordinateSystem::World);
   }
 
   for (size_t i = 0; i < triangles_allocated; i++) {
@@ -697,7 +708,8 @@ ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
     }
   }
 
-  return std::make_pair(std::move(shapes), std::move(emissive_faces));
+  return std::make_tuple(std::move(shapes), std::move(emissive_faces),
+                         ShapeCoordinateSystem::World);
 }
 
 }  // namespace iris

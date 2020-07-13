@@ -15,6 +15,7 @@ class ListValueMatcher : public ParamMatcher {
                      &m_variant_type, 1),
         m_value(std::move(default_value)) {}
   const std::vector<ValueType>& Get() { return m_value; }
+  std::vector<ValueType>& GetMutable() { return m_value; }
 
  protected:
   void Match(ParameterData& data) final {

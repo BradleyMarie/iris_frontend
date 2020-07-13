@@ -7,16 +7,14 @@
 
 namespace iris {
 
-ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
-                              Tokenizer& tokenizer,
-                              MaterialManager& material_manager,
-                              const NamedTextureManager& named_texture_manager,
-                              NormalMapManager& normal_map_manager,
-                              TextureManager& texture_manager,
-                              SpectrumManager& spectrum_manager,
-                              const MaterialFactory& material_factory,
-                              const EmissiveMaterial& front_emissive_material,
-                              const EmissiveMaterial& back_emissive_material);
+ShapeResult ParseTriangleMesh(
+    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
+    const Matrix& model_to_world, MaterialManager& material_manager,
+    const NamedTextureManager& named_texture_manager,
+    NormalMapManager& normal_map_manager, TextureManager& texture_manager,
+    SpectrumManager& spectrum_manager, const MaterialFactory& material_factory,
+    const EmissiveMaterial& front_emissive_material,
+    const EmissiveMaterial& back_emissive_material);
 
 }  // namespace iris
 

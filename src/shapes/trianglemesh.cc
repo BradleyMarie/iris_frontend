@@ -21,16 +21,14 @@ static const std::vector<int> kTriangleMeshDefaultIndices;
 
 }  // namespace
 
-ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
-                              Tokenizer& tokenizer,
-                              MaterialManager& material_manager,
-                              const NamedTextureManager& named_texture_manager,
-                              NormalMapManager& normal_map_manager,
-                              TextureManager& texture_manager,
-                              SpectrumManager& spectrum_manager,
-                              const MaterialFactory& material_factory,
-                              const EmissiveMaterial& front_emissive_material,
-                              const EmissiveMaterial& back_emissive_material) {
+ShapeResult ParseTriangleMesh(
+    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
+    const Matrix& model_to_world, MaterialManager& material_manager,
+    const NamedTextureManager& named_texture_manager,
+    NormalMapManager& normal_map_manager, TextureManager& texture_manager,
+    SpectrumManager& spectrum_manager, const MaterialFactory& material_factory,
+    const EmissiveMaterial& front_emissive_material,
+    const EmissiveMaterial& back_emissive_material) {
   TriangleMeshPointListMatcher points(base_type_name, type_name, "P", true,
                                       kTriangleMeshDefaultPoints);
   TriangleMeshIndexListMatcher int_indices(base_type_name, type_name, "indices",
@@ -58,6 +56,10 @@ ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
 
   // TODO: Check for nonsensical indices
 
+  for (auto& point : points.GetMutable()) {
+    point = PointMatrixMultiply(model_to_world.get(), point);
+  }
+
   std::vector<Shape> shapes(indices.size() / 3);
   size_t triangles_allocated;
   ISTATUS status = TriangleMeshAllocate(
@@ -82,7 +84,8 @@ ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
 
   std::vector<std::tuple<Shape, EmissiveMaterial, uint32_t>> emissive_faces;
   if (!front_emissive_material.get() && !back_emissive_material.get()) {
-    return std::make_pair(std::move(shapes), std::move(emissive_faces));
+    return std::make_tuple(std::move(shapes), std::move(emissive_faces),
+                           ShapeCoordinateSystem::World);
   }
 
   for (size_t i = 0; i < triangles_allocated; i++) {
@@ -97,7 +100,8 @@ ShapeResult ParseTriangleMesh(const char* base_type_name, const char* type_name,
     }
   }
 
-  return std::make_pair(std::move(shapes), std::move(emissive_faces));
+  return std::make_tuple(std::move(shapes), std::move(emissive_faces),
+                         ShapeCoordinateSystem::World);
 }
 
 }  // namespace iris

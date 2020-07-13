@@ -267,19 +267,22 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     }
 
     if (token == "Shape") {
+      auto model_to_world = matrix_manager.GetCurrent().first;
       auto material = graphics_state.GetMaterials();
       auto emissive_materials = graphics_state.GetEmissiveMaterials();
       auto shape_result = ParseShape(
-          "Shape", tokenizer, material_manager,
-          graphics_state.GetNamedTextureManager(), normal_map_manager,
-          texture_manager, spectrum_manager, material, emissive_materials.first,
-          emissive_materials.second);
-      for (const auto& shape : shape_result.first) {
-        scene_builder.AddShape(shape, matrix_manager.GetCurrent().first);
+          "Shape", tokenizer, matrix_manager.GetCurrent().first,
+          material_manager, graphics_state.GetNamedTextureManager(),
+          normal_map_manager, texture_manager, spectrum_manager, material,
+          emissive_materials.first, emissive_materials.second);
+      if (std::get<2>(shape_result) == ShapeCoordinateSystem::World) {
+        model_to_world.reset();
       }
-      for (const auto& light : shape_result.second) {
-        scene_builder.AddAreaLight(std::get<0>(light),
-                                   matrix_manager.GetCurrent().first,
+      for (const auto& shape : std::get<0>(shape_result)) {
+        scene_builder.AddShape(shape, model_to_world);
+      }
+      for (const auto& light : std::get<1>(shape_result)) {
+        scene_builder.AddAreaLight(std::get<0>(light), model_to_world,
                                    std::get<1>(light), std::get<2>(light));
       }
       continue;

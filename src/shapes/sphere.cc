@@ -17,7 +17,8 @@ static const float_t kSphereDefaultRadius = (float_t)1.0;
 }  // namespace
 
 ShapeResult ParseSphere(const char* base_type_name, const char* type_name,
-                        Tokenizer& tokenizer, MaterialManager& material_manager,
+                        Tokenizer& tokenizer, const Matrix& model_to_world,
+                        MaterialManager& material_manager,
                         const NamedTextureManager& named_texture_manager,
                         NormalMapManager& normal_map_manager,
                         TextureManager& texture_manager,
@@ -47,19 +48,20 @@ ShapeResult ParseSphere(const char* base_type_name, const char* type_name,
 
   std::vector<std::tuple<Shape, EmissiveMaterial, uint32_t>> emissive_faces;
   if (front_emissive_material.get()) {
-    emissive_faces.push_back(std::make_tuple(shape, front_emissive_material,
-                                             SPHERE_FRONT_FACE));
+    emissive_faces.push_back(
+        std::make_tuple(shape, front_emissive_material, SPHERE_FRONT_FACE));
   }
 
   if (back_emissive_material.get()) {
-    emissive_faces.push_back(std::make_tuple(shape, front_emissive_material,
-                                             SPHERE_BACK_FACE));
+    emissive_faces.push_back(
+        std::make_tuple(shape, front_emissive_material, SPHERE_BACK_FACE));
   }
 
   std::vector<Shape> shapes;
   shapes.push_back(std::move(shape));
 
-  return std::make_pair(std::move(shapes), std::move(emissive_faces));
+  return std::make_tuple(std::move(shapes), std::move(emissive_faces),
+                         ShapeCoordinateSystem::Model);
 }
 
 }  // namespace iris
