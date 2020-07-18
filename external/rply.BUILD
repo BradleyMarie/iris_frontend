@@ -9,5 +9,4 @@ cc_library(
         "rply.h",
         "rplyfile.h",
     ],
-    copts = ["-Wno-maybe-uninitialized"],
 )

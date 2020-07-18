@@ -2,7 +2,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_r
 
 git_repository(
     name = "com_github_bradleymarie_iris",
-    commit = "a10f15d7c04ca74c4b1e2e8205d0ee152a6db81e",
+    commit = "75c7f3d44fcd775e93b232af3bb3305f0674bb02",
     remote = "https://github.com/BradleyMarie/iris",
 )
 
@@ -21,8 +21,8 @@ git_repository(
 new_git_repository(
     name = "rply",
     build_file = "rply.BUILD",
+    commit = "4296cc91b5c8c26d4e7d7aac0cee2b194ffc5800",
     remote = "https://github.com/diegonehab/rply.git",
-    tag = "v1.1.4",
 )
 
 new_git_repository(
