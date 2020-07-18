@@ -6,7 +6,7 @@ Film "image"
    "integer xresolution" [250]
    "integer yresolution" [250]
 
-Integrator "path"
+Integrator "path" "integer maxdepth" [6] "float rrminprobability" [1.0] "float rrthreshold" [10000000]
 
 WorldBegin
 

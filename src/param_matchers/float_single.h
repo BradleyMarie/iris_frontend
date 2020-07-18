@@ -22,8 +22,6 @@ class SingleFloatMatcher : public ParamMatcher {
         m_inclusive(inclusive) {
     assert(!std::isnan(minimum));
     assert(!std::isnan(maximum));
-    assert(!inclusive || std::isfinite(minimum));
-    assert(!inclusive || std::isfinite(maximum));
     assert((inclusive && minimum <= maximum) ||
            (!inclusive && minimum < maximum));
     if (default_value) {
