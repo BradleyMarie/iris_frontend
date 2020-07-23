@@ -14,6 +14,22 @@ namespace {
 static const POINT3 kSphereOrigin = {(float_t)0.0, (float_t)0.0, (float_t)0.0};
 static const float_t kSphereDefaultRadius = (float_t)1.0;
 
+bool IsUniformPositiveScaleAndTranslateOnly(const Matrix& matrix) {
+  float_t contents[4][4];
+  MatrixReadContents(matrix.get(), contents);
+
+  bool result =
+      contents[0][0] == contents[1][1] && contents[0][0] == contents[2][2] &&
+      (float_t)0.0 < contents[0][0] && (float_t)0.0 < contents[3][3] &&
+      (float_t)0.0 == contents[0][1] && (float_t)0.0 == contents[0][2] &&
+      (float_t)0.0 == contents[1][0] && (float_t)0.0 == contents[1][2] &&
+      (float_t)0.0 == contents[2][0] && (float_t)0.0 == contents[2][1] &&
+      (float_t)0.0 == contents[3][0] && (float_t)0.0 == contents[3][1] &&
+      (float_t)0.0 == contents[3][2];
+
+  return result;
+}
+
 }  // namespace
 
 ShapeResult ParseSphere(const char* base_type_name, const char* type_name,
@@ -39,9 +55,20 @@ ShapeResult ParseSphere(const char* base_type_name, const char* type_name,
       named_texture_manager, normal_map_manager, texture_manager,
       spectrum_manager);
 
+  ShapeCoordinateSystem coordinate_system = ShapeCoordinateSystem::Model;
+  POINT3 origin = kSphereOrigin;
+  float_t parsed_radius = *radius.Get();
+  if (IsUniformPositiveScaleAndTranslateOnly(model_to_world)) {
+    POINT3 on_sphere = PointCreate(parsed_radius, (float_t)0.0, (float_t)0.0);
+    origin = PointMatrixMultiply(model_to_world.get(), origin);
+    on_sphere = PointMatrixMultiply(model_to_world.get(), on_sphere);
+    parsed_radius = on_sphere.x - origin.x;
+    coordinate_system = ShapeCoordinateSystem::World;
+  }
+
   Shape shape;
   ISTATUS status = EmissiveSphereAllocate(
-      kSphereOrigin, *radius.Get(), material.first.get(), material.first.get(),
+      origin, parsed_radius, material.first.get(), material.first.get(),
       front_emissive_material.get(), back_emissive_material.get(),
       shape.release_and_get_address());
   SuccessOrOOM(status);
@@ -61,7 +88,7 @@ ShapeResult ParseSphere(const char* base_type_name, const char* type_name,
   shapes.push_back(std::move(shape));
 
   return std::make_tuple(std::move(shapes), std::move(emissive_faces),
-                         ShapeCoordinateSystem::Model);
+                         coordinate_system);
 }
 
 }  // namespace iris
