@@ -271,10 +271,10 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
       auto material = graphics_state.GetMaterials();
       auto emissive_materials = graphics_state.GetEmissiveMaterials();
       auto shape_result = ParseShape(
-          "Shape", tokenizer, matrix_manager.GetCurrent().first,
-          material_manager, graphics_state.GetNamedTextureManager(),
-          normal_map_manager, texture_manager, spectrum_manager, material,
-          emissive_materials.first, emissive_materials.second);
+          "Shape", tokenizer, model_to_world, material_manager,
+          graphics_state.GetNamedTextureManager(), normal_map_manager,
+          texture_manager, spectrum_manager, material, emissive_materials.first,
+          emissive_materials.second);
       if (std::get<2>(shape_result) == ShapeCoordinateSystem::World) {
         model_to_world.reset();
       }

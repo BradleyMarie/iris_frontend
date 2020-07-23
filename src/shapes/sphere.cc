@@ -59,7 +59,8 @@ ShapeResult ParseSphere(const char* base_type_name, const char* type_name,
   POINT3 origin = kSphereOrigin;
   float_t parsed_radius = *radius.Get();
   if (IsUniformPositiveScaleAndTranslateOnly(model_to_world)) {
-    POINT3 on_sphere = PointCreate(parsed_radius, (float_t)0.0, (float_t)0.0);
+    POINT3 on_sphere =
+        PointCreate(origin.x + parsed_radius, origin.y, origin.z);
     origin = PointMatrixMultiply(model_to_world.get(), origin);
     on_sphere = PointMatrixMultiply(model_to_world.get(), on_sphere);
     parsed_radius = on_sphere.x - origin.x;
