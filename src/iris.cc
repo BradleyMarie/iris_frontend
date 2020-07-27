@@ -16,6 +16,10 @@ ABSL_FLAG(uint32_t, num_threads, 0,
           "number of threads will equal the number of processors in the "
           "system.");
 
+ABSL_FLAG(bool, report_progress, true,
+          "If false, no status bar or progress reporting will be displayed "
+          "while rendering.");
+
 ABSL_FLAG(bool, spectrum_color_workaround, true,
           "Replicates an erratum in pbrt-v3 which incorrectly scales the color "
           "computed for emissive spectral power distributions by the integral "
@@ -68,9 +72,10 @@ int main(int argc, char** argv) {
                                                 unparsed[1]);
   }
 
-  while (tokenizer->Peek()) {
-    iris::RenderToOutput(*tokenizer, absl::GetFlag(FLAGS_epsilon),
+  for (size_t render_index = 0; tokenizer->Peek(); render_index += 1) {
+    iris::RenderToOutput(*tokenizer, render_index, absl::GetFlag(FLAGS_epsilon),
                          absl::GetFlag(FLAGS_num_threads),
+                         absl::GetFlag(FLAGS_report_progress),
                          absl::GetFlag(FLAGS_spectral),
                          absl::GetFlag(FLAGS_spectrum_color_workaround));
   }

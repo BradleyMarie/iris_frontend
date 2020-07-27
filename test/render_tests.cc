@@ -106,8 +106,10 @@ CreateTokenizerFromString(const std::string& string_to_parse) {
   return std::make_pair(std::move(tokenizer), std::move(buffer));
 }
 
+static const size_t kRenderIndex = 0;
 static const float_t kEpsilon = (float_t)0.001;
 static const size_t kNumThreads = 1;
+static const bool kReportProgress = false;
 static const bool kSpectral = false;
 static const bool kSpectrumColorWorkaround = false;
 
@@ -116,8 +118,9 @@ static const bool kSpectrumColorWorkaround = false;
 TEST(RenderTests, CornellBox) {
   auto tokenizer =
       Tokenizer::CreateFromFile(kSearchDir, "test/cornell_box.pbrt");
-  auto render_result = RenderToFramebuffer(*tokenizer, kEpsilon, kNumThreads,
-                                           kSpectral, kSpectrumColorWorkaround);
+  auto render_result =
+      RenderToFramebuffer(*tokenizer, kRenderIndex, kEpsilon, kNumThreads,
+                          kReportProgress, kSpectral, kSpectrumColorWorkaround);
   CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.1);
 }
 
@@ -125,7 +128,7 @@ TEST(RenderTests, IncludeCornellBox) {
   auto tokenizer =
       CreateTokenizerFromString("Include \"test/cornell_box.pbrt\"");
   auto render_result =
-      RenderToFramebuffer(*tokenizer.first, kEpsilon, kNumThreads, kSpectral,
-                          kSpectrumColorWorkaround);
+      RenderToFramebuffer(*tokenizer.first, kRenderIndex, kEpsilon, kNumThreads,
+                          kReportProgress, kSpectral, kSpectrumColorWorkaround);
   CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.1);
 }

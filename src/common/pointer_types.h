@@ -32,6 +32,7 @@ typedef SharedPtr<NORMAL_MAP, NormalMapRetain, NormalMapRelease> NormalMap;
 typedef SharedPtr<LIGHT, LightRetain, LightRelease> Light;
 typedef SharedPtr<LIGHT_SAMPLER, LightSamplerRetain, LightSamplerRelease>
     LightSampler;
+typedef UniquePtr<PROGRESS_REPORTER, ProgressReporterFree> ProgressReporter;
 typedef UniquePtr<RANDOM, RandomFree> Random;
 typedef SharedPtr<REFLECTOR, ReflectorRetain, ReflectorRelease> Reflector;
 typedef UniquePtr<REFLECTOR_MIPMAP, ReflectorMipmapFree> ReflectorMipmap;
