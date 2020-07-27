@@ -33,7 +33,7 @@ std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(
       std::get<2>(render_config).get(), std::get<3>(render_config).get(),
       std::get<4>(render_config).get(), sample_tracer.get(),
       std::get<7>(render_config).get(), std::get<8>(render_config).get(),
-      epsilon, num_threads);
+      nullptr, epsilon, num_threads);
 
   switch (status) {
     case ISTATUS_SUCCESS:
