@@ -1,8 +1,13 @@
 #include "src/common/tokenizer.h"
 
-#include <cctype>
 #include <fstream>
-#include <sstream>
+#include <vector>
+
+// TODO: Make this platform independent
+#include <libgen.h>
+#include <unistd.h>
+
+#include "absl/strings/str_cat.h"
 
 namespace iris {
 namespace {
@@ -130,8 +135,12 @@ bool ParseNext(std::istream& stream, std::string& output) {
 }  // namespace
 
 Tokenizer Tokenizer::CreateFromFile(absl::string_view file) {
+  std::vector<char> file_name(file.begin(), file.end());
+  file_name.push_back('\0');
+
   Tokenizer result;
   result.Include(file);
+  result.m_search_root = dirname(file_name.data());
   return result;
 }
 
@@ -141,12 +150,18 @@ Tokenizer Tokenizer::CreateFromStream(std::istream& stream) {
   return result;
 }
 
-std::string Tokenizer::AbsolutePath(absl::string_view file) const {
-  return std::string(file);
+std::string Tokenizer::ResolvePath(absl::string_view file) const {
+  // TODO: Make this platform independent
+  if (!m_search_root.has_value() || file.empty() || file[0] == '/') {
+    return std::string(file);
+  }
+
+  file.remove_prefix(1);
+  return absl::StrCat(*m_search_root, "/", file);
 }
 
 void Tokenizer::Include(absl::string_view file) {
-  auto buffer = absl::make_unique<std::ifstream>(AbsolutePath(file));
+  auto buffer = absl::make_unique<std::ifstream>(ResolvePath(file));
   if (buffer->fail()) {
     std::cerr << "ERROR: Error opening file: " << file << std::endl;
     exit(EXIT_FAILURE);

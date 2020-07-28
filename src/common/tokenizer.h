@@ -21,7 +21,7 @@ class Tokenizer {
   static Tokenizer CreateFromFile(absl::string_view file_path);
   static Tokenizer CreateFromStream(std::istream& stream);
 
-  std::string AbsolutePath(absl::string_view file_path) const;
+  std::string ResolvePath(absl::string_view file_path) const;
   void Include(absl::string_view file_path);
 
   absl::optional<absl::string_view> Peek();
@@ -34,6 +34,7 @@ class Tokenizer {
   std::string m_next;
   std::string m_peeked;
   absl::optional<bool> m_peeked_valid;
+  absl::optional<std::string> m_search_root;
 };
 
 }  // namespace iris
