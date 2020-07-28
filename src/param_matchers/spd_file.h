@@ -11,10 +11,9 @@
 
 namespace iris {
 
-absl::optional<std::vector<float_t>> ReadSpdFile(const std::string& file,
-                                                 std::istream& stream);
-absl::optional<std::vector<float_t>> ReadSpdFile(const std::string& search_dir,
-                                                 const std::string& file);
+absl::optional<std::vector<float_t>> ReadSpdFile(std::istream& stream);
+absl::optional<std::vector<float_t>> ReadSpdFile(
+    absl::string_view file, const std::string& resolved_file_path);
 
 }  // namespace iris
 

@@ -21,7 +21,7 @@ AreaLightResult ParseDiffuse(const char* base_type_name, const char* type_name,
   SingleBoolMatcher twosided(base_type_name, type_name, "twosided", false,
                              kDiffuseAreaLightDefaultTwoSided);
   SpectrumMatcher spectrum =
-      SpectrumMatcher::FromRgb(base_type_name, type_name, "L", false,
+      SpectrumMatcher::FromRgb(base_type_name, type_name, "L", false, tokenizer,
                                spectrum_manager, kDiffuseAreaLightDefaultL);
   MatchParameters<2>(base_type_name, type_name, tokenizer,
                      {&twosided, &spectrum});

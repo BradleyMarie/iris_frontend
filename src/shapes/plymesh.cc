@@ -493,8 +493,9 @@ static void InitializeUVCallbacks(p_ply ply, PlyData* ply_data,
                        found);
 }
 
-PlyData ReadPlyFile(const std::string& file_name) {
-  FILE* file = fopen(file_name.c_str(), "rb");
+PlyData ReadPlyFile(absl::string_view file_name,
+                    const std::string& resolved_file_name) {
+  FILE* file = fopen(resolved_file_name.c_str(), "rb");
   if (!file) {
     std::cerr << "ERROR: Failed to open PLY file: " << file_name << std::endl;
     exit(EXIT_FAILURE);
@@ -640,11 +641,12 @@ ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
                      &unused_parameters);
 
   auto material = material_factory.Build(
-      base_type_name, type_name, unused_parameters, material_manager,
+      base_type_name, type_name, tokenizer, unused_parameters, material_manager,
       named_texture_manager, normal_map_manager, texture_manager,
       spectrum_manager);
 
-  PlyData fileData = ReadPlyFile(filename.Get());
+  PlyData fileData =
+      ReadPlyFile(filename.Get(), tokenizer.ResolvePath(filename.Get()));
 
   for (auto& point : fileData.GetVertices()) {
     point = PointMatrixMultiply(model_to_world.get(), point);

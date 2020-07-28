@@ -51,7 +51,7 @@ ShapeResult ParseSphere(const char* base_type_name, const char* type_name,
                      &unused_parameters);
 
   auto material = material_factory.Build(
-      base_type_name, type_name, unused_parameters, material_manager,
+      base_type_name, type_name, tokenizer, unused_parameters, material_manager,
       named_texture_manager, normal_map_manager, texture_manager,
       spectrum_manager);
 

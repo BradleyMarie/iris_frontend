@@ -27,12 +27,13 @@ const size_t ReflectorTextureMatcher::m_variant_indices[4] = {
 ReflectorTextureMatcher ReflectorTextureMatcher::FromUniformReflectance(
     const char* base_type_name, const char* type_name,
     const char* parameter_name, bool required,
+    const Tokenizer& tokenizer,
     const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager,
     float_t default_reflectance) {
   assert(ValidateFloat(default_reflectance));
   return ReflectorTextureMatcher(
-      base_type_name, type_name, parameter_name, required,
+      base_type_name, type_name, parameter_name, required, tokenizer,
       named_texture_manager, texture_manager, spectrum_manager,
       std::move(ReflectorFromUniformReflectance(
           texture_manager, spectrum_manager, default_reflectance)));
@@ -78,7 +79,7 @@ ReflectorTexture ReflectorTextureMatcher::Match(
   if (files.size() != 1) {
     NumberOfElementsError();
   }
-  auto maybe_samples = ReadSpdFile(/*search_dir=*/"", files[0]);
+  auto maybe_samples = ReadSpdFile(files[0], m_tokenizer.ResolvePath(files[0]));
   if (!maybe_samples) {
     std::cerr << "ERROR: Malformed SPD file: " << files[0] << std::endl;
     exit(EXIT_FAILURE);

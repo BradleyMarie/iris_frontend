@@ -155,8 +155,6 @@ std::string Tokenizer::ResolvePath(absl::string_view file) const {
   if (!m_search_root.has_value() || file.empty() || file[0] == '/') {
     return std::string(file);
   }
-
-  file.remove_prefix(1);
   return absl::StrCat(*m_search_root, "/", file);
 }
 

@@ -14,12 +14,14 @@ class ReflectorTextureMatcher : public ParamMatcher {
  public:
   ReflectorTextureMatcher(const char* base_type_name, const char* type_name,
                           const char* parameter_name, bool required,
+                          const Tokenizer& tokenizer,
                           const NamedTextureManager& named_texture_manager,
                           TextureManager& texture_manager,
                           SpectrumManager& spectrum_manager,
                           ReflectorTexture default_value)
       : ParamMatcher(base_type_name, type_name, parameter_name, required,
                      m_variant_indices, 4),
+        m_tokenizer(tokenizer),
         m_named_texture_manager(named_texture_manager),
         m_texture_manager(texture_manager),
         m_spectrum_manager(spectrum_manager),
@@ -29,7 +31,7 @@ class ReflectorTextureMatcher : public ParamMatcher {
 
   static ReflectorTextureMatcher FromUniformReflectance(
       const char* base_type_name, const char* type_name,
-      const char* parameter_name, bool required,
+      const char* parameter_name, bool required, const Tokenizer& tokenizer,
       const NamedTextureManager& named_texture_manager,
       TextureManager& texture_manager, SpectrumManager& spectrum_manager,
       float_t default_reflectance);
@@ -51,6 +53,7 @@ class ReflectorTextureMatcher : public ParamMatcher {
 
  private:
   static const size_t m_variant_indices[4];
+  const Tokenizer& m_tokenizer;
   const NamedTextureManager& m_named_texture_manager;
   TextureManager& m_texture_manager;
   SpectrumManager& m_spectrum_manager;

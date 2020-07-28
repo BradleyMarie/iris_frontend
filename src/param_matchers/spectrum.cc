@@ -12,13 +12,13 @@ const size_t SpectrumMatcher::m_variant_indices[2] = {
 
 SpectrumMatcher SpectrumMatcher::FromRgb(
     const char* base_type_name, const char* type_name,
-    const char* parameter_name, bool required,
+    const char* parameter_name, bool required, const Tokenizer& tokenizer,
     SpectrumManager& spectrum_manager,
     const std::array<float_t, 3>& default_rgb) {
   COLOR3 color =
       ColorCreate(absl::GetFlag(FLAGS_rgb_color_space), default_rgb.data());
   return SpectrumMatcher(base_type_name, type_name, parameter_name, required,
-                         spectrum_manager,
+                         tokenizer, spectrum_manager,
                          spectrum_manager.AllocateColorSpectrum(color).value());
 }
 
@@ -33,7 +33,7 @@ Spectrum SpectrumMatcher::Match(const std::vector<std::string>& files) {
   if (files.size() != 1) {
     NumberOfElementsError();
   }
-  auto maybe_samples = ReadSpdFile(/*search_dir=*/"", files[0]);
+  auto maybe_samples = ReadSpdFile(files[0], m_tokenizer.ResolvePath(files[0]));
   if (!maybe_samples) {
     std::cerr << "ERROR: Malformed SPD file: " << files[0] << std::endl;
     exit(EXIT_FAILURE);

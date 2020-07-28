@@ -19,8 +19,7 @@ absl::optional<float_t> ParseFloat(const std::vector<char>& token) {
 
 }  // namespace
 
-absl::optional<std::vector<float_t>> ReadSpdFile(const std::string& file,
-                                                 std::istream& stream) {
+absl::optional<std::vector<float_t>> ReadSpdFile(std::istream& stream) {
   std::vector<float_t> result;
   std::vector<char> token;
   for (int read = stream.get(); read != EOF; read = stream.get()) {
@@ -69,15 +68,15 @@ absl::optional<std::vector<float_t>> ReadSpdFile(const std::string& file,
   return result;
 }
 
-absl::optional<std::vector<float_t>> ReadSpdFile(const std::string& search_dir,
-                                                 const std::string& file) {
-  std::ifstream stream(file);
+absl::optional<std::vector<float_t>> ReadSpdFile(
+    absl::string_view file, const std::string& resolved_file_path) {
+  std::ifstream stream(resolved_file_path);
   if (stream.fail()) {
     std::cerr << "ERROR: Error opening file: " << file << std::endl;
     exit(EXIT_FAILURE);
   }
 
-  return ReadSpdFile(file, stream);
+  return ReadSpdFile(stream);
 }
 
 }  // namespace iris

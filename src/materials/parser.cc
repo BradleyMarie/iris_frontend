@@ -35,7 +35,7 @@ const static char* kMatteTypeName = "matte";
 const static char* kPlasticTypeName = "plastic";
 
 typedef std::function<MaterialFactory(
-    const char*, const char*, std::vector<Parameter>&,
+    const char*, const char*, const Tokenizer&, std::vector<Parameter>&,
     const NamedTextureManager&, NormalMapManager&, TextureManager&,
     SpectrumManager&)>
     MakeNamedMaterialFunction;
@@ -110,7 +110,7 @@ MaterialFactory ParseMakeNamedMaterial(
   }
 
   auto material = name_and_function.second(
-      base_type_name, name_and_function.first, parameters,
+      base_type_name, name_and_function.first, tokenizer, parameters,
       named_texture_manager, normal_map_manager, texture_manager,
       spectrum_manager);
 

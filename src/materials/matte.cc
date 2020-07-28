@@ -13,13 +13,13 @@ static const FloatTexture kMatteMaterialDefaultBumpMap;
 
 template <typename T>
 MaterialFactory ParseMatte(const char* base_type_name, const char* type_name,
-                           T& parameters,
+                           const Tokenizer& tokenizer, T& parameters,
                            const NamedTextureManager& named_texture_manager,
                            NormalMapManager& normal_map_manager,
                            TextureManager& texture_manager,
                            SpectrumManager& spectrum_manager) {
   ReflectorTextureMatcher kd = ReflectorTextureMatcher::FromUniformReflectance(
-      base_type_name, type_name, "Kd", false, named_texture_manager,
+      base_type_name, type_name, "Kd", false, tokenizer, named_texture_manager,
       texture_manager, spectrum_manager, kMatteMaterialDefaultReflectance);
   FloatTextureMatcher sigma = FloatTextureMatcher::FromValue(
       base_type_name, type_name, "sigma", false, false,
@@ -38,13 +38,14 @@ MaterialFactory ParseMatte(const char* base_type_name, const char* type_name,
   MaterialFactoryFn result =
       [default_kd, default_sigma, default_bumpmap](
           const char* base_type_name, const char* type_name,
-          std::vector<Parameter>& parameters, MaterialManager& material_manager,
+          const Tokenizer& tokenizer, std::vector<Parameter>& parameters,
+          MaterialManager& material_manager,
           const NamedTextureManager& named_texture_manager,
           NormalMapManager& normal_map_manager, TextureManager& texture_manager,
           SpectrumManager& spectrum_manager) -> std::pair<Material, NormalMap> {
     ReflectorTextureMatcher kd(base_type_name, type_name, "Kd", false,
-                               named_texture_manager, texture_manager,
-                               spectrum_manager, default_kd);
+                               tokenizer, named_texture_manager,
+                               texture_manager, spectrum_manager, default_kd);
     FloatTextureMatcher sigma(base_type_name, type_name, "sigma", false, false,
                               -std::numeric_limits<float_t>::infinity(),
                               std::numeric_limits<float_t>::infinity(),
@@ -72,20 +73,21 @@ MaterialFactory ParseMatte(const char* base_type_name, const char* type_name,
                            NormalMapManager& normal_map_manager,
                            TextureManager& texture_manager,
                            SpectrumManager& spectrum_manager) {
-  return ParseMatte<Tokenizer>(base_type_name, type_name, tokenizer,
+  return ParseMatte<Tokenizer>(base_type_name, type_name, tokenizer, tokenizer,
                                named_texture_manager, normal_map_manager,
                                texture_manager, spectrum_manager);
 }
 
 MaterialFactory MakeNamedMatte(const char* base_type_name,
                                const char* type_name,
+                               const Tokenizer& tokenizer,
                                std::vector<Parameter>& parameters,
                                const NamedTextureManager& named_texture_manager,
                                NormalMapManager& normal_map_manager,
                                TextureManager& texture_manager,
                                SpectrumManager& spectrum_manager) {
   return ParseMatte<typename std::vector<Parameter>>(
-      base_type_name, type_name, parameters, named_texture_manager,
+      base_type_name, type_name, tokenizer, parameters, named_texture_manager,
       normal_map_manager, texture_manager, spectrum_manager);
 }
 

@@ -17,8 +17,9 @@ ReflectorTexture ParseConstantReflector(
     TextureManager& texture_manager, SpectrumManager& spectrum_manager) {
   ReflectorTextureMatcher value =
       ReflectorTextureMatcher::FromUniformReflectance(
-          base_type_name, type_name, "value", false, named_texture_manager,
-          texture_manager, spectrum_manager, kConstantTextureDefaultValue);
+          base_type_name, type_name, "value", false, tokenizer,
+          named_texture_manager, texture_manager, spectrum_manager,
+          kConstantTextureDefaultValue);
   MatchParameters<1>(base_type_name, type_name, tokenizer, {&value});
 
   return value.Get();

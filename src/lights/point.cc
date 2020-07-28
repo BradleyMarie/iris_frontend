@@ -23,7 +23,7 @@ Light ParsePoint(const char* base_type_name, const char* type_name,
                            kPointLightDefaultFrom);
   SpectrumMatcher spectrum =
       SpectrumMatcher::FromRgb(base_type_name, type_name, "L", false,
-                               spectrum_manager, kPointLightDefaultL);
+                               tokenizer, spectrum_manager, kPointLightDefaultL);
   MatchParameters<2>(base_type_name, type_name, tokenizer, {&from, &spectrum});
 
   POINT3 world_from = PointMatrixMultiply(model_to_world.get(), from.Get());

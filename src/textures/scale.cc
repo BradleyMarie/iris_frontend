@@ -17,12 +17,14 @@ ReflectorTexture ParseScaleReflector(
     TextureManager& texture_manager, SpectrumManager& spectrum_manager) {
   ReflectorTextureMatcher tex1 =
       ReflectorTextureMatcher::FromUniformReflectance(
-          base_type_name, type_name, "tex1", false, named_texture_manager,
-          texture_manager, spectrum_manager, kScaleTextureDefaultValue);
+          base_type_name, type_name, "tex1", false, tokenizer,
+          named_texture_manager, texture_manager, spectrum_manager,
+          kScaleTextureDefaultValue);
   ReflectorTextureMatcher tex2 =
       ReflectorTextureMatcher::FromUniformReflectance(
-          base_type_name, type_name, "tex2", false, named_texture_manager,
-          texture_manager, spectrum_manager, kScaleTextureDefaultValue);
+          base_type_name, type_name, "tex2", false, tokenizer,
+          named_texture_manager, texture_manager, spectrum_manager,
+          kScaleTextureDefaultValue);
   MatchParameters<2>(base_type_name, type_name, tokenizer, {&tex1, &tex2});
 
   return texture_manager.AllocateProductReflectorTexture(tex1.Get(),

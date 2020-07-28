@@ -16,16 +16,16 @@ static const FloatTexture kPlasticMaterialDefaultBumpMap;
 
 template <typename T>
 MaterialFactory ParsePlastic(const char* base_type_name, const char* type_name,
-                             T& parameters,
+                             const Tokenizer& tokenizer, T& parameters,
                              const NamedTextureManager& named_texture_manager,
                              NormalMapManager& normal_map_manager,
                              TextureManager& texture_manager,
                              SpectrumManager& spectrum_manager) {
   ReflectorTextureMatcher kd = ReflectorTextureMatcher::FromUniformReflectance(
-      base_type_name, type_name, "Kd", false, named_texture_manager,
+      base_type_name, type_name, "Kd", false, tokenizer, named_texture_manager,
       texture_manager, spectrum_manager, kPlasticMaterialDefaultDiffuse);
   ReflectorTextureMatcher ks = ReflectorTextureMatcher::FromUniformReflectance(
-      base_type_name, type_name, "Ks", false, named_texture_manager,
+      base_type_name, type_name, "Ks", false, tokenizer, named_texture_manager,
       texture_manager, spectrum_manager, kPlasticMaterialDefaultSpecular);
   FloatTextureMatcher roughness = FloatTextureMatcher::FromValue(
       base_type_name, type_name, "roughness", false, true,
@@ -49,16 +49,17 @@ MaterialFactory ParsePlastic(const char* base_type_name, const char* type_name,
       [default_kd, default_ks, default_roughness, default_remap_roughness,
        default_bumpmap](
           const char* base_type_name, const char* type_name,
-          std::vector<Parameter>& parameters, MaterialManager& material_manager,
+          const Tokenizer& tokenizer, std::vector<Parameter>& parameters,
+          MaterialManager& material_manager,
           const NamedTextureManager& named_texture_manager,
           NormalMapManager& normal_map_manager, TextureManager& texture_manager,
           SpectrumManager& spectrum_manager) -> std::pair<Material, NormalMap> {
     ReflectorTextureMatcher kd(base_type_name, type_name, "Kd", false,
-                               named_texture_manager, texture_manager,
-                               spectrum_manager, default_kd);
+                               tokenizer, named_texture_manager,
+                               texture_manager, spectrum_manager, default_kd);
     ReflectorTextureMatcher ks(base_type_name, type_name, "Ks", false,
-                               named_texture_manager, texture_manager,
-                               spectrum_manager, default_ks);
+                               tokenizer, named_texture_manager,
+                               texture_manager, spectrum_manager, default_ks);
     FloatTextureMatcher roughness(
         base_type_name, type_name, "roughness", false, true,
         static_cast<float_t>(0.0), static_cast<float_t>(1.0),
@@ -89,19 +90,19 @@ MaterialFactory ParsePlastic(const char* base_type_name, const char* type_name,
                              NormalMapManager& normal_map_manager,
                              TextureManager& texture_manager,
                              SpectrumManager& spectrum_manager) {
-  return ParsePlastic<Tokenizer>(base_type_name, type_name, tokenizer,
-                                 named_texture_manager, normal_map_manager,
-                                 texture_manager, spectrum_manager);
+  return ParsePlastic<Tokenizer>(
+      base_type_name, type_name, tokenizer, tokenizer, named_texture_manager,
+      normal_map_manager, texture_manager, spectrum_manager);
 }
 
 MaterialFactory MakeNamedPlastic(
     const char* base_type_name, const char* type_name,
-    std::vector<Parameter>& parameters,
+    const Tokenizer& tokenizer, std::vector<Parameter>& parameters,
     const NamedTextureManager& named_texture_manager,
     NormalMapManager& normal_map_manager, TextureManager& texture_manager,
     SpectrumManager& spectrum_manager) {
   return ParsePlastic<typename std::vector<Parameter>>(
-      base_type_name, type_name, parameters, named_texture_manager,
+      base_type_name, type_name, tokenizer, parameters, named_texture_manager,
       normal_map_manager, texture_manager, spectrum_manager);
 }
 

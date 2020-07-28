@@ -4,7 +4,7 @@
 
 namespace iris {
 
-void ReportOOM[[noreturn]]() {
+void ReportOOM [[noreturn]] () {
   std::cerr << "ERROR: Allocation failed" << std::endl;
   exit(EXIT_FAILURE);
 }

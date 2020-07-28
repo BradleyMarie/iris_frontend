@@ -15,8 +15,8 @@
 namespace iris {
 
 typedef std::function<std::pair<Material, NormalMap>(
-    const char* base_type_name, const char* type_name, std::vector<Parameter>&,
-    MaterialManager& material_manager,
+    const char* base_type_name, const char* type_name, const Tokenizer&,
+    std::vector<Parameter>&, MaterialManager& material_manager,
     const NamedTextureManager& named_texture_manager, NormalMapManager&,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager)>
     MaterialFactoryFn;
@@ -29,7 +29,7 @@ class MaterialFactory {
 
   std::pair<Material, NormalMap> Build(
       const char* base_type_name, const char* type_name,
-      std::vector<Parameter>& param_overrides,
+      const Tokenizer& tokenizer, std::vector<Parameter>& param_overrides,
       MaterialManager& material_manager,
       const NamedTextureManager& named_texture_manager,
       NormalMapManager& normal_map_manager, TextureManager& texture_manager,
@@ -38,7 +38,7 @@ class MaterialFactory {
       return std::pair<Material, NormalMap>();
     }
 
-    return m_factory(base_type_name, type_name, param_overrides,
+    return m_factory(base_type_name, type_name, tokenizer, param_overrides,
                      material_manager, named_texture_manager,
                      normal_map_manager, texture_manager, spectrum_manager);
   }

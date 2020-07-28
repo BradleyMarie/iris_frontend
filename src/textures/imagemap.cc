@@ -66,12 +66,23 @@ ReflectorTexture ParseImageMapReflector(
     exit(EXIT_FAILURE);
   }
 
+  std::string resolved_path = tokenizer.ResolvePath(filename.Get());
+
   ReflectorMipmap mipmap;
   ISTATUS status =
-      PngReflectorMipmapAllocate(filename.Get().c_str(), wrap_mode,
+      PngReflectorMipmapAllocate(resolved_path.c_str(), wrap_mode,
                                  spectrum_manager.GetColorExtrapolator().get(),
                                  mipmap.release_and_get_address());
-  SuccessOrOOM(status);
+  switch (status) {
+    case ISTATUS_IO_ERROR:
+      std::cerr << "ERROR: Failed to read PNG file: " << filename.Get()
+                << std::endl;
+      exit(EXIT_FAILURE);
+    case ISTATUS_ALLOCATION_FAILED:
+      ReportOOM();
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
 
   return texture_manager.AllocateImageMapReflectorTexture(
       std::move(mipmap), *u_delta.Get(), *v_delta.Get(), *u_scale.Get(),
@@ -124,10 +135,21 @@ FloatTexture ParseImageMapFloat(
     exit(EXIT_FAILURE);
   }
 
+  std::string resolved_path = tokenizer.ResolvePath(filename.Get());
+
   FloatMipmap mipmap;
-  ISTATUS status = PngFloatMipmapAllocate(filename.Get().c_str(), wrap_mode,
+  ISTATUS status = PngFloatMipmapAllocate(resolved_path.c_str(), wrap_mode,
                                           mipmap.release_and_get_address());
-  SuccessOrOOM(status);
+  switch (status) {
+    case ISTATUS_IO_ERROR:
+      std::cerr << "ERROR: Failed to read PNG file: " << filename.Get()
+                << std::endl;
+      exit(EXIT_FAILURE);
+    case ISTATUS_ALLOCATION_FAILED:
+      ReportOOM();
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
 
   return texture_manager.AllocateImageMapFloatTexture(
       std::move(mipmap), *u_delta.Get(), *v_delta.Get(), *u_scale.Get(),

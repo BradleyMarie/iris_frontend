@@ -20,7 +20,7 @@ MaterialFactory ParsePlastic(const char* base_type_name, const char* type_name,
 
 MaterialFactory MakeNamedPlastic(
     const char* base_type_name, const char* type_name,
-    std::vector<Parameter>& parameters,
+    const Tokenizer& tokenizer, std::vector<Parameter>& parameters,
     const NamedTextureManager& named_texture_manager,
     NormalMapManager& normal_map_manager, TextureManager& texture_manager,
     SpectrumManager& spectrum_manager);
