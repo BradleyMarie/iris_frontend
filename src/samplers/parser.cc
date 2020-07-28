@@ -18,7 +18,7 @@ Sampler ParseSampler(const char* base_type_name, Tokenizer& tokenizer) {
 }
 
 Sampler CreateDefaultSampler() {
-  Tokenizer tokenizer("");
+  Tokenizer tokenizer;
   return ParseHalton("Unused", "Unused", tokenizer);
 }
 

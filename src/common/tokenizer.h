@@ -12,23 +12,22 @@ namespace iris {
 
 class Tokenizer {
  public:
-  Tokenizer(const std::string& search_dir);
+  Tokenizer() = default;
   Tokenizer(const Tokenizer&) = delete;
   Tokenizer& operator=(const Tokenizer&) = delete;
+  Tokenizer(Tokenizer&& other) = default;
+  Tokenizer& operator=(Tokenizer&& other) = default;
 
-  static std::unique_ptr<Tokenizer> CreateFromFile(
-      const std::string& search_dir, const std::string& file);
-  static std::unique_ptr<Tokenizer> CreateFromStream(
-      const std::string& search_dir, std::istream& stream);
+  static Tokenizer CreateFromFile(absl::string_view file_path);
+  static Tokenizer CreateFromStream(std::istream& stream);
 
-  std::string AbsolutePath(const std::string& file) const;
-  void Include(const std::string& file);
+  std::string AbsolutePath(absl::string_view file_path) const;
+  void Include(absl::string_view file_path);
 
   absl::optional<absl::string_view> Peek();
   absl::optional<absl::string_view> Next();
 
  private:
-  std::string m_search_dir;
   std::stack<std::pair<std::reference_wrapper<std::istream>,
                        std::unique_ptr<std::istream>>>
       m_streams;

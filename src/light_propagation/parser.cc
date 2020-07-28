@@ -17,7 +17,7 @@ LightPropagationResult ParseLightPropagation(const char* base_type_name,
 }
 
 LightPropagationResult CreateDefaultLightPropagation(bool spectral) {
-  Tokenizer tokenizer("");
+  Tokenizer tokenizer;
   if (spectral) {
     return ParseSpectrum("Unused", "Unused", tokenizer);
   }

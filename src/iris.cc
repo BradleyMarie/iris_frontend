@@ -65,12 +65,6 @@ std::string VersionString() {
 static const absl::FlagsUsageConfig flags_usage_config = {
     nullptr, nullptr, nullptr, VersionString, nullptr};
 
-std::string GetWorkingDirectory() { return ""; }
-
-std::string GetParentDirectory(const std::string& file_name) {
-  return file_name;
-}
-
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -96,21 +90,19 @@ int main(int argc, char** argv) {
     absl::SetFlag(&FLAGS_num_threads, std::thread::hardware_concurrency());
   }
 
-  std::unique_ptr<iris::Tokenizer> tokenizer;
+  iris::Tokenizer tokenizer;
   if (unparsed.size() == 1) {
-    tokenizer =
-        iris::Tokenizer::CreateFromStream(GetWorkingDirectory(), std::cin);
+    tokenizer = iris::Tokenizer::CreateFromStream(std::cin);
   } else {
-    tokenizer = iris::Tokenizer::CreateFromFile(GetParentDirectory(unparsed[1]),
-                                                unparsed[1]);
+    tokenizer = iris::Tokenizer::CreateFromFile(unparsed[1]);
   }
 
   if (absl::GetFlag(FLAGS_welcome_message)) {
     std::cout << VersionString();
   }
 
-  for (size_t render_index = 0; tokenizer->Peek(); render_index += 1) {
-    iris::RenderToOutput(*tokenizer, render_index, absl::GetFlag(FLAGS_epsilon),
+  for (size_t render_index = 0; tokenizer.Peek(); render_index += 1) {
+    iris::RenderToOutput(tokenizer, render_index, absl::GetFlag(FLAGS_epsilon),
                          absl::GetFlag(FLAGS_num_threads),
                          absl::GetFlag(FLAGS_report_progress),
                          absl::GetFlag(FLAGS_spectral),
