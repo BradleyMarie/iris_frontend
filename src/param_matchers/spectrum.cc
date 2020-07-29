@@ -12,13 +12,13 @@ const size_t SpectrumMatcher::m_variant_indices[2] = {
 
 SpectrumMatcher SpectrumMatcher::FromRgb(
     const char* base_type_name, const char* type_name,
-    const char* parameter_name, bool required, const Tokenizer& tokenizer,
+    const char* parameter_name, bool required,
     SpectrumManager& spectrum_manager,
     const std::array<float_t, 3>& default_rgb) {
   COLOR3 color =
       ColorCreate(absl::GetFlag(FLAGS_rgb_color_space), default_rgb.data());
   return SpectrumMatcher(base_type_name, type_name, parameter_name, required,
-                         tokenizer, spectrum_manager,
+                         spectrum_manager,
                          spectrum_manager.AllocateColorSpectrum(color).value());
 }
 
@@ -29,19 +29,20 @@ Spectrum SpectrumMatcher::Match(const ColorParameter& parameter) {
   return m_spectrum_manager.AllocateColorSpectrum(parameter.data[0]).value();
 }
 
-Spectrum SpectrumMatcher::Match(const std::vector<std::string>& files) {
+Spectrum SpectrumMatcher::Match(
+    const std::vector<std::pair<std::string, std::string>>& files) {
   if (files.size() != 1) {
     NumberOfElementsError();
   }
-  auto maybe_samples = ReadSpdFile(files[0], m_tokenizer.ResolvePath(files[0]));
+  auto maybe_samples = ReadSpdFile(files[0].first, files[0].second);
   if (!maybe_samples) {
-    std::cerr << "ERROR: Malformed SPD file: " << files[0] << std::endl;
+    std::cerr << "ERROR: Malformed SPD file: " << files[0].first << std::endl;
     exit(EXIT_FAILURE);
   }
   auto maybe_spectrum =
       m_spectrum_manager.AllocateInterpolatedSpectrum(*maybe_samples);
   if (!maybe_samples) {
-    std::cerr << "ERROR: Malformed SPD file: " << files[0] << std::endl;
+    std::cerr << "ERROR: Malformed SPD file: " << files[0].first << std::endl;
     exit(EXIT_FAILURE);
   }
   return *maybe_spectrum;
@@ -62,8 +63,10 @@ Spectrum SpectrumMatcher::Match(
 }
 
 Spectrum SpectrumMatcher::Match(const SpectrumParameter& parameter) {
-  if (absl::holds_alternative<std::vector<std::string>>(parameter.data)) {
-    return Match(absl::get<std::vector<std::string>>(parameter.data));
+  if (absl::holds_alternative<std::vector<std::pair<std::string, std::string>>>(
+          parameter.data)) {
+    return Match(absl::get<std::vector<std::pair<std::string, std::string>>>(
+        parameter.data));
   } else {
     return Match(
         absl::get<std::pair<std::vector<std::string>, std::vector<float_t>>>(

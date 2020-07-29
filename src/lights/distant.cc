@@ -28,7 +28,7 @@ Light ParseDistant(const char* base_type_name, const char* type_name,
   SinglePoint3Matcher to(base_type_name, type_name, "to", false,
                          kPointLightDefaultTo);
   SpectrumMatcher spectrum =
-      SpectrumMatcher::FromRgb(base_type_name, type_name, "L", false, tokenizer,
+      SpectrumMatcher::FromRgb(base_type_name, type_name, "L", false,
                                spectrum_manager, kPointLightDefaultL);
   MatchParameters(base_type_name, type_name, tokenizer,
                   {&from, &to, &spectrum});

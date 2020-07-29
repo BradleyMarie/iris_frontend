@@ -9,7 +9,7 @@ cc_library(
     deps = [
         ":result",
         "//src/common:error",
-        "//src/common:tokenizer",
+        "//src/common:parameters",
         "//src/param_matchers:matcher",
         "//src/param_matchers:single",
         "//src/param_matchers:spectrum",
@@ -26,6 +26,7 @@ cc_library(
         ":diffuse",
         ":result",
         "//src/common:call_directive",
+        "//src/common:parameters",
         "//src/common:tokenizer",
     ],
 )

@@ -34,7 +34,7 @@ Parameters& Parameters::operator=(Parameters&& other) {
 
 Parameters::~Parameters() { assert(!m_unused_parameters && !m_tokenizer); }
 
-Parameters Parameters::MatchAllowUnused(
+Parameters Parameters::MatchAllowUnusedImpl(
     absl::Span<ParamMatcher* const> param_matchers) {
   assert(m_tokenizer || m_unused_parameters);
   std::vector<Parameter> unused_parameters;
@@ -52,7 +52,7 @@ Parameters Parameters::MatchAllowUnused(
                     std::move(unused_parameters));
 }
 
-void Parameters::Match(absl::Span<ParamMatcher* const> param_matchers) {
+void Parameters::MatchImpl(absl::Span<ParamMatcher* const> param_matchers) {
   assert(m_tokenizer || m_unused_parameters);
   if (m_tokenizer) {
     MatchParameters(m_base_type_name, m_type_name, *m_tokenizer,

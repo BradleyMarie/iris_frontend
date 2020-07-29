@@ -7,6 +7,7 @@ cc_library(
     hdrs = ["call_directive.h"],
     deps = [
         ":matrix_manager",
+        ":parameters",
         ":quoted_string",
         ":tokenizer",
     ],

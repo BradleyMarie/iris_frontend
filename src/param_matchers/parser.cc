@@ -197,12 +197,17 @@ static ColorParameter ParseXyz(Tokenizer& tokenizer) {
   return ColorParameter{std::move(data)};
 }
 
-static std::vector<std::string> ParseSpectrumFilenames(
-    const std::vector<std::string>& quoted_filenames) {
-  std::vector<std::string> result;
+static std::vector<std::pair<std::string, std::string>> ParseSpectrumFilenames(
+    const std::vector<std::string>& quoted_filenames,
+    const Tokenizer& tokenizer) {
+  std::vector<std::string> parsed_filenames;
   for (const auto& filename : quoted_filenames) {
     ParseSingle<std::string, ParseQuotedTokenToString>(filename, "spectrum",
-                                                       &result);
+                                                       &parsed_filenames);
+  }
+  std::vector<std::pair<std::string, std::string>> result;
+  for (const auto& filename : parsed_filenames) {
+    result.push_back(std::make_pair(filename, tokenizer.ResolvePath(filename)));
   }
   return result;
 }
@@ -221,7 +226,7 @@ static SpectrumParameter ParseSpectrum(Tokenizer& tokenizer) {
       ParseData<std::string, ParseStringWithoutValidation>(
           tokenizer, "Spectrum", "spectrum");
   if (unknown_data.empty() || unknown_data[0][0] == '"') {
-    return {{ParseSpectrumFilenames(unknown_data)}};
+    return {{ParseSpectrumFilenames(unknown_data, tokenizer)}};
   } else {
     return {{ParseSpectrumSamples(unknown_data)}};
   }

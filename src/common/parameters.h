@@ -1,6 +1,7 @@
 #ifndef _SRC_COMMON_PARAMETERS_
 #define _SRC_COMMON_PARAMETERS_
 
+#include <array>
 #include <vector>
 
 #include "absl/types/optional.h"
@@ -20,13 +21,29 @@ class Parameters {
   Parameters& operator=(const Parameters&) = delete;
   ~Parameters();
 
-  Parameters MatchAllowUnused(absl::Span<ParamMatcher* const> param_matchers);
-  void Match(absl::Span<ParamMatcher* const> param_matchers);
+  template <typename... Args>
+  Parameters MatchAllowUnused(Args&... param_matchers) {
+    std::array<ParamMatcher*, sizeof...(Args)> parameters = {
+        {&param_matchers...}};
+    return MatchAllowUnusedImpl(parameters);
+  }
+
+  template <typename... Args>
+  void Match(Args&... param_matchers) {
+    std::array<ParamMatcher*, sizeof...(Args)> parameters = {
+        {&param_matchers...}};
+    MatchImpl(parameters);
+  }
+
   void Ignore();
 
  private:
   Parameters(absl::string_view base_type_name, absl::string_view type_name,
              std::vector<Parameter> unused_parameters);
+
+  Parameters MatchAllowUnusedImpl(
+      absl::Span<ParamMatcher* const> param_matchers);
+  void MatchImpl(absl::Span<ParamMatcher* const> param_matchers);
 
   absl::string_view m_base_type_name;
   absl::string_view m_type_name;

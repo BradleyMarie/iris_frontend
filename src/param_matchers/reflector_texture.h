@@ -45,7 +45,8 @@ class ReflectorTextureMatcher : public ParamMatcher {
   ReflectorTexture Match(const SpectrumParameter& parameter);
   ReflectorTexture Match(const TextureParameter& parameter);
 
-  ReflectorTexture Match(const std::vector<std::string>& files);
+  ReflectorTexture Match(
+      const std::vector<std::pair<std::string, std::string>>& files);
   ReflectorTexture Match(
       const std::pair<std::vector<std::string>, std::vector<float_t>>& samples);
 

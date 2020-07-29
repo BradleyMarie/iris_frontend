@@ -11,11 +11,9 @@ class SpectrumMatcher : public ParamMatcher {
  public:
   SpectrumMatcher(const char* base_type_name, const char* type_name,
                   const char* parameter_name, bool required,
-                  const Tokenizer& tokenizer, SpectrumManager& spectrum_manager,
-                  Spectrum default_value)
+                  SpectrumManager& spectrum_manager, Spectrum default_value)
       : ParamMatcher(base_type_name, type_name, parameter_name, required,
                      m_variant_indices, 2),
-        m_tokenizer(tokenizer),
         m_spectrum_manager(spectrum_manager),
         m_value(std::move(default_value)) {}
   const Spectrum& Get() { return m_value; }
@@ -23,7 +21,6 @@ class SpectrumMatcher : public ParamMatcher {
   static SpectrumMatcher FromRgb(const char* base_type_name,
                                  const char* type_name,
                                  const char* parameter_name, bool required,
-                                 const Tokenizer& tokenizer,
                                  SpectrumManager& spectrum_manager,
                                  const std::array<float_t, 3>& default_rgb);
 
@@ -34,13 +31,12 @@ class SpectrumMatcher : public ParamMatcher {
   Spectrum Match(const ColorParameter& parameter);
   Spectrum Match(const SpectrumParameter& parameter);
 
-  Spectrum Match(const std::vector<std::string>& files);
+  Spectrum Match(const std::vector<std::pair<std::string, std::string>>& files);
   Spectrum Match(
       const std::pair<std::vector<std::string>, std::vector<float_t>>& samples);
 
  private:
   static const size_t m_variant_indices[2];
-  const Tokenizer& m_tokenizer;
   SpectrumManager& m_spectrum_manager;
   Spectrum m_value;
 };

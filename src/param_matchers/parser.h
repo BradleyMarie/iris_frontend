@@ -27,7 +27,7 @@ struct FloatParameter {
 
 struct SpectrumParameter {
   absl::variant<std::pair<std::vector<std::string>, std::vector<float_t>>,
-                std::vector<std::string>>
+                std::vector<std::pair<std::string, std::string>>>
       data;
 };
 

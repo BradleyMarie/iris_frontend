@@ -26,8 +26,7 @@ const size_t ReflectorTextureMatcher::m_variant_indices[4] = {
 
 ReflectorTextureMatcher ReflectorTextureMatcher::FromUniformReflectance(
     const char* base_type_name, const char* type_name,
-    const char* parameter_name, bool required,
-    const Tokenizer& tokenizer,
+    const char* parameter_name, bool required, const Tokenizer& tokenizer,
     const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager,
     float_t default_reflectance) {
@@ -75,19 +74,19 @@ ReflectorTexture ReflectorTextureMatcher::Match(
 }
 
 ReflectorTexture ReflectorTextureMatcher::Match(
-    const std::vector<std::string>& files) {
+    const std::vector<std::pair<std::string, std::string>>& files) {
   if (files.size() != 1) {
     NumberOfElementsError();
   }
-  auto maybe_samples = ReadSpdFile(files[0], m_tokenizer.ResolvePath(files[0]));
+  auto maybe_samples = ReadSpdFile(files[0].first, files[0].second);
   if (!maybe_samples) {
-    std::cerr << "ERROR: Malformed SPD file: " << files[0] << std::endl;
+    std::cerr << "ERROR: Malformed SPD file: " << files[0].first << std::endl;
     exit(EXIT_FAILURE);
   }
   auto maybe_reflector =
       m_spectrum_manager.AllocateInterpolatedReflector(*maybe_samples);
   if (!maybe_samples) {
-    std::cerr << "ERROR: Malformed reflection SPD file: " << files[0]
+    std::cerr << "ERROR: Malformed reflection SPD file: " << files[0].first
               << std::endl;
     exit(EXIT_FAILURE);
   }
@@ -112,8 +111,10 @@ ReflectorTexture ReflectorTextureMatcher::Match(
 
 ReflectorTexture ReflectorTextureMatcher::Match(
     const SpectrumParameter& parameter) {
-  if (absl::holds_alternative<std::vector<std::string>>(parameter.data)) {
-    return Match(absl::get<std::vector<std::string>>(parameter.data));
+  if (absl::holds_alternative<std::vector<std::pair<std::string, std::string>>>(
+          parameter.data)) {
+    return Match(absl::get<std::vector<std::pair<std::string, std::string>>>(
+        parameter.data));
   } else {
     return Match(
         absl::get<std::pair<std::vector<std::string>, std::vector<float_t>>>(

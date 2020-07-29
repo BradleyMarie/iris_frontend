@@ -3,12 +3,12 @@
 
 #include "src/area_lights/result.h"
 #include "src/common/spectrum_manager.h"
-#include "src/common/tokenizer.h"
+#include "src/common/parameters.h"
 
 namespace iris {
 
 AreaLightResult ParseDiffuse(const char* base_type_name, const char* type_name,
-                             Tokenizer& tokenizer,
+                             Parameters& parameters,
                              SpectrumManager& spectrum_manager);
 
 }  // namespace iris
