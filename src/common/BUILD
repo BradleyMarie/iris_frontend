@@ -114,6 +114,18 @@ cc_library(
 )
 
 cc_library(
+    name = "parameters",
+    srcs = ["parameters.cc"],
+    hdrs = ["parameters.h"],
+    deps = [
+        ":tokenizer",
+        "//src/param_matchers:matcher",
+        "@com_google_absl//absl/types:optional",
+        "@com_google_absl//absl/types:span",
+    ],
+)
+
+cc_library(
     name = "pointer_types",
     hdrs = ["pointer_types.h"],
     deps = [
