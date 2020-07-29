@@ -15,8 +15,8 @@ class ParamMatcher {
   void Validate() const;
 
  protected:
-  ParamMatcher(const char* base_type_name, const char* type_name,
-               const char* parameter_name, bool required,
+  ParamMatcher(absl::string_view base_type_name, absl::string_view type_name,
+               absl::string_view parameter_name, bool required,
                const size_t* variant_indicies, size_t num_indices)
       : m_parameter_name(parameter_name),
         m_base_type_name(base_type_name),
@@ -31,9 +31,9 @@ class ParamMatcher {
   void ElementRangeError [[noreturn]] () const;
 
  private:
-  const char* m_parameter_name;
-  const char* m_base_type_name;
-  const char* m_type_name;
+  absl::string_view m_parameter_name;
+  absl::string_view m_base_type_name;
+  absl::string_view m_type_name;
   const size_t* m_indices;
   size_t m_num_indices;
   bool m_required;
@@ -54,7 +54,7 @@ struct GetIndex<T, absl::variant<Ts...>>
 template <typename ParameterForwardIterator,
           typename SupportedParameterForwardIterator>
 void MatchParameters(
-    const char* base_type_name, const char* type_name,
+    absl::string_view base_type_name, absl::string_view type_name,
     ParameterForwardIterator parameters_current,
     ParameterForwardIterator parameters_end,
     SupportedParameterForwardIterator supported_parameters_begin,
@@ -84,7 +84,8 @@ void MatchParameters(
 
 template <typename SupportedParameterForwardIterator>
 void MatchParameters(
-    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
+    absl::string_view base_type_name, absl::string_view type_name,
+    Tokenizer& tokenizer,
     SupportedParameterForwardIterator supported_parameters_begin,
     SupportedParameterForwardIterator supported_parameters_end,
     std::vector<Parameter>* unhandled_parameters) {
@@ -121,8 +122,8 @@ void MatchParameters(
 }
 
 static inline void MatchParameters(
-    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
-    absl::Span<ParamMatcher* const> supported_parameters,
+    absl::string_view base_type_name, absl::string_view type_name,
+    Tokenizer& tokenizer, absl::Span<ParamMatcher* const> supported_parameters,
     std::vector<Parameter>* unhandled_parameters = nullptr) {
   MatchParameters<typename absl::Span<ParamMatcher* const>::iterator>(
       base_type_name, type_name, tokenizer, supported_parameters.begin(),
@@ -130,7 +131,7 @@ static inline void MatchParameters(
 }
 
 static inline void MatchParameters(
-    const char* base_type_name, const char* type_name,
+    absl::string_view base_type_name, absl::string_view type_name,
     absl::Span<Parameter> parameters,
     absl::Span<ParamMatcher* const> supported_parameters,
     std::vector<Parameter>* unhandled_parameters = nullptr) {
