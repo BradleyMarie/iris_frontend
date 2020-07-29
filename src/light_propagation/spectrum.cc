@@ -19,8 +19,7 @@ LightPropagationResult ParseSpectrum(const char* base_type_name,
   SingleStringMatcher colorextrapolator(
       base_type_name, type_name, "colorextrapolator", false,
       kSpectrumLightPropagationColorExtrapolator);
-  MatchParameters<1>(base_type_name, type_name, tokenizer,
-                     {&colorextrapolator});
+  MatchParameters(base_type_name, type_name, tokenizer, {&colorextrapolator});
 
   if (colorextrapolator.Get() != "smits") {
     std::cerr << "ERROR: Unsupported colorextrapolator for spectrum "

@@ -35,13 +35,13 @@ ShapeResult ParseTriangleMesh(
                                            true, kTriangleMeshDefaultIndices);
 
   std::vector<Parameter> unused_parameters;
-  MatchParameters<2>(base_type_name, type_name, tokenizer,
-                     {&points, &int_indices}, &unused_parameters);
+  MatchParameters(base_type_name, type_name, tokenizer,
+                  {&points, &int_indices}, &unused_parameters);
 
   auto material = material_factory.Build(
-      base_type_name, type_name, tokenizer, unused_parameters, material_manager,
-      named_texture_manager, normal_map_manager, texture_manager,
-      spectrum_manager);
+      base_type_name, type_name, tokenizer, absl::MakeSpan(unused_parameters),
+      material_manager, named_texture_manager, normal_map_manager,
+      texture_manager, spectrum_manager);
 
   std::vector<size_t> indices;
   for (const auto& entry : int_indices.Get()) {

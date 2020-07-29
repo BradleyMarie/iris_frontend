@@ -44,7 +44,7 @@ ReflectorTexture ParseImageMapReflector(
                                kImageMapDefaultFilename);
   SingleStringMatcher wrap(base_type_name, type_name, "wrap", true,
                            kImageMapDefaultWrap);
-  MatchParameters<6>(
+  MatchParameters(
       base_type_name, type_name, tokenizer,
       {&u_scale, &v_scale, &u_delta, &v_delta, &filename, &wrap});
 
@@ -113,7 +113,7 @@ FloatTexture ParseImageMapFloat(
                                kImageMapDefaultFilename);
   SingleStringMatcher wrap(base_type_name, type_name, "wrap", true,
                            kImageMapDefaultWrap);
-  MatchParameters<6>(
+  MatchParameters(
       base_type_name, type_name, tokenizer,
       {&u_scale, &v_scale, &u_delta, &v_delta, &filename, &wrap});
 

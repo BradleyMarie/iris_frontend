@@ -17,7 +17,7 @@ LightPropagationResult ParseColor(const char* base_type_name,
                                   const char* type_name, Tokenizer& tokenizer) {
   SingleStringMatcher colorspace(base_type_name, type_name, "colorspace", false,
                                  kColorLightPropagationColorSpace);
-  MatchParameters<1>(base_type_name, type_name, tokenizer, {&colorspace});
+  MatchParameters(base_type_name, type_name, tokenizer, {&colorspace});
 
   COLOR_SPACE color_space;
   if (colorspace.Get() == "xyz") {

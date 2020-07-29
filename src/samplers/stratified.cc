@@ -25,8 +25,8 @@ Sampler ParseStratified(const char* base_type_name, const char* type_name,
                                       false, kStratifiedSamplerDefaultXSamples);
   NonZeroSingleUInt16Matcher ysamples(base_type_name, type_name, "ysamples",
                                       false, kStratifiedSamplerDefaultXSamples);
-  MatchParameters<3>(base_type_name, type_name, tokenizer,
-                     {&jitter, &xsamples, &ysamples});
+  MatchParameters(base_type_name, type_name, tokenizer,
+                  {&jitter, &xsamples, &ysamples});
 
   Sampler result;
   ISTATUS status =

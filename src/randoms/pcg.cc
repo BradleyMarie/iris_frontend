@@ -16,7 +16,7 @@ static const uint64_t kPcgRandomDefaultOutputSequence = 0xda3e39cb94b95bdbULL;
 
 Random ParsePcg(const char* base_type_name, const char* type_name,
                 Tokenizer& tokenizer) {
-  MatchParameters<0>(base_type_name, type_name, tokenizer, {});
+  MatchParameters(base_type_name, type_name, tokenizer, {});
 
   Random result;
   ISTATUS status = PermutedCongruentialRandomAllocate(

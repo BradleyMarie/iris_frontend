@@ -19,7 +19,7 @@ Sampler ParseHalton(const char* base_type_name, const char* type_name,
   NonZeroSingleUInt16Matcher pixelsamples(base_type_name, type_name,
                                           "pixelsamples", false,
                                           kHaltonSamplerDefaultPixelSamples);
-  MatchParameters<1>(base_type_name, type_name, tokenizer, {&pixelsamples});
+  MatchParameters(base_type_name, type_name, tokenizer, {&pixelsamples});
 
   Sampler result;
   ISTATUS status = HaltonImageSamplerAllocate(pixelsamples.Get(),

@@ -1,10 +1,10 @@
 #ifndef _SRC_PARAM_MATCHER_MATCHER_
 #define _SRC_PARAM_MATCHER_MATCHER_
 
-#include <array>
 #include <type_traits>
 #include <vector>
 
+#include "absl/types/span.h"
 #include "src/param_matchers/parser.h"
 
 namespace iris {
@@ -120,23 +120,22 @@ void MatchParameters(
       supported_parameters_end, unhandled_parameters);
 }
 
-template <size_t NumParams>
-void MatchParameters(const char* base_type_name, const char* type_name,
-                     Tokenizer& tokenizer,
-                     std::array<ParamMatcher*, NumParams> supported_parameters,
-                     std::vector<Parameter>* unhandled_parameters = nullptr) {
-  MatchParameters<typename std::array<ParamMatcher*, NumParams>::iterator>(
+static inline void MatchParameters(
+    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
+    absl::Span<ParamMatcher* const> supported_parameters,
+    std::vector<Parameter>* unhandled_parameters = nullptr) {
+  MatchParameters<typename absl::Span<ParamMatcher* const>::iterator>(
       base_type_name, type_name, tokenizer, supported_parameters.begin(),
       supported_parameters.end(), unhandled_parameters);
 }
 
-template <size_t NumParams>
-void MatchParameters(const char* base_type_name, const char* type_name,
-                     std::vector<Parameter>& parameters,
-                     std::array<ParamMatcher*, NumParams> supported_parameters,
-                     std::vector<Parameter>* unhandled_parameters = nullptr) {
-  MatchParameters<typename std::vector<Parameter>::iterator,
-                  typename std::array<ParamMatcher*, NumParams>::iterator>(
+static inline void MatchParameters(
+    const char* base_type_name, const char* type_name,
+    absl::Span<Parameter> parameters,
+    absl::Span<ParamMatcher* const> supported_parameters,
+    std::vector<Parameter>* unhandled_parameters = nullptr) {
+  MatchParameters<typename absl::Span<Parameter>::iterator,
+                  typename absl::Span<ParamMatcher* const>::iterator>(
       base_type_name, type_name, parameters.begin(), parameters.end(),
       supported_parameters.begin(), supported_parameters.end(),
       unhandled_parameters);

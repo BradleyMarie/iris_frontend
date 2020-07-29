@@ -37,8 +37,8 @@ MaterialFactory ParsePlastic(const char* base_type_name, const char* type_name,
   FloatTextureMatcher bumpmap(base_type_name, type_name, "bumpmap", false, true,
                               (float_t)0.0, (float_t)1.0, named_texture_manager,
                               texture_manager, kPlasticMaterialDefaultBumpMap);
-  MatchParameters<5>(base_type_name, type_name, parameters,
-                     {&kd, &ks, &roughness, &remap_roughness, &bumpmap});
+  MatchParameters(base_type_name, type_name, parameters,
+                  {&kd, &ks, &roughness, &remap_roughness, &bumpmap});
 
   ReflectorTexture default_kd = kd.Get();
   ReflectorTexture default_ks = ks.Get();
@@ -49,7 +49,7 @@ MaterialFactory ParsePlastic(const char* base_type_name, const char* type_name,
       [default_kd, default_ks, default_roughness, default_remap_roughness,
        default_bumpmap](
           const char* base_type_name, const char* type_name,
-          const Tokenizer& tokenizer, std::vector<Parameter>& parameters,
+          const Tokenizer& tokenizer, absl::Span<Parameter> parameters,
           MaterialManager& material_manager,
           const NamedTextureManager& named_texture_manager,
           NormalMapManager& normal_map_manager, TextureManager& texture_manager,
@@ -70,8 +70,8 @@ MaterialFactory ParsePlastic(const char* base_type_name, const char* type_name,
     FloatTextureMatcher bumpmap(
         base_type_name, type_name, "bumpmap", false, true, (float_t)0.0,
         (float_t)1.0, named_texture_manager, texture_manager, default_bumpmap);
-    MatchParameters<5>(base_type_name, type_name, parameters,
-                       {&kd, &ks, &roughness, &remap_roughness, &bumpmap});
+    MatchParameters(base_type_name, type_name, parameters,
+                    {&kd, &ks, &roughness, &remap_roughness, &bumpmap});
 
     return std::make_pair(
         material_manager.AllocatePlasticMaterial(
@@ -97,11 +97,11 @@ MaterialFactory ParsePlastic(const char* base_type_name, const char* type_name,
 
 MaterialFactory MakeNamedPlastic(
     const char* base_type_name, const char* type_name,
-    const Tokenizer& tokenizer, std::vector<Parameter>& parameters,
+    const Tokenizer& tokenizer, absl::Span<Parameter> parameters,
     const NamedTextureManager& named_texture_manager,
     NormalMapManager& normal_map_manager, TextureManager& texture_manager,
     SpectrumManager& spectrum_manager) {
-  return ParsePlastic<typename std::vector<Parameter>>(
+  return ParsePlastic<typename absl::Span<Parameter>>(
       base_type_name, type_name, tokenizer, parameters, named_texture_manager,
       normal_map_manager, texture_manager, spectrum_manager);
 }

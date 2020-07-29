@@ -23,8 +23,8 @@ AreaLightResult ParseDiffuse(const char* base_type_name, const char* type_name,
   SpectrumMatcher spectrum =
       SpectrumMatcher::FromRgb(base_type_name, type_name, "L", false, tokenizer,
                                spectrum_manager, kDiffuseAreaLightDefaultL);
-  MatchParameters<2>(base_type_name, type_name, tokenizer,
-                     {&twosided, &spectrum});
+  MatchParameters(base_type_name, type_name, tokenizer,
+                  {&twosided, &spectrum});
 
   EmissiveMaterial front_emissive_material, back_emissive_material;
   ISTATUS status = ConstantEmissiveMaterialAllocate(

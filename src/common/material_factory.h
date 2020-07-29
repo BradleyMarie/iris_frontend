@@ -5,6 +5,7 @@
 #include <utility>
 #include <vector>
 
+#include "absl/types/span.h"
 #include "src/common/material_manager.h"
 #include "src/common/named_texture_manager.h"
 #include "src/common/normal_map_manager.h"
@@ -16,7 +17,7 @@ namespace iris {
 
 typedef std::function<std::pair<Material, NormalMap>(
     const char* base_type_name, const char* type_name, const Tokenizer&,
-    std::vector<Parameter>&, MaterialManager& material_manager,
+    absl::Span<Parameter>, MaterialManager& material_manager,
     const NamedTextureManager& named_texture_manager, NormalMapManager&,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager)>
     MaterialFactoryFn;
@@ -29,7 +30,7 @@ class MaterialFactory {
 
   std::pair<Material, NormalMap> Build(
       const char* base_type_name, const char* type_name,
-      const Tokenizer& tokenizer, std::vector<Parameter>& param_overrides,
+      const Tokenizer& tokenizer, absl::Span<Parameter> param_overrides,
       MaterialManager& material_manager,
       const NamedTextureManager& named_texture_manager,
       NormalMapManager& normal_map_manager, TextureManager& texture_manager,

@@ -637,13 +637,13 @@ ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
                                kPlyMeshDefaultFilename);
 
   std::vector<Parameter> unused_parameters;
-  MatchParameters<1>(base_type_name, type_name, tokenizer, {&filename},
-                     &unused_parameters);
+  MatchParameters(base_type_name, type_name, tokenizer, {&filename},
+                  &unused_parameters);
 
   auto material = material_factory.Build(
-      base_type_name, type_name, tokenizer, unused_parameters, material_manager,
-      named_texture_manager, normal_map_manager, texture_manager,
-      spectrum_manager);
+      base_type_name, type_name, tokenizer, absl::MakeSpan(unused_parameters),
+      material_manager, named_texture_manager, normal_map_manager,
+      texture_manager, spectrum_manager);
 
   PlyData fileData =
       ReadPlyFile(filename.Get(), tokenizer.ResolvePath(filename.Get()));

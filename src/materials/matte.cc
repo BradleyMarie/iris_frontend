@@ -29,8 +29,8 @@ MaterialFactory ParseMatte(const char* base_type_name, const char* type_name,
   FloatTextureMatcher bumpmap(base_type_name, type_name, "bumpmap", false, true,
                               (float_t)0.0, (float_t)1.0, named_texture_manager,
                               texture_manager, kMatteMaterialDefaultBumpMap);
-  MatchParameters<3>(base_type_name, type_name, parameters,
-                     {&kd, &sigma, &bumpmap});
+  MatchParameters(base_type_name, type_name, parameters,
+                  {&kd, &sigma, &bumpmap});
 
   ReflectorTexture default_kd = kd.Get();
   FloatTexture default_sigma = sigma.Get();
@@ -38,7 +38,7 @@ MaterialFactory ParseMatte(const char* base_type_name, const char* type_name,
   MaterialFactoryFn result =
       [default_kd, default_sigma, default_bumpmap](
           const char* base_type_name, const char* type_name,
-          const Tokenizer& tokenizer, std::vector<Parameter>& parameters,
+          const Tokenizer& tokenizer, absl::Span<Parameter> parameters,
           MaterialManager& material_manager,
           const NamedTextureManager& named_texture_manager,
           NormalMapManager& normal_map_manager, TextureManager& texture_manager,
@@ -54,8 +54,8 @@ MaterialFactory ParseMatte(const char* base_type_name, const char* type_name,
     FloatTextureMatcher bumpmap(
         base_type_name, type_name, "bumpmap", false, true, (float_t)0.0,
         (float_t)1.0, named_texture_manager, texture_manager, default_bumpmap);
-    MatchParameters<3>(base_type_name, type_name, parameters,
-                       {&kd, &sigma, &bumpmap});
+    MatchParameters(base_type_name, type_name, parameters,
+                    {&kd, &sigma, &bumpmap});
 
     return std::make_pair(
         material_manager.AllocateMatteMaterial(kd.Get(), sigma.Get()),
@@ -81,12 +81,12 @@ MaterialFactory ParseMatte(const char* base_type_name, const char* type_name,
 MaterialFactory MakeNamedMatte(const char* base_type_name,
                                const char* type_name,
                                const Tokenizer& tokenizer,
-                               std::vector<Parameter>& parameters,
+                               absl::Span<Parameter> parameters,
                                const NamedTextureManager& named_texture_manager,
                                NormalMapManager& normal_map_manager,
                                TextureManager& texture_manager,
                                SpectrumManager& spectrum_manager) {
-  return ParseMatte<typename std::vector<Parameter>>(
+  return ParseMatte<typename absl::Span<Parameter>>(
       base_type_name, type_name, tokenizer, parameters, named_texture_manager,
       normal_map_manager, texture_manager, spectrum_manager);
 }

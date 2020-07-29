@@ -26,8 +26,8 @@ FilmResult ParseImage(const char* base_type_name, const char* type_name,
   NonZeroSingleSizeTMatcher yresolution(base_type_name, type_name,
                                         "yresolution", false,
                                         kImageFilmDefaultYResolution);
-  MatchParameters<3>(base_type_name, type_name, tokenizer,
-                     {&filename, &xresolution, &yresolution});
+  MatchParameters(base_type_name, type_name, tokenizer,
+                  {&filename, &xresolution, &yresolution});
 
   Framebuffer framebuffer;
   ISTATUS status = FramebufferAllocate(xresolution.Get(), yresolution.Get(),

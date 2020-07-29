@@ -25,7 +25,7 @@ ReflectorTexture ParseScaleReflector(
           base_type_name, type_name, "tex2", false, tokenizer,
           named_texture_manager, texture_manager, spectrum_manager,
           kScaleTextureDefaultValue);
-  MatchParameters<2>(base_type_name, type_name, tokenizer, {&tex1, &tex2});
+  MatchParameters(base_type_name, type_name, tokenizer, {&tex1, &tex2});
 
   return texture_manager.AllocateProductReflectorTexture(tex1.Get(),
                                                          tex2.Get());
@@ -44,7 +44,7 @@ FloatTexture ParseScaleFloat(const char* base_type_name, const char* type_name,
       (float_t)1.0, named_texture_manager, texture_manager,
       kScaleTextureDefaultValue);
 
-  MatchParameters<2>(base_type_name, type_name, tokenizer, {&tex1, &tex2});
+  MatchParameters(base_type_name, type_name, tokenizer, {&tex1, &tex2});
 
   return texture_manager.AllocateProductFloatTexture(tex1.Get(), tex2.Get());
 }
