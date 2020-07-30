@@ -7,7 +7,8 @@
 
 namespace iris {
 
-AreaLightResult ParseAreaLight(const char* base_type_name, Tokenizer& tokenizer,
+AreaLightResult ParseAreaLight(absl::string_view base_type_name,
+                               Tokenizer& tokenizer,
                                SpectrumManager& spectrum_manager);
 
 }  // namespace iris

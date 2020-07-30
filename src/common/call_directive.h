@@ -46,16 +46,14 @@ Result CallDirective(
 }
 
 template <typename Result, typename... Args>
-using ParameterDirectiveImpl =
-    std::function<Result(const char* base_type_name, const char* type_name,
-                         Parameters&, Args... args)>;
+using ParameterDirectiveImpl = std::function<Result(Parameters&, Args... args)>;
 
-template <typename Result, size_t NumImplementations, typename... Args>
+template <typename Result, typename... Args>
 Result CallDirective(
-    const char* base_type_name, Tokenizer& tokenizer,
-    const std::array<
-        std::pair<const char*, ParameterDirectiveImpl<Result, Args...>>,
-        NumImplementations>& callbacks,
+    absl::string_view base_type_name, Tokenizer& tokenizer,
+    absl::Span<const std::pair<absl::string_view,
+                               ParameterDirectiveImpl<Result, Args...>>>
+        callbacks,
     Args... args) {
   auto token = tokenizer.Next();
   if (!token) {
@@ -69,7 +67,7 @@ Result CallDirective(
     for (auto& entry : callbacks) {
       if (*unquoted == entry.first) {
         Parameters parameters(base_type_name, entry.first, tokenizer);
-        return entry.second(base_type_name, entry.first, parameters, args...);
+        return entry.second(parameters, args...);
       }
     }
   }

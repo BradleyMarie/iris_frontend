@@ -90,6 +90,10 @@ Parameters& Parameters::operator=(Parameters&& other) {
 
 Parameters::~Parameters() { assert(!m_unused_parameters && !m_tokenizer); }
 
+absl::string_view Parameters::BaseType() { return m_base_type_name; }
+
+absl::string_view Parameters::Type() { return m_type_name; }
+
 Parameters Parameters::MatchAllowUnusedImpl(
     absl::Span<ParamMatcher* const> param_matchers) {
   assert(m_tokenizer || m_unused_parameters);

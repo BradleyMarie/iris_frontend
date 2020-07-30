@@ -7,8 +7,7 @@
 
 namespace iris {
 
-AreaLightResult ParseDiffuse(const char* base_type_name, const char* type_name,
-                             Parameters& parameters,
+AreaLightResult ParseDiffuse(Parameters& parameters,
                              SpectrumManager& spectrum_manager);
 
 }  // namespace iris

@@ -7,11 +7,11 @@
 
 namespace iris {
 
-AreaLightResult ParseAreaLight(const char* base_type_name, Tokenizer& tokenizer,
+AreaLightResult ParseAreaLight(absl::string_view base_type_name,
+                               Tokenizer& tokenizer,
                                SpectrumManager& spectrum_manager) {
-  return CallDirective<AreaLightResult, 1, SpectrumManager&>(
-      base_type_name, tokenizer, {std::make_pair("diffuse", ParseDiffuse)},
-      spectrum_manager);
+  return CallDirective<AreaLightResult, SpectrumManager&>(
+      base_type_name, tokenizer, {{"diffuse", ParseDiffuse}}, spectrum_manager);
 }
 
 }  // namespace iris

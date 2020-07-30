@@ -15,8 +15,7 @@ static const std::array<float_t, 3> kDiffuseAreaLightDefaultL = {
 
 }  // namespace
 
-AreaLightResult ParseDiffuse(const char* base_type_name, const char* type_name,
-                             Parameters& parameters,
+AreaLightResult ParseDiffuse(Parameters& parameters,
                              SpectrumManager& spectrum_manager) {
   SingleBoolMatcher twosided("twosided", false,
                              kDiffuseAreaLightDefaultTwoSided);

@@ -21,6 +21,9 @@ class Parameters {
   Parameters& operator=(const Parameters&) = delete;
   ~Parameters();
 
+  absl::string_view BaseType();
+  absl::string_view Type();
+
   template <typename... Args>
   Parameters MatchAllowUnused(Args&... param_matchers) {
     std::array<ParamMatcher*, sizeof...(Args)> parameters = {
