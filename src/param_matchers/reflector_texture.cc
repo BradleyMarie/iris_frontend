@@ -25,14 +25,13 @@ const size_t ReflectorTextureMatcher::m_variant_indices[4] = {
     GetIndex<TextureParameter, ParameterData>()};
 
 ReflectorTextureMatcher ReflectorTextureMatcher::FromUniformReflectance(
-    const char* base_type_name, const char* type_name,
-    const char* parameter_name, bool required, const Tokenizer& tokenizer,
+    absl::string_view parameter_name, bool required, const Tokenizer& tokenizer,
     const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager,
     float_t default_reflectance) {
   assert(ValidateFloat(default_reflectance));
   return ReflectorTextureMatcher(
-      base_type_name, type_name, parameter_name, required, tokenizer,
+      parameter_name, required, tokenizer,
       named_texture_manager, texture_manager, spectrum_manager,
       std::move(ReflectorFromUniformReflectance(
           texture_manager, spectrum_manager, default_reflectance)));

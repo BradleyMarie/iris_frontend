@@ -42,8 +42,7 @@ ShapeResult ParseSphere(const char* base_type_name, const char* type_name,
                         const MaterialFactory& material_factory,
                         const EmissiveMaterial& front_emissive_material,
                         const EmissiveMaterial& back_emissive_material) {
-  SingleFloatMatcher radius(
-      base_type_name, type_name, "radius", false, false, (float_t)0.0,
+  SingleFloatMatcher radius("radius", false, false, (float_t)0.0,
       std::numeric_limits<float_t>::infinity(), kSphereDefaultRadius);
 
   std::vector<Parameter> unused_parameters;

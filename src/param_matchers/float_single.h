@@ -10,12 +10,10 @@ namespace iris {
 
 class SingleFloatMatcher : public ParamMatcher {
  public:
-  SingleFloatMatcher(const char* base_type_name, const char* type_name,
-                     const char* parameter_name, bool required, bool inclusive,
-                     float_t minimum, float_t maximum,
+  SingleFloatMatcher(absl::string_view parameter_name, bool required,
+                     bool inclusive, float_t minimum, float_t maximum,
                      absl::optional<float_t> default_value)
-      : ParamMatcher(base_type_name, type_name, parameter_name, required,
-                     &m_variant_type, 1),
+      : ParamMatcher(parameter_name, required, &m_variant_type, 1),
         m_minimum(minimum),
         m_maximum(maximum),
         m_value(default_value),

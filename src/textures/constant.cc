@@ -17,9 +17,8 @@ ReflectorTexture ParseConstantReflector(
     TextureManager& texture_manager, SpectrumManager& spectrum_manager) {
   ReflectorTextureMatcher value =
       ReflectorTextureMatcher::FromUniformReflectance(
-          base_type_name, type_name, "value", false, tokenizer,
-          named_texture_manager, texture_manager, spectrum_manager,
-          kConstantTextureDefaultValue);
+          "value", false, tokenizer, named_texture_manager, texture_manager,
+          spectrum_manager, kConstantTextureDefaultValue);
   MatchParameters(base_type_name, type_name, tokenizer, {&value});
 
   return value.Get();
@@ -30,9 +29,8 @@ FloatTexture ParseConstantFloat(
     const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager) {
   FloatTextureMatcher value = FloatTextureMatcher::FromValue(
-      base_type_name, type_name, "value", false, true, (float_t)0.0,
-      (float_t)1.0, named_texture_manager, texture_manager,
-      kConstantTextureDefaultValue);
+      "value", false, true, (float_t)0.0, (float_t)1.0, named_texture_manager,
+      texture_manager, kConstantTextureDefaultValue);
 
   MatchParameters(base_type_name, type_name, tokenizer, {&value});
 

@@ -29,14 +29,14 @@ const size_t FloatTextureMatcher::m_variant_indices[2] = {
     GetIndex<TextureParameter, ParameterData>()};
 
 FloatTextureMatcher FloatTextureMatcher::FromValue(
-    const char* base_type_name, const char* type_name,
-    const char* parameter_name, bool required, bool inclusive, float_t minimum,
-    float_t maximum, const NamedTextureManager& named_texture_manager,
+    absl::string_view parameter_name, bool required, bool inclusive,
+    float_t minimum, float_t maximum,
+    const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager, float_t default_value) {
   assert(ValidateFloatImpl(inclusive, minimum, maximum, default_value));
   return FloatTextureMatcher(
-      base_type_name, type_name, parameter_name, required, inclusive, minimum,
-      maximum, named_texture_manager, texture_manager,
+      parameter_name, required, inclusive, minimum, maximum,
+      named_texture_manager, texture_manager,
       std::move(texture_manager.AllocateConstantFloatTexture(default_value)));
 }
 

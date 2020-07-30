@@ -23,13 +23,10 @@ static const POINT3 kPointLightDefaultTo =
 Light ParseDistant(const char* base_type_name, const char* type_name,
                    Tokenizer& tokenizer, SpectrumManager& spectrum_manager,
                    const Matrix& model_to_world) {
-  SinglePoint3Matcher from(base_type_name, type_name, "from", false,
-                           kPointLightDefaultFrom);
-  SinglePoint3Matcher to(base_type_name, type_name, "to", false,
-                         kPointLightDefaultTo);
-  SpectrumMatcher spectrum =
-      SpectrumMatcher::FromRgb(base_type_name, type_name, "L", false,
-                               spectrum_manager, kPointLightDefaultL);
+  SinglePoint3Matcher from("from", false, kPointLightDefaultFrom);
+  SinglePoint3Matcher to("to", false, kPointLightDefaultTo);
+  SpectrumMatcher spectrum = SpectrumMatcher::FromRgb(
+      "L", false, spectrum_manager, kPointLightDefaultL);
   MatchParameters(base_type_name, type_name, tokenizer,
                   {&from, &to, &spectrum});
 

@@ -18,13 +18,12 @@ static const uint16_t kStratifiedSamplerDefaultYSamples = 2;
 }  // namespace
 
 Sampler ParseStratified(const char* base_type_name, const char* type_name,
-                             Tokenizer& tokenizer) {
-  SingleBoolMatcher jitter(base_type_name, type_name, "jitter", false,
-                           kStratifiedSamplerDefaultJitter);
-  NonZeroSingleUInt16Matcher xsamples(base_type_name, type_name, "xsamples",
-                                      false, kStratifiedSamplerDefaultXSamples);
-  NonZeroSingleUInt16Matcher ysamples(base_type_name, type_name, "ysamples",
-                                      false, kStratifiedSamplerDefaultXSamples);
+                        Tokenizer& tokenizer) {
+  SingleBoolMatcher jitter("jitter", false, kStratifiedSamplerDefaultJitter);
+  NonZeroSingleUInt16Matcher xsamples("xsamples", false,
+                                      kStratifiedSamplerDefaultXSamples);
+  NonZeroSingleUInt16Matcher ysamples("ysamples", false,
+                                      kStratifiedSamplerDefaultXSamples);
   MatchParameters(base_type_name, type_name, tokenizer,
                   {&jitter, &xsamples, &ysamples});
 

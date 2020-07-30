@@ -633,8 +633,7 @@ ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
                          const MaterialFactory& material_factory,
                          const EmissiveMaterial& front_emissive_material,
                          const EmissiveMaterial& back_emissive_material) {
-  SingleStringMatcher filename(base_type_name, type_name, "filename", true,
-                               kPlyMeshDefaultFilename);
+  SingleStringMatcher filename("filename", true, kPlyMeshDefaultFilename);
 
   std::vector<Parameter> unused_parameters;
   MatchParameters(base_type_name, type_name, tokenizer, {&filename},

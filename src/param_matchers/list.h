@@ -8,11 +8,9 @@ namespace iris {
 template <typename VariantType, typename ValueType, size_t Min, size_t Mod>
 class ListValueMatcher : public ParamMatcher {
  public:
-  ListValueMatcher(const char* base_type_name, const char* type_name,
-                   const char* parameter_name, bool required,
+  ListValueMatcher(absl::string_view parameter_name, bool required,
                    std::vector<ValueType> default_value)
-      : ParamMatcher(base_type_name, type_name, parameter_name, required,
-                     &m_variant_type, 1),
+      : ParamMatcher(parameter_name, required, &m_variant_type, 1),
         m_value(std::move(default_value)) {}
   const std::vector<ValueType>& Get() { return m_value; }
   std::vector<ValueType>& GetMutable() { return m_value; }

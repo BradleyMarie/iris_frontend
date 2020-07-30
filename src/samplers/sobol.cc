@@ -16,8 +16,7 @@ static const uint16_t kSobolSamplerDefaultPixelSamples = 16;
 
 Sampler ParseSobol(const char* base_type_name, const char* type_name,
                    Tokenizer& tokenizer) {
-  NonZeroSingleUInt16Matcher pixelsamples(base_type_name, type_name,
-                                          "pixelsamples", false,
+  NonZeroSingleUInt16Matcher pixelsamples("pixelsamples", false,
                                           kSobolSamplerDefaultPixelSamples);
   MatchParameters(base_type_name, type_name, tokenizer, {&pixelsamples});
 

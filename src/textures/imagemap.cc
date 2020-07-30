@@ -24,29 +24,22 @@ ReflectorTexture ParseImageMapReflector(
     const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
     const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager) {
-  SingleFloatMatcher u_scale(base_type_name, type_name, "uscale", false, false,
-                             -std::numeric_limits<float_t>::infinity(),
-                             std::numeric_limits<float_t>::infinity(),
-                             kImageMapDefaultUVScaleValue);
-  SingleFloatMatcher v_scale(base_type_name, type_name, "vscale", false, false,
-                             -std::numeric_limits<float_t>::infinity(),
-                             std::numeric_limits<float_t>::infinity(),
-                             kImageMapDefaultUVScaleValue);
-  SingleFloatMatcher u_delta(base_type_name, type_name, "udelta", false, false,
-                             -std::numeric_limits<float_t>::infinity(),
-                             std::numeric_limits<float_t>::infinity(),
-                             kImageMapDefaultUVDeltaValue);
-  SingleFloatMatcher v_delta(base_type_name, type_name, "vdelta", false, false,
-                             -std::numeric_limits<float_t>::infinity(),
-                             std::numeric_limits<float_t>::infinity(),
-                             kImageMapDefaultUVDeltaValue);
-  SingleStringMatcher filename(base_type_name, type_name, "filename", true,
-                               kImageMapDefaultFilename);
-  SingleStringMatcher wrap(base_type_name, type_name, "wrap", true,
-                           kImageMapDefaultWrap);
-  MatchParameters(
-      base_type_name, type_name, tokenizer,
-      {&u_scale, &v_scale, &u_delta, &v_delta, &filename, &wrap});
+  SingleFloatMatcher u_scale(
+      "uscale", false, false, -std::numeric_limits<float_t>::infinity(),
+      std::numeric_limits<float_t>::infinity(), kImageMapDefaultUVScaleValue);
+  SingleFloatMatcher v_scale(
+      "vscale", false, false, -std::numeric_limits<float_t>::infinity(),
+      std::numeric_limits<float_t>::infinity(), kImageMapDefaultUVScaleValue);
+  SingleFloatMatcher u_delta(
+      "udelta", false, false, -std::numeric_limits<float_t>::infinity(),
+      std::numeric_limits<float_t>::infinity(), kImageMapDefaultUVDeltaValue);
+  SingleFloatMatcher v_delta(
+      "vdelta", false, false, -std::numeric_limits<float_t>::infinity(),
+      std::numeric_limits<float_t>::infinity(), kImageMapDefaultUVDeltaValue);
+  SingleStringMatcher filename("filename", true, kImageMapDefaultFilename);
+  SingleStringMatcher wrap("wrap", true, kImageMapDefaultWrap);
+  MatchParameters(base_type_name, type_name, tokenizer,
+                  {&u_scale, &v_scale, &u_delta, &v_delta, &filename, &wrap});
 
   if (!absl::EndsWith(filename.Get(), ".png")) {
     std::cerr << "ERROR: png is the only supported image format" << std::endl;
@@ -93,29 +86,22 @@ FloatTexture ParseImageMapFloat(
     const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
     const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager) {
-  SingleFloatMatcher u_scale(base_type_name, type_name, "uscale", false, false,
-                             -std::numeric_limits<float_t>::infinity(),
-                             std::numeric_limits<float_t>::infinity(),
-                             kImageMapDefaultUVScaleValue);
-  SingleFloatMatcher v_scale(base_type_name, type_name, "vscale", false, false,
-                             -std::numeric_limits<float_t>::infinity(),
-                             std::numeric_limits<float_t>::infinity(),
-                             kImageMapDefaultUVScaleValue);
-  SingleFloatMatcher u_delta(base_type_name, type_name, "udelta", false, false,
-                             -std::numeric_limits<float_t>::infinity(),
-                             std::numeric_limits<float_t>::infinity(),
-                             kImageMapDefaultUVDeltaValue);
-  SingleFloatMatcher v_delta(base_type_name, type_name, "vdelta", false, false,
-                             -std::numeric_limits<float_t>::infinity(),
-                             std::numeric_limits<float_t>::infinity(),
-                             kImageMapDefaultUVDeltaValue);
-  SingleStringMatcher filename(base_type_name, type_name, "filename", true,
-                               kImageMapDefaultFilename);
-  SingleStringMatcher wrap(base_type_name, type_name, "wrap", true,
-                           kImageMapDefaultWrap);
-  MatchParameters(
-      base_type_name, type_name, tokenizer,
-      {&u_scale, &v_scale, &u_delta, &v_delta, &filename, &wrap});
+  SingleFloatMatcher u_scale(
+      "uscale", false, false, -std::numeric_limits<float_t>::infinity(),
+      std::numeric_limits<float_t>::infinity(), kImageMapDefaultUVScaleValue);
+  SingleFloatMatcher v_scale(
+      "vscale", false, false, -std::numeric_limits<float_t>::infinity(),
+      std::numeric_limits<float_t>::infinity(), kImageMapDefaultUVScaleValue);
+  SingleFloatMatcher u_delta(
+      "udelta", false, false, -std::numeric_limits<float_t>::infinity(),
+      std::numeric_limits<float_t>::infinity(), kImageMapDefaultUVDeltaValue);
+  SingleFloatMatcher v_delta(
+      "vdelta", false, false, -std::numeric_limits<float_t>::infinity(),
+      std::numeric_limits<float_t>::infinity(), kImageMapDefaultUVDeltaValue);
+  SingleStringMatcher filename("filename", true, kImageMapDefaultFilename);
+  SingleStringMatcher wrap("wrap", true, kImageMapDefaultWrap);
+  MatchParameters(base_type_name, type_name, tokenizer,
+                  {&u_scale, &v_scale, &u_delta, &v_delta, &filename, &wrap});
 
   if (!absl::EndsWith(filename.Get(), ".png")) {
     std::cerr << "ERROR: png is the only supported image format" << std::endl;

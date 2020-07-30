@@ -19,15 +19,14 @@ MaterialFactory ParseMatte(const char* base_type_name, const char* type_name,
                            TextureManager& texture_manager,
                            SpectrumManager& spectrum_manager) {
   ReflectorTextureMatcher kd = ReflectorTextureMatcher::FromUniformReflectance(
-      base_type_name, type_name, "Kd", false, tokenizer, named_texture_manager,
-      texture_manager, spectrum_manager, kMatteMaterialDefaultReflectance);
+      "Kd", false, tokenizer, named_texture_manager, texture_manager,
+      spectrum_manager, kMatteMaterialDefaultReflectance);
   FloatTextureMatcher sigma = FloatTextureMatcher::FromValue(
-      base_type_name, type_name, "sigma", false, false,
-      -std::numeric_limits<float_t>::infinity(),
+      "sigma", false, false, -std::numeric_limits<float_t>::infinity(),
       std::numeric_limits<float_t>::infinity(), named_texture_manager,
       texture_manager, kMatteMaterialDefaultSigma);
-  FloatTextureMatcher bumpmap(base_type_name, type_name, "bumpmap", false, true,
-                              (float_t)0.0, (float_t)1.0, named_texture_manager,
+  FloatTextureMatcher bumpmap("bumpmap", false, true, (float_t)0.0,
+                              (float_t)1.0, named_texture_manager,
                               texture_manager, kMatteMaterialDefaultBumpMap);
   MatchParameters(base_type_name, type_name, parameters,
                   {&kd, &sigma, &bumpmap});
@@ -43,17 +42,15 @@ MaterialFactory ParseMatte(const char* base_type_name, const char* type_name,
           const NamedTextureManager& named_texture_manager,
           NormalMapManager& normal_map_manager, TextureManager& texture_manager,
           SpectrumManager& spectrum_manager) -> std::pair<Material, NormalMap> {
-    ReflectorTextureMatcher kd(base_type_name, type_name, "Kd", false,
-                               tokenizer, named_texture_manager,
+    ReflectorTextureMatcher kd("Kd", false, tokenizer, named_texture_manager,
                                texture_manager, spectrum_manager, default_kd);
-    FloatTextureMatcher sigma(base_type_name, type_name, "sigma", false, false,
-                              -std::numeric_limits<float_t>::infinity(),
-                              std::numeric_limits<float_t>::infinity(),
-                              named_texture_manager, texture_manager,
-                              default_sigma);
-    FloatTextureMatcher bumpmap(
-        base_type_name, type_name, "bumpmap", false, true, (float_t)0.0,
-        (float_t)1.0, named_texture_manager, texture_manager, default_bumpmap);
+    FloatTextureMatcher sigma(
+        "sigma", false, false, -std::numeric_limits<float_t>::infinity(),
+        std::numeric_limits<float_t>::infinity(), named_texture_manager,
+        texture_manager, default_sigma);
+    FloatTextureMatcher bumpmap("bumpmap", false, true, (float_t)0.0,
+                                (float_t)1.0, named_texture_manager,
+                                texture_manager, default_bumpmap);
     MatchParameters(base_type_name, type_name, parameters,
                     {&kd, &sigma, &bumpmap});
 

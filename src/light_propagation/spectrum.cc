@@ -17,8 +17,7 @@ LightPropagationResult ParseSpectrum(const char* base_type_name,
                                      const char* type_name,
                                      Tokenizer& tokenizer) {
   SingleStringMatcher colorextrapolator(
-      base_type_name, type_name, "colorextrapolator", false,
-      kSpectrumLightPropagationColorExtrapolator);
+      "colorextrapolator", false, kSpectrumLightPropagationColorExtrapolator);
   MatchParameters(base_type_name, type_name, tokenizer, {&colorextrapolator});
 
   if (colorextrapolator.Get() != "smits") {

@@ -18,13 +18,10 @@ static const size_t kImageFilmDefaultYResolution = 480;
 
 FilmResult ParseImage(const char* base_type_name, const char* type_name,
                       Tokenizer& tokenizer) {
-  SingleStringMatcher filename(base_type_name, type_name, "filename", false,
-                               GetDefaultOutputFilename());
-  NonZeroSingleSizeTMatcher xresolution(base_type_name, type_name,
-                                        "xresolution", false,
+  SingleStringMatcher filename("filename", false, GetDefaultOutputFilename());
+  NonZeroSingleSizeTMatcher xresolution("xresolution", false,
                                         kImageFilmDefaultXResolution);
-  NonZeroSingleSizeTMatcher yresolution(base_type_name, type_name,
-                                        "yresolution", false,
+  NonZeroSingleSizeTMatcher yresolution("yresolution", false,
                                         kImageFilmDefaultYResolution);
   MatchParameters(base_type_name, type_name, tokenizer,
                   {&filename, &xresolution, &yresolution});

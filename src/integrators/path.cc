@@ -23,20 +23,17 @@ static const float_t kPathTracerDefaultRRThreshold = (float_t)1.0;
 
 IntegratorResult ParsePath(const char* base_type_name, const char* type_name,
                            Tokenizer& tokenizer) {
-  SingleStringMatcher lightsamplestrategy(base_type_name, type_name,
-                                          "lightsamplestrategy", false,
+  SingleStringMatcher lightsamplestrategy("lightsamplestrategy", false,
                                           "uniform");  // TODO: Set default to
-  NonZeroSingleUInt8Matcher maxdepth(base_type_name, type_name, "maxdepth",
-                                     false, kPathTracerDefaultMaxDepth);
-  NonZeroSingleUInt8Matcher rrminbounces(base_type_name, type_name,
-                                         "rrminbounces", false,
+  NonZeroSingleUInt8Matcher maxdepth("maxdepth", false,
+                                     kPathTracerDefaultMaxDepth);
+  NonZeroSingleUInt8Matcher rrminbounces("rrminbounces", false,
                                          kPathTracerDefaultRRMinBounces);
-  SingleFloatMatcher rrthreshold(base_type_name, type_name, "rrthreshold",
-                                 false, true, (float_t)0.0, INFINITY,
-                                 kPathTracerDefaultRRThreshold);
-  SingleFloatMatcher rrminprobability(
-      base_type_name, type_name, "rrminprobability", false, true, (float_t)0.0,
-      (float_t)1.0, kPathTracerDefaultRRMinProbability);
+  SingleFloatMatcher rrthreshold("rrthreshold", false, true, (float_t)0.0,
+                                 INFINITY, kPathTracerDefaultRRThreshold);
+  SingleFloatMatcher rrminprobability("rrminprobability", false, true,
+                                      (float_t)0.0, (float_t)1.0,
+                                      kPathTracerDefaultRRMinProbability);
   MatchParameters(base_type_name, type_name, tokenizer,
                   {&lightsamplestrategy, &maxdepth, &rrminbounces,
                    &rrminprobability, &rrthreshold});

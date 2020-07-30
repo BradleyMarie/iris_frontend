@@ -11,14 +11,12 @@ const size_t SpectrumMatcher::m_variant_indices[2] = {
     GetIndex<SpectrumParameter, ParameterData>()};
 
 SpectrumMatcher SpectrumMatcher::FromRgb(
-    const char* base_type_name, const char* type_name,
-    const char* parameter_name, bool required,
+    absl::string_view parameter_name, bool required,
     SpectrumManager& spectrum_manager,
     const std::array<float_t, 3>& default_rgb) {
   COLOR3 color =
       ColorCreate(absl::GetFlag(FLAGS_rgb_color_space), default_rgb.data());
-  return SpectrumMatcher(base_type_name, type_name, parameter_name, required,
-                         spectrum_manager,
+  return SpectrumMatcher(parameter_name, required, spectrum_manager,
                          spectrum_manager.AllocateColorSpectrum(color).value());
 }
 

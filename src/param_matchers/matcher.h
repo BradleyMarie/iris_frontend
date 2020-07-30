@@ -11,16 +11,15 @@ namespace iris {
 
 class ParamMatcher {
  public:
-  bool Match(Parameter& parameter);
-  void Validate() const;
+  bool Match(absl::string_view base_type_name, absl::string_view type_name,
+             Parameter& parameter);
+  void Validate(absl::string_view base_type_name,
+                absl::string_view type_name) const;
 
  protected:
-  ParamMatcher(absl::string_view base_type_name, absl::string_view type_name,
-               absl::string_view parameter_name, bool required,
+  ParamMatcher(absl::string_view parameter_name, bool required,
                const size_t* variant_indicies, size_t num_indices)
       : m_parameter_name(parameter_name),
-        m_base_type_name(base_type_name),
-        m_type_name(type_name),
         m_indices(variant_indicies),
         m_num_indices(num_indices),
         m_required(required),
@@ -64,7 +63,7 @@ void MatchParameters(
     bool found = false;
     for (auto current = supported_parameters_begin;
          current != supported_parameters_end; ++current) {
-      if ((*current)->Match(*parameters_current)) {
+      if ((*current)->Match(base_type_name, type_name, *parameters_current)) {
         found = true;
         break;
       }

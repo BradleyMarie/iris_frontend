@@ -8,11 +8,9 @@ namespace iris {
 template <typename ValueType, int Minimum, ValueType Maximum>
 class IntegralSingleValueMatcher : public ParamMatcher {
  public:
-  IntegralSingleValueMatcher(const char* base_type_name, const char* type_name,
-                             const char* parameter_name, bool required,
+  IntegralSingleValueMatcher(absl::string_view parameter_name, bool required,
                              ValueType default_value)
-      : ParamMatcher(base_type_name, type_name, parameter_name, required,
-                     &m_variant_type, 1),
+      : ParamMatcher(parameter_name, required, &m_variant_type, 1),
         m_value(std::move(default_value)) {}
   const ValueType& Get() { return m_value; }
 

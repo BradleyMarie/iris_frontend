@@ -17,14 +17,12 @@ ReflectorTexture ParseScaleReflector(
     TextureManager& texture_manager, SpectrumManager& spectrum_manager) {
   ReflectorTextureMatcher tex1 =
       ReflectorTextureMatcher::FromUniformReflectance(
-          base_type_name, type_name, "tex1", false, tokenizer,
-          named_texture_manager, texture_manager, spectrum_manager,
-          kScaleTextureDefaultValue);
+          "tex1", false, tokenizer, named_texture_manager, texture_manager,
+          spectrum_manager, kScaleTextureDefaultValue);
   ReflectorTextureMatcher tex2 =
       ReflectorTextureMatcher::FromUniformReflectance(
-          base_type_name, type_name, "tex2", false, tokenizer,
-          named_texture_manager, texture_manager, spectrum_manager,
-          kScaleTextureDefaultValue);
+          "tex2", false, tokenizer, named_texture_manager, texture_manager,
+          spectrum_manager, kScaleTextureDefaultValue);
   MatchParameters(base_type_name, type_name, tokenizer, {&tex1, &tex2});
 
   return texture_manager.AllocateProductReflectorTexture(tex1.Get(),
@@ -36,13 +34,11 @@ FloatTexture ParseScaleFloat(const char* base_type_name, const char* type_name,
                              const NamedTextureManager& named_texture_manager,
                              TextureManager& texture_manager) {
   FloatTextureMatcher tex1 = FloatTextureMatcher::FromValue(
-      base_type_name, type_name, "tex1", false, true, (float_t)0.0,
-      (float_t)1.0, named_texture_manager, texture_manager,
-      kScaleTextureDefaultValue);
+      "tex1", false, true, (float_t)0.0, (float_t)1.0, named_texture_manager,
+      texture_manager, kScaleTextureDefaultValue);
   FloatTextureMatcher tex2 = FloatTextureMatcher::FromValue(
-      base_type_name, type_name, "tex2", false, true, (float_t)0.0,
-      (float_t)1.0, named_texture_manager, texture_manager,
-      kScaleTextureDefaultValue);
+      "tex2", false, true, (float_t)0.0, (float_t)1.0, named_texture_manager,
+      texture_manager, kScaleTextureDefaultValue);
 
   MatchParameters(base_type_name, type_name, tokenizer, {&tex1, &tex2});
 

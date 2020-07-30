@@ -29,14 +29,13 @@ ShapeResult ParseTriangleMesh(
     SpectrumManager& spectrum_manager, const MaterialFactory& material_factory,
     const EmissiveMaterial& front_emissive_material,
     const EmissiveMaterial& back_emissive_material) {
-  TriangleMeshPointListMatcher points(base_type_name, type_name, "P", true,
-                                      kTriangleMeshDefaultPoints);
-  TriangleMeshIndexListMatcher int_indices(base_type_name, type_name, "indices",
-                                           true, kTriangleMeshDefaultIndices);
+  TriangleMeshPointListMatcher points("P", true, kTriangleMeshDefaultPoints);
+  TriangleMeshIndexListMatcher int_indices("indices", true,
+                                           kTriangleMeshDefaultIndices);
 
   std::vector<Parameter> unused_parameters;
-  MatchParameters(base_type_name, type_name, tokenizer,
-                  {&points, &int_indices}, &unused_parameters);
+  MatchParameters(base_type_name, type_name, tokenizer, {&points, &int_indices},
+                  &unused_parameters);
 
   auto material = material_factory.Build(
       base_type_name, type_name, tokenizer, absl::MakeSpan(unused_parameters),

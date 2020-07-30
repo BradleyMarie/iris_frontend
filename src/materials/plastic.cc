@@ -22,20 +22,19 @@ MaterialFactory ParsePlastic(const char* base_type_name, const char* type_name,
                              TextureManager& texture_manager,
                              SpectrumManager& spectrum_manager) {
   ReflectorTextureMatcher kd = ReflectorTextureMatcher::FromUniformReflectance(
-      base_type_name, type_name, "Kd", false, tokenizer, named_texture_manager,
-      texture_manager, spectrum_manager, kPlasticMaterialDefaultDiffuse);
+      "Kd", false, tokenizer, named_texture_manager, texture_manager,
+      spectrum_manager, kPlasticMaterialDefaultDiffuse);
   ReflectorTextureMatcher ks = ReflectorTextureMatcher::FromUniformReflectance(
-      base_type_name, type_name, "Ks", false, tokenizer, named_texture_manager,
-      texture_manager, spectrum_manager, kPlasticMaterialDefaultSpecular);
+      "Ks", false, tokenizer, named_texture_manager, texture_manager,
+      spectrum_manager, kPlasticMaterialDefaultSpecular);
   FloatTextureMatcher roughness = FloatTextureMatcher::FromValue(
-      base_type_name, type_name, "roughness", false, true,
-      static_cast<float_t>(0.0), static_cast<float_t>(1.0),
-      named_texture_manager, texture_manager, kPlasticMaterialDefaultRoughness);
-  SingleBoolMatcher remap_roughness(base_type_name, type_name,
-                                    "reamaproughness", false,
+      "roughness", false, true, static_cast<float_t>(0.0),
+      static_cast<float_t>(1.0), named_texture_manager, texture_manager,
+      kPlasticMaterialDefaultRoughness);
+  SingleBoolMatcher remap_roughness("reamaproughness", false,
                                     kPlasticMaterialDefaultRemapRoughness);
-  FloatTextureMatcher bumpmap(base_type_name, type_name, "bumpmap", false, true,
-                              (float_t)0.0, (float_t)1.0, named_texture_manager,
+  FloatTextureMatcher bumpmap("bumpmap", false, true, (float_t)0.0,
+                              (float_t)1.0, named_texture_manager,
                               texture_manager, kPlasticMaterialDefaultBumpMap);
   MatchParameters(base_type_name, type_name, parameters,
                   {&kd, &ks, &roughness, &remap_roughness, &bumpmap});
@@ -54,22 +53,19 @@ MaterialFactory ParsePlastic(const char* base_type_name, const char* type_name,
           const NamedTextureManager& named_texture_manager,
           NormalMapManager& normal_map_manager, TextureManager& texture_manager,
           SpectrumManager& spectrum_manager) -> std::pair<Material, NormalMap> {
-    ReflectorTextureMatcher kd(base_type_name, type_name, "Kd", false,
-                               tokenizer, named_texture_manager,
+    ReflectorTextureMatcher kd("Kd", false, tokenizer, named_texture_manager,
                                texture_manager, spectrum_manager, default_kd);
-    ReflectorTextureMatcher ks(base_type_name, type_name, "Ks", false,
-                               tokenizer, named_texture_manager,
+    ReflectorTextureMatcher ks("Ks", false, tokenizer, named_texture_manager,
                                texture_manager, spectrum_manager, default_ks);
     FloatTextureMatcher roughness(
-        base_type_name, type_name, "roughness", false, true,
-        static_cast<float_t>(0.0), static_cast<float_t>(1.0),
-        named_texture_manager, texture_manager, default_roughness);
-    SingleBoolMatcher remap_roughness(base_type_name, type_name,
-                                      "reamaproughness", false,
+        "roughness", false, true, static_cast<float_t>(0.0),
+        static_cast<float_t>(1.0), named_texture_manager, texture_manager,
+        default_roughness);
+    SingleBoolMatcher remap_roughness("reamaproughness", false,
                                       default_remap_roughness);
-    FloatTextureMatcher bumpmap(
-        base_type_name, type_name, "bumpmap", false, true, (float_t)0.0,
-        (float_t)1.0, named_texture_manager, texture_manager, default_bumpmap);
+    FloatTextureMatcher bumpmap("bumpmap", false, true, (float_t)0.0,
+                                (float_t)1.0, named_texture_manager,
+                                texture_manager, default_bumpmap);
     MatchParameters(base_type_name, type_name, parameters,
                     {&kd, &ks, &roughness, &remap_roughness, &bumpmap});
 

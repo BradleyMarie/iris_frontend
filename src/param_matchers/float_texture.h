@@ -11,14 +11,12 @@ namespace iris {
 
 class FloatTextureMatcher : public ParamMatcher {
  public:
-  FloatTextureMatcher(const char* base_type_name, const char* type_name,
-                      const char* parameter_name, bool required, bool inclusive,
-                      float_t minimum, float_t maximum,
+  FloatTextureMatcher(absl::string_view parameter_name, bool required,
+                      bool inclusive, float_t minimum, float_t maximum,
                       const NamedTextureManager& named_texture_manager,
                       TextureManager& texture_manager,
                       FloatTexture default_value)
-      : ParamMatcher(base_type_name, type_name, parameter_name, required,
-                     m_variant_indices, 3),
+      : ParamMatcher(parameter_name, required, m_variant_indices, 3),
         m_named_texture_manager(named_texture_manager),
         m_texture_manager(texture_manager),
         m_value(std::move(default_value)),
@@ -33,8 +31,7 @@ class FloatTextureMatcher : public ParamMatcher {
   const FloatTexture& Get() { return m_value; }
 
   static FloatTextureMatcher FromValue(
-      const char* base_type_name, const char* type_name,
-      const char* parameter_name, bool required, bool inclusive,
+      absl::string_view parameter_name, bool required, bool inclusive,
       float_t minimum, float_t maximum,
       const NamedTextureManager& named_texture_manager,
       TextureManager& texture_manager, float_t default_value);

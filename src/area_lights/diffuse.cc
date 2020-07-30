@@ -18,11 +18,10 @@ static const std::array<float_t, 3> kDiffuseAreaLightDefaultL = {
 AreaLightResult ParseDiffuse(const char* base_type_name, const char* type_name,
                              Parameters& parameters,
                              SpectrumManager& spectrum_manager) {
-  SingleBoolMatcher twosided(base_type_name, type_name, "twosided", false,
+  SingleBoolMatcher twosided("twosided", false,
                              kDiffuseAreaLightDefaultTwoSided);
-  SpectrumMatcher spectrum =
-      SpectrumMatcher::FromRgb(base_type_name, type_name, "L", false,
-                               spectrum_manager, kDiffuseAreaLightDefaultL);
+  SpectrumMatcher spectrum = SpectrumMatcher::FromRgb(
+      "L", false, spectrum_manager, kDiffuseAreaLightDefaultL);
   parameters.Match(twosided, spectrum);
 
   EmissiveMaterial front_emissive_material, back_emissive_material;

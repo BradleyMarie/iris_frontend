@@ -73,13 +73,13 @@ static const float_t kDefaultFocalDistance = (float_t)1e31;
 
 CameraFactory ParsePerspective(const char* base_type_name,
                                const char* type_name, Tokenizer& tokenizer) {
-  SingleFloatMatcher halffov(base_type_name, type_name, "halffov", false, false,
-                             (float_t)0.0, (float_t)90.0, absl::nullopt);
-  SingleFloatMatcher fov(base_type_name, type_name, "fov", false, false,
-                         (float_t)0.0, (float_t)180.0, absl::nullopt);
-  SingleFloatMatcher frameaspectratio(
-      base_type_name, type_name, "frameaspectratio", false, false, (float_t)0.0,
-      (float_t)INFINITY, absl::nullopt);
+  SingleFloatMatcher halffov("halffov", false, false, (float_t)0.0,
+                             (float_t)90.0, absl::nullopt);
+  SingleFloatMatcher fov("fov", false, false, (float_t)0.0, (float_t)180.0,
+                         absl::nullopt);
+  SingleFloatMatcher frameaspectratio("frameaspectratio", false, false,
+                                      (float_t)0.0, (float_t)INFINITY,
+                                      absl::nullopt);
 
   MatchParameters(base_type_name, type_name, tokenizer,
                   {&halffov, &fov, &frameaspectratio});

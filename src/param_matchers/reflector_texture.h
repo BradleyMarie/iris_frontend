@@ -12,15 +12,13 @@ namespace iris {
 
 class ReflectorTextureMatcher : public ParamMatcher {
  public:
-  ReflectorTextureMatcher(const char* base_type_name, const char* type_name,
-                          const char* parameter_name, bool required,
+  ReflectorTextureMatcher(absl::string_view parameter_name, bool required,
                           const Tokenizer& tokenizer,
                           const NamedTextureManager& named_texture_manager,
                           TextureManager& texture_manager,
                           SpectrumManager& spectrum_manager,
                           ReflectorTexture default_value)
-      : ParamMatcher(base_type_name, type_name, parameter_name, required,
-                     m_variant_indices, 4),
+      : ParamMatcher(parameter_name, required, m_variant_indices, 4),
         m_tokenizer(tokenizer),
         m_named_texture_manager(named_texture_manager),
         m_texture_manager(texture_manager),
@@ -30,8 +28,7 @@ class ReflectorTextureMatcher : public ParamMatcher {
   const ReflectorTexture& Get() { return m_value; }
 
   static ReflectorTextureMatcher FromUniformReflectance(
-      const char* base_type_name, const char* type_name,
-      const char* parameter_name, bool required, const Tokenizer& tokenizer,
+      absl::string_view parameter_name, bool required, const Tokenizer& tokenizer,
       const NamedTextureManager& named_texture_manager,
       TextureManager& texture_manager, SpectrumManager& spectrum_manager,
       float_t default_reflectance);

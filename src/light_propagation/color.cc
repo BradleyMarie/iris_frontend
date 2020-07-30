@@ -15,7 +15,7 @@ static const char* kColorLightPropagationColorSpace = "linearsrgb";
 
 LightPropagationResult ParseColor(const char* base_type_name,
                                   const char* type_name, Tokenizer& tokenizer) {
-  SingleStringMatcher colorspace(base_type_name, type_name, "colorspace", false,
+  SingleStringMatcher colorspace("colorspace", false,
                                  kColorLightPropagationColorSpace);
   MatchParameters(base_type_name, type_name, tokenizer, {&colorspace});
 

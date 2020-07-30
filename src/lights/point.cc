@@ -19,11 +19,9 @@ static const POINT3 kPointLightDefaultFrom =
 Light ParsePoint(const char* base_type_name, const char* type_name,
                  Tokenizer& tokenizer, SpectrumManager& spectrum_manager,
                  const Matrix& model_to_world) {
-  SinglePoint3Matcher from(base_type_name, type_name, "from", false,
-                           kPointLightDefaultFrom);
-  SpectrumMatcher spectrum =
-      SpectrumMatcher::FromRgb(base_type_name, type_name, "L", false,
-                               spectrum_manager, kPointLightDefaultL);
+  SinglePoint3Matcher from("from", false, kPointLightDefaultFrom);
+  SpectrumMatcher spectrum = SpectrumMatcher::FromRgb(
+      "L", false, spectrum_manager, kPointLightDefaultL);
   MatchParameters(base_type_name, type_name, tokenizer, {&from, &spectrum});
 
   POINT3 world_from = PointMatrixMultiply(model_to_world.get(), from.Get());
