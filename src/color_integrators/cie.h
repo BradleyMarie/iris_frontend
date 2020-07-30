@@ -1,13 +1,13 @@
 #ifndef _SRC_COLOR_INTEGRATORS_CIE_
 #define _SRC_COLOR_INTEGRATORS_CIE_
 
+#include "src/common/parameters.h"
 #include "src/common/pointer_types.h"
-#include "src/common/tokenizer.h"
 
 namespace iris {
 
-ColorIntegrator ParseCie(const char* base_type_name, const char* type_name,
-                         Tokenizer& tokenizer, bool spectrum_color_workaround);
+ColorIntegrator ParseCie(Parameters& parameters,
+                         bool spectrum_color_workaround);
 
 }  // namespace iris
 

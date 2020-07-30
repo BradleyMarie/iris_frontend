@@ -8,9 +8,9 @@
 
 namespace iris {
 
-ColorIntegrator ParseCie(const char* base_type_name, const char* type_name,
-                         Tokenizer& tokenizer, bool spectrum_color_workaround) {
-  MatchParameters(base_type_name, type_name, tokenizer, {});
+ColorIntegrator ParseCie(Parameters& parameters,
+                         bool spectrum_color_workaround) {
+  parameters.Ignore();
 
   ColorIntegrator result;
   ISTATUS status = CieColorIntegratorAllocate(spectrum_color_workaround,

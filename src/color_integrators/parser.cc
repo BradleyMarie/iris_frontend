@@ -8,14 +8,14 @@ namespace iris {
 ColorIntegrator ParseColorIntegrator(const char* base_type_name,
                                      Tokenizer& tokenizer,
                                      bool spectrum_color_workaround) {
-  return CallDirective<ColorIntegrator, 1>(base_type_name, tokenizer,
-                                           {std::make_pair("cie", ParseCie)},
-                                           spectrum_color_workaround);
+  return CallDirective<ColorIntegrator>(base_type_name, tokenizer,
+                                        {{"cie", ParseCie}},
+                                        spectrum_color_workaround);
 }
 
 ColorIntegrator CreateDefaultColorIntegrator(bool spectrum_color_workaround) {
-  Tokenizer tokenizer;
-  return ParseCie("Unused", "Unused", tokenizer, spectrum_color_workaround);
+  Parameters parameters;
+  return ParseCie(parameters, spectrum_color_workaround);
 }
 
 }  // namespace iris

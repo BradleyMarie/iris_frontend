@@ -62,7 +62,8 @@ void MatchParameters(absl::string_view base_type_name,
 Parameters::Parameters()
     : m_base_type_name(kInvalidTypeName),
       m_type_name(kInvalidTypeName),
-      m_unused_parameters(std::vector<Parameter>()) {}
+      m_unused_parameters(std::vector<Parameter>()),
+      m_tokenizer(nullptr) {}
 
 Parameters::Parameters(absl::string_view base_type_name,
                        absl::string_view type_name, Tokenizer& tokenizer)
@@ -75,7 +76,8 @@ Parameters::Parameters(absl::string_view base_type_name,
                        std::vector<Parameter> unused_parameters)
     : m_base_type_name(base_type_name),
       m_type_name(type_name),
-      m_unused_parameters(std::move(unused_parameters)) {}
+      m_unused_parameters(std::move(unused_parameters)),
+      m_tokenizer(nullptr) {}
 
 Parameters::Parameters(Parameters&& other)
     : m_base_type_name(other.m_base_type_name),
