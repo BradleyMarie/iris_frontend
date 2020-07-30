@@ -1,7 +1,5 @@
 #include "src/shapes/parser.h"
 
-#include <iostream>
-
 #include "src/common/call_directive.h"
 #include "src/shapes/plymesh.h"
 #include "src/shapes/sphere.h"

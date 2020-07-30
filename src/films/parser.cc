@@ -1,7 +1,5 @@
 #include "src/films/parser.h"
 
-#include <iostream>
-
 #include "src/common/call_directive.h"
 #include "src/films/image.h"
 

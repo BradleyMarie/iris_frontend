@@ -1,7 +1,5 @@
 #include "src/integrators/parser.h"
 
-#include <iostream>
-
 #include "src/common/call_directive.h"
 #include "src/integrators/path.h"
 

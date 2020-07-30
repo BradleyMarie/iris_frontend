@@ -1,7 +1,5 @@
 #include "src/cameras/parser.h"
 
-#include <iostream>
-
 #include "src/cameras/perspective.h"
 #include "src/common/call_directive.h"
 

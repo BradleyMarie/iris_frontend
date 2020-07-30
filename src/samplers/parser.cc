@@ -1,7 +1,5 @@
 #include "src/samplers/parser.h"
 
-#include <iostream>
-
 #include "src/common/call_directive.h"
 #include "src/samplers/halton.h"
 #include "src/samplers/sobol.h"

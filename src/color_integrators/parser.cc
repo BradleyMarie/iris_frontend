@@ -1,7 +1,5 @@
 #include "src/color_integrators/parser.h"
 
-#include <iostream>
-
 #include "src/color_integrators/cie.h"
 #include "src/common/call_directive.h"
 

@@ -1,7 +1,5 @@
 #include "src/light_propagation/parser.h"
 
-#include <iostream>
-
 #include "src/common/call_directive.h"
 #include "src/light_propagation/color.h"
 #include "src/light_propagation/spectrum.h"
