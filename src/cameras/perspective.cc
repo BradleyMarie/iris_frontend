@@ -71,8 +71,7 @@ static const float_t kDefaultFocalDistance = (float_t)1e31;
 
 }  // namespace
 
-CameraFactory ParsePerspective(const char* base_type_name,
-                               const char* type_name, Tokenizer& tokenizer) {
+CameraFactory ParsePerspective(Parameters& parameters) {
   SingleFloatMatcher halffov("halffov", false, false, (float_t)0.0,
                              (float_t)90.0, absl::nullopt);
   SingleFloatMatcher fov("fov", false, false, (float_t)0.0, (float_t)180.0,
@@ -80,9 +79,7 @@ CameraFactory ParsePerspective(const char* base_type_name,
   SingleFloatMatcher frameaspectratio("frameaspectratio", false, false,
                                       (float_t)0.0, (float_t)INFINITY,
                                       absl::nullopt);
-
-  MatchParameters(base_type_name, type_name, tokenizer,
-                  {&halffov, &fov, &frameaspectratio});
+  parameters.Match(halffov, fov, frameaspectratio);
 
   if (halffov.Get() && fov.Get()) {
     std::cerr << "ERROR: Only one of halffov or fov may be specified"

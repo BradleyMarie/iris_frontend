@@ -58,6 +58,11 @@ void MatchParameters(absl::string_view base_type_name,
 
 }  // namespace
 
+Parameters::Parameters()
+  : m_base_type_name("Unused"),
+    m_type_name("Unused"),
+    m_unused_parameters(std::vector<Parameter>()) {}
+
 Parameters::Parameters(absl::string_view base_type_name,
                        absl::string_view type_name, Tokenizer& tokenizer)
     : m_base_type_name(base_type_name),

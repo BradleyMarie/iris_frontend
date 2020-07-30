@@ -6,14 +6,13 @@
 namespace iris {
 
 CameraFactory ParseCamera(const char* base_type_name, Tokenizer& tokenizer) {
-  return CallDirective<CameraFactory, 1>(
-      base_type_name, tokenizer,
-      {std::make_pair("perspective", ParsePerspective)});
+  return CallDirective<CameraFactory>(base_type_name, tokenizer,
+                                      {{"perspective", ParsePerspective}});
 }
 
 CameraFactory CreateDefaultCamera() {
-  Tokenizer tokenizer;
-  return ParsePerspective("Unused", "Unused", tokenizer);
+  Parameters parameters;
+  return ParsePerspective(parameters);
 }
 
 }  // namespace iris
