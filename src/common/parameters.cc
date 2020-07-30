@@ -1,8 +1,9 @@
 #include "src/common/parameters.h"
 
 namespace iris {
-
 namespace {
+
+const char* kInvalidTypeName = "[INVALID_TYPE_NAME]";
 
 void MatchParameter(absl::string_view base_type_name,
                     absl::string_view type_name,
@@ -59,9 +60,9 @@ void MatchParameters(absl::string_view base_type_name,
 }  // namespace
 
 Parameters::Parameters()
-  : m_base_type_name("Unused"),
-    m_type_name("Unused"),
-    m_unused_parameters(std::vector<Parameter>()) {}
+    : m_base_type_name(kInvalidTypeName),
+      m_type_name(kInvalidTypeName),
+      m_unused_parameters(std::vector<Parameter>()) {}
 
 Parameters::Parameters(absl::string_view base_type_name,
                        absl::string_view type_name, Tokenizer& tokenizer)
@@ -95,9 +96,15 @@ Parameters& Parameters::operator=(Parameters&& other) {
 
 Parameters::~Parameters() { assert(!m_unused_parameters && !m_tokenizer); }
 
-absl::string_view Parameters::BaseType() { return m_base_type_name; }
+absl::string_view Parameters::BaseType() {
+  assert(m_base_type_name != kInvalidTypeName);
+  return m_base_type_name;
+}
 
-absl::string_view Parameters::Type() { return m_type_name; }
+absl::string_view Parameters::Type() {
+  assert(m_type_name != kInvalidTypeName);
+  return m_type_name;
+}
 
 Parameters Parameters::MatchAllowUnusedImpl(
     absl::Span<ParamMatcher* const> param_matchers) {
