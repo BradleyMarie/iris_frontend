@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "absl/strings/str_join.h"
+#include "src/common/error.h"
 #include "src/param_matchers/spd_file.h"
 
 namespace iris {
@@ -16,13 +17,26 @@ ReflectorTexture ReflectorFromUniformReflectance(
   return texture_manager.AllocateConstantReflectorTexture(reflector);
 }
 
-}  // namespace
-
-const size_t ReflectorTextureMatcher::m_variant_indices[4] = {
+const size_t variant_indices[4] = {
     GetIndex<FloatParameter, ParameterData>(),
     GetIndex<ColorParameter, ParameterData>(),
     GetIndex<SpectrumParameter, ParameterData>(),
     GetIndex<TextureParameter, ParameterData>()};
+
+}  // namespace
+
+ReflectorTextureMatcher::ReflectorTextureMatcher(
+    absl::string_view parameter_name, bool required,
+    const NamedTextureManager& named_texture_manager,
+    TextureManager& texture_manager, SpectrumManager& spectrum_manager,
+    ReflectorTexture default_value)
+    : ParameterMatcher(parameter_name, required, variant_indices),
+      m_named_texture_manager(named_texture_manager),
+      m_texture_manager(texture_manager),
+      m_spectrum_manager(spectrum_manager),
+      m_value(std::move(default_value)) {}
+
+const ReflectorTexture& ReflectorTextureMatcher::Get() const { return m_value; }
 
 ReflectorTextureMatcher ReflectorTextureMatcher::FromUniformReflectance(
     absl::string_view parameter_name, bool required,

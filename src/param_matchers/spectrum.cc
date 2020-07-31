@@ -5,10 +5,23 @@
 #include "src/param_matchers/spd_file.h"
 
 namespace iris {
+namespace {
 
-const size_t SpectrumMatcher::m_variant_indices[2] = {
+const size_t variant_indices[2] = {
     GetIndex<ColorParameter, ParameterData>(),
     GetIndex<SpectrumParameter, ParameterData>()};
+
+}  // namespace
+
+SpectrumMatcher::SpectrumMatcher(absl::string_view parameter_name,
+                                 bool required,
+                                 SpectrumManager& spectrum_manager,
+                                 Spectrum default_value)
+    : ParameterMatcher(parameter_name, required, variant_indices),
+      m_spectrum_manager(spectrum_manager),
+      m_value(std::move(default_value)) {}
+
+const Spectrum& SpectrumMatcher::Get() const { return m_value; }
 
 SpectrumMatcher SpectrumMatcher::FromRgb(
     absl::string_view parameter_name, bool required,

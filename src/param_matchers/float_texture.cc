@@ -1,5 +1,7 @@
 #include "src/param_matchers/float_texture.h"
 
+#include "src/common/error.h"
+
 namespace iris {
 namespace {
 
@@ -22,11 +24,30 @@ bool ValidateFloatImpl(bool inclusive, float_t minimum, float_t maximum,
   return valid;
 }
 
+const size_t variant_indices[2] = {GetIndex<FloatParameter, ParameterData>(),
+                                   GetIndex<TextureParameter, ParameterData>()};
+
 }  // namespace
 
-const size_t FloatTextureMatcher::m_variant_indices[2] = {
-    GetIndex<FloatParameter, ParameterData>(),
-    GetIndex<TextureParameter, ParameterData>()};
+FloatTextureMatcher::FloatTextureMatcher(
+    absl::string_view parameter_name, bool required, bool inclusive,
+    float_t minimum, float_t maximum,
+    const NamedTextureManager& named_texture_manager,
+    TextureManager& texture_manager, FloatTexture default_value)
+    : ParameterMatcher(parameter_name, required, variant_indices),
+      m_named_texture_manager(named_texture_manager),
+      m_texture_manager(texture_manager),
+      m_value(std::move(default_value)),
+      m_minimum(minimum),
+      m_maximum(maximum),
+      m_inclusive(inclusive) {
+  assert(!inclusive || std::isfinite(minimum));
+  assert(!inclusive || std::isfinite(maximum));
+  assert((inclusive && minimum <= maximum) ||
+         (!inclusive && minimum < maximum));
+}
+
+const FloatTexture& FloatTextureMatcher::Get() const { return m_value; }
 
 FloatTextureMatcher FloatTextureMatcher::FromValue(
     absl::string_view parameter_name, bool required, bool inclusive,

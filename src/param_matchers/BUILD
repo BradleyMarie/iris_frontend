@@ -28,6 +28,7 @@ cc_library(
     name = "integral_single",
     hdrs = ["integral_single.h"],
     deps = [
+        "//src/common:error",
         "//src/common:parameter_matcher",
     ],
 )
@@ -36,6 +37,7 @@ cc_library(
     name = "list",
     hdrs = ["list.h"],
     deps = [
+        "//src/common:error",
         "//src/common:parameter_matcher",
     ],
 )
@@ -59,6 +61,7 @@ cc_library(
     name = "single",
     hdrs = ["single.h"],
     deps = [
+        "//src/common:error",
         "//src/common:parameter_matcher",
     ],
 )

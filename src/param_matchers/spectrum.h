@@ -7,14 +7,12 @@
 
 namespace iris {
 
-class SpectrumMatcher : public ParamMatcher {
+class SpectrumMatcher : public ParameterMatcher {
  public:
   SpectrumMatcher(absl::string_view parameter_name, bool required,
-                  SpectrumManager& spectrum_manager, Spectrum default_value)
-      : ParamMatcher(parameter_name, required, m_variant_indices, 2),
-        m_spectrum_manager(spectrum_manager),
-        m_value(std::move(default_value)) {}
-  const Spectrum& Get() { return m_value; }
+                  SpectrumManager& spectrum_manager, Spectrum default_value);
+
+  const Spectrum& Get() const;
 
   static SpectrumMatcher FromRgb(absl::string_view parameter_name,
                                  bool required,

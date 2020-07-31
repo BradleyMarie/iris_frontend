@@ -142,6 +142,7 @@ cc_library(
     deps = [
         ":parameter",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:span",
     ],
 )
 
@@ -155,7 +156,6 @@ cc_library(
         ":parameter_matcher",
         ":quoted_string",
         "@com_google_absl//absl/types:optional",
-        "@com_google_absl//absl/types:span",
         "@com_google_absl//absl/strings",
     ],
 )

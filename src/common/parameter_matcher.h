@@ -3,12 +3,13 @@
 
 #include <type_traits>
 
+#include "absl/types/span.h"
 #include "absl/strings/string_view.h"
 #include "src/common/parameter.h"
 
 namespace iris {
 
-class ParamMatcher {
+class ParameterMatcher {
  public:
   bool Match(absl::string_view base_type_name,
              absl::optional<absl::string_view> type_name,
@@ -17,13 +18,8 @@ class ParamMatcher {
                 absl::optional<absl::string_view> type_name) const;
 
  protected:
-  ParamMatcher(absl::string_view parameter_name, bool required,
-               const size_t* variant_indicies, size_t num_indices)
-      : m_parameter_name(parameter_name),
-        m_indices(variant_indicies),
-        m_num_indices(num_indices),
-        m_required(required),
-        m_found(false) {}
+  ParameterMatcher(absl::string_view parameter_name, bool required,
+                   absl::Span<const size_t> variant_indices);
 
   virtual void Match(ParameterData& data) = 0;
   void NumberOfElementsError [[noreturn]] () const;
@@ -33,8 +29,7 @@ class ParamMatcher {
   absl::string_view m_parameter_name;
   absl::string_view m_base_type_name;
   absl::optional<absl::string_view> m_type_name;
-  const size_t* m_indices;
-  size_t m_num_indices;
+  absl::Span<const size_t> m_variant_indices;
   bool m_required;
   bool m_found;
 };

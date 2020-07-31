@@ -309,7 +309,7 @@ std::string ErrorTypeName(absl::string_view base_type_name,
 
 void MatchParameter(absl::string_view base_type_name,
                     absl::optional<absl::string_view> type_name,
-                    absl::Span<ParamMatcher* const> param_matchers,
+                    absl::Span<ParameterMatcher* const> param_matchers,
                     Parameter& parameter,
                     std::vector<Parameter>* unhandled_parameters) {
   bool found = false;
@@ -334,7 +334,7 @@ void MatchParameter(absl::string_view base_type_name,
 void MatchParameters(absl::string_view base_type_name,
                      absl::optional<absl::string_view> type_name,
                      Tokenizer& tokenizer,
-                     absl::Span<ParamMatcher* const> param_matchers,
+                     absl::Span<ParameterMatcher* const> param_matchers,
                      std::vector<Parameter>* unhandled_parameters) {
   for (auto parameter = ParseNextParam(tokenizer); parameter.has_value();
        parameter = ParseNextParam(tokenizer)) {
@@ -349,7 +349,7 @@ void MatchParameters(absl::string_view base_type_name,
 void MatchParameters(absl::string_view base_type_name,
                      absl::optional<absl::string_view> type_name,
                      std::vector<Parameter>& parameters,
-                     absl::Span<ParamMatcher* const> param_matchers,
+                     absl::Span<ParameterMatcher* const> param_matchers,
                      std::vector<Parameter>* unhandled_parameters) {
   for (auto& parameter : parameters) {
     MatchParameter(base_type_name, type_name, param_matchers, parameter,
@@ -417,7 +417,7 @@ absl::string_view Parameters::Type() {
 }
 
 Parameters Parameters::MatchAllowUnusedImpl(
-    absl::Span<ParamMatcher* const> param_matchers) {
+    absl::Span<ParameterMatcher* const> param_matchers) {
   assert(m_tokenizer || m_unused_parameters);
   std::vector<Parameter> unused_parameters;
   if (m_tokenizer) {
@@ -433,7 +433,7 @@ Parameters Parameters::MatchAllowUnusedImpl(
                     std::move(unused_parameters));
 }
 
-void Parameters::MatchImpl(absl::Span<ParamMatcher* const> param_matchers) {
+void Parameters::MatchImpl(absl::Span<ParameterMatcher* const> param_matchers) {
   assert(m_tokenizer || m_unused_parameters);
   if (m_tokenizer) {
     MatchParameters(m_base_type_name, m_type_name, *m_tokenizer, param_matchers,

@@ -5,6 +5,7 @@
 #include "absl/strings/str_cat.h"
 
 namespace iris {
+namespace {
 
 std::string ErrorTypeName(absl::string_view base_type_name,
                           absl::optional<absl::string_view> type_name) {
@@ -14,9 +15,19 @@ std::string ErrorTypeName(absl::string_view base_type_name,
   return absl::StrCat(*type_name, " ", base_type_name);
 }
 
-bool ParamMatcher::Match(absl::string_view base_type_name,
-                         absl::optional<absl::string_view> type_name,
-                         Parameter& parameter) {
+}  // namespace
+
+ParameterMatcher::ParameterMatcher(absl::string_view parameter_name,
+                                   bool required,
+                                   absl::Span<const size_t> variant_indices)
+    : m_parameter_name(parameter_name),
+      m_variant_indices(variant_indices),
+      m_required(required),
+      m_found(false) {}
+
+bool ParameterMatcher::Match(absl::string_view base_type_name,
+                             absl::optional<absl::string_view> type_name,
+                             Parameter& parameter) {
   if (parameter.first != m_parameter_name) {
     return false;
   }
@@ -24,8 +35,8 @@ bool ParamMatcher::Match(absl::string_view base_type_name,
   m_base_type_name = base_type_name;
   m_type_name = type_name;
 
-  for (size_t i = 0; i < m_num_indices; i++) {
-    if (parameter.second.index() != m_indices[i]) {
+  for (size_t i = 0; i < m_variant_indices.size(); i++) {
+    if (parameter.second.index() != m_variant_indices[i]) {
       continue;
     }
 
@@ -48,8 +59,9 @@ bool ParamMatcher::Match(absl::string_view base_type_name,
   exit(EXIT_FAILURE);
 }
 
-void ParamMatcher::Validate(absl::string_view base_type_name,
-                            absl::optional<absl::string_view> type_name) const {
+void ParameterMatcher::Validate(
+    absl::string_view base_type_name,
+    absl::optional<absl::string_view> type_name) const {
   if (!m_required || m_found) {
     return;
   }
@@ -60,14 +72,14 @@ void ParamMatcher::Validate(absl::string_view base_type_name,
   exit(EXIT_FAILURE);
 }
 
-void ParamMatcher::NumberOfElementsError [[noreturn]] () const {
+void ParameterMatcher::NumberOfElementsError [[noreturn]] () const {
   std::cerr << "ERROR: Wrong number of values for "
             << ErrorTypeName(m_base_type_name, m_type_name)
             << " parameter: " << m_parameter_name << std::endl;
   exit(EXIT_FAILURE);
 }
 
-void ParamMatcher::ElementRangeError [[noreturn]] () const {
+void ParameterMatcher::ElementRangeError [[noreturn]] () const {
   std::cerr << "ERROR: Out of range value for "
             << ErrorTypeName(m_base_type_name, m_type_name)
             << " parameter: " << m_parameter_name << std::endl;

@@ -1,18 +1,19 @@
 #ifndef _SRC_PARAM_MATCHER_INTEGRAL_SINGLE_
 #define _SRC_PARAM_MATCHER_INTEGRAL_SINGLE_
 
+#include "src/common/error.h"
 #include "src/common/parameter_matcher.h"
 
 namespace iris {
 
 template <typename ValueType, int Minimum, ValueType Maximum>
-class IntegralSingleValueMatcher : public ParamMatcher {
+class IntegralSingleValueMatcher : public ParameterMatcher {
  public:
   IntegralSingleValueMatcher(absl::string_view parameter_name, bool required,
                              ValueType default_value)
-      : ParamMatcher(parameter_name, required, &m_variant_type, 1),
+      : ParameterMatcher(parameter_name, required, m_variant_type),
         m_value(std::move(default_value)) {}
-  const ValueType& Get() { return m_value; }
+  const ValueType& Get() const { return m_value; }
 
  protected:
   static_assert(Minimum < Maximum);
@@ -28,15 +29,15 @@ class IntegralSingleValueMatcher : public ParamMatcher {
     m_value = static_cast<ValueType>(absl::get<IntParameter>(data).data[0]);
   }
 
-  static const size_t m_variant_type;
+  static const size_t m_variant_type[1];
   static const int m_maximum;
   ValueType m_value;
 };
 
 template <typename ValueType, int Minimum, ValueType Maximum>
-const size_t
-    IntegralSingleValueMatcher<ValueType, Minimum, Maximum>::m_variant_type =
-        GetIndex<IntParameter, ParameterData>();
+const size_t IntegralSingleValueMatcher<ValueType, Minimum,
+                                        Maximum>::m_variant_type[1] = {
+    GetIndex<IntParameter, ParameterData>()};
 
 template <typename ValueType, int Minimum, ValueType Maximum>
 const int IntegralSingleValueMatcher<ValueType, Minimum, Maximum>::m_maximum =

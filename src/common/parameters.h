@@ -28,14 +28,14 @@ class Parameters {
 
   template <typename... Args>
   Parameters MatchAllowUnused(Args&... param_matchers) {
-    std::array<ParamMatcher*, sizeof...(Args)> parameters = {
+    std::array<ParameterMatcher*, sizeof...(Args)> parameters = {
         {&param_matchers...}};
     return MatchAllowUnusedImpl(parameters);
   }
 
   template <typename... Args>
   void Match(Args&... param_matchers) {
-    std::array<ParamMatcher*, sizeof...(Args)> parameters = {
+    std::array<ParameterMatcher*, sizeof...(Args)> parameters = {
         {&param_matchers...}};
     MatchImpl(parameters);
   }
@@ -54,8 +54,8 @@ class Parameters {
              std::vector<Parameter> unused_parameters);
 
   Parameters MatchAllowUnusedImpl(
-      absl::Span<ParamMatcher* const> param_matchers);
-  void MatchImpl(absl::Span<ParamMatcher* const> param_matchers);
+      absl::Span<ParameterMatcher* const> param_matchers);
+  void MatchImpl(absl::Span<ParameterMatcher* const> param_matchers);
 
   absl::string_view m_base_type_name;
   absl::optional<absl::string_view> m_type_name;
