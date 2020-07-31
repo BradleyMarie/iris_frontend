@@ -1,12 +1,20 @@
 #include "src/common/parameters.h"
 
+#include "absl/strings/str_cat.h"
+
 namespace iris {
 namespace {
 
-const char* kInvalidTypeName = "[INVALID_TYPE_NAME]";
+std::string ErrorTypeName(absl::string_view base_type_name,
+                          absl::optional<absl::string_view> type_name) {
+  if (!type_name) {
+    return std::string(base_type_name);
+  }
+  return absl::StrCat(*type_name, " ", base_type_name);
+}
 
 void MatchParameter(absl::string_view base_type_name,
-                    absl::string_view type_name,
+                    absl::optional<absl::string_view> type_name,
                     absl::Span<ParamMatcher* const> param_matchers,
                     Parameter& parameter,
                     std::vector<Parameter>* unhandled_parameters) {
@@ -20,8 +28,8 @@ void MatchParameter(absl::string_view base_type_name,
   if (!found) {
     if (!unhandled_parameters) {
       std::cerr << "ERROR: Unrecognized or misconfigured parameter to "
-                << type_name << " " << base_type_name << ": " << parameter.first
-                << std::endl;
+                << ErrorTypeName(base_type_name, type_name) << ": "
+                << parameter.first << std::endl;
       exit(EXIT_FAILURE);
     }
 
@@ -29,10 +37,11 @@ void MatchParameter(absl::string_view base_type_name,
   }
 }
 
-void MatchParametersF(absl::string_view base_type_name,
-                      absl::string_view type_name, Tokenizer& tokenizer,
-                      absl::Span<ParamMatcher* const> param_matchers,
-                      std::vector<Parameter>* unhandled_parameters) {
+void MatchParameters(absl::string_view base_type_name,
+                     absl::optional<absl::string_view> type_name,
+                     Tokenizer& tokenizer,
+                     absl::Span<ParamMatcher* const> param_matchers,
+                     std::vector<Parameter>* unhandled_parameters) {
   for (auto parameter = ParseNextParam(tokenizer); parameter.has_value();
        parameter = ParseNextParam(tokenizer)) {
     MatchParameter(base_type_name, type_name, param_matchers, *parameter,
@@ -44,7 +53,7 @@ void MatchParametersF(absl::string_view base_type_name,
 }
 
 void MatchParameters(absl::string_view base_type_name,
-                     absl::string_view type_name,
+                     absl::optional<absl::string_view> type_name,
                      std::vector<Parameter>& parameters,
                      absl::Span<ParamMatcher* const> param_matchers,
                      std::vector<Parameter>* unhandled_parameters) {
@@ -57,6 +66,8 @@ void MatchParameters(absl::string_view base_type_name,
   }
 }
 
+const char* kInvalidTypeName = "[INVALID_TYPE_NAME]";
+
 }  // namespace
 
 Parameters::Parameters()
@@ -65,6 +76,9 @@ Parameters::Parameters()
       m_unused_parameters(std::vector<Parameter>()),
       m_tokenizer(nullptr) {}
 
+Parameters::Parameters(absl::string_view base_type_name, Tokenizer& tokenizer)
+    : m_base_type_name(base_type_name), m_tokenizer(&tokenizer) {}
+
 Parameters::Parameters(absl::string_view base_type_name,
                        absl::string_view type_name, Tokenizer& tokenizer)
     : m_base_type_name(base_type_name),
@@ -72,7 +86,7 @@ Parameters::Parameters(absl::string_view base_type_name,
       m_tokenizer(&tokenizer) {}
 
 Parameters::Parameters(absl::string_view base_type_name,
-                       absl::string_view type_name,
+                       absl::optional<absl::string_view> type_name,
                        std::vector<Parameter> unused_parameters)
     : m_base_type_name(base_type_name),
       m_type_name(type_name),
@@ -104,8 +118,8 @@ absl::string_view Parameters::BaseType() {
 }
 
 absl::string_view Parameters::Type() {
-  assert(m_type_name != kInvalidTypeName);
-  return m_type_name;
+  assert(m_type_name.has_value() && *m_type_name != kInvalidTypeName);
+  return *m_type_name;
 }
 
 Parameters Parameters::MatchAllowUnusedImpl(
@@ -113,8 +127,8 @@ Parameters Parameters::MatchAllowUnusedImpl(
   assert(m_tokenizer || m_unused_parameters);
   std::vector<Parameter> unused_parameters;
   if (m_tokenizer) {
-    MatchParametersF(m_base_type_name, m_type_name, *m_tokenizer,
-                     param_matchers, &unused_parameters);
+    MatchParameters(m_base_type_name, m_type_name, *m_tokenizer, param_matchers,
+                    &unused_parameters);
     m_tokenizer = nullptr;
   } else {
     MatchParameters(m_base_type_name, m_type_name, *m_unused_parameters,
@@ -128,8 +142,8 @@ Parameters Parameters::MatchAllowUnusedImpl(
 void Parameters::MatchImpl(absl::Span<ParamMatcher* const> param_matchers) {
   assert(m_tokenizer || m_unused_parameters);
   if (m_tokenizer) {
-    MatchParametersF(m_base_type_name, m_type_name, *m_tokenizer,
-                     param_matchers, nullptr);
+    MatchParameters(m_base_type_name, m_type_name, *m_tokenizer, param_matchers,
+                    nullptr);
     m_tokenizer = nullptr;
   } else {
     MatchParameters(m_base_type_name, m_type_name, *m_unused_parameters,

@@ -14,6 +14,7 @@ namespace iris {
 class Parameters {
  public:
   Parameters();
+  Parameters(absl::string_view base_type_name, Tokenizer& tokenizer);
   Parameters(absl::string_view base_type_name, absl::string_view type_name,
              Tokenizer& tokenizer);
   Parameters(Parameters&& other);
@@ -48,7 +49,8 @@ class Parameters {
   }
 
  private:
-  Parameters(absl::string_view base_type_name, absl::string_view type_name,
+  Parameters(absl::string_view base_type_name,
+             absl::optional<absl::string_view> type_name,
              std::vector<Parameter> unused_parameters);
 
   Parameters MatchAllowUnusedImpl(
@@ -56,7 +58,7 @@ class Parameters {
   void MatchImpl(absl::Span<ParamMatcher* const> param_matchers);
 
   absl::string_view m_base_type_name;
-  absl::string_view m_type_name;
+  absl::optional<absl::string_view> m_type_name;
   absl::optional<std::vector<Parameter>> m_unused_parameters;
   Tokenizer* m_tokenizer;
 };

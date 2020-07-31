@@ -2,13 +2,12 @@
 #define _SRC_SHAPES_PLYMESH_
 
 #include "src/common/material_factory.h"
-#include "src/common/tokenizer.h"
+#include "src/common/parameters.h"
 #include "src/shapes/result.h"
 
 namespace iris {
 
-ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
-                         Tokenizer& tokenizer, const Matrix& model_to_world,
+ShapeResult ParsePlyMesh(Parameters& parameters, const Matrix& model_to_world,
                          MaterialManager& material_manager,
                          const NamedTextureManager& named_texture_manager,
                          NormalMapManager& normal_map_manager,

@@ -32,8 +32,7 @@ bool IsUniformPositiveScaleAndTranslateOnly(const Matrix& matrix) {
 
 }  // namespace
 
-ShapeResult ParseSphere(const char* base_type_name, const char* type_name,
-                        Tokenizer& tokenizer, const Matrix& model_to_world,
+ShapeResult ParseSphere(Parameters& parameters, const Matrix& model_to_world,
                         MaterialManager& material_manager,
                         const NamedTextureManager& named_texture_manager,
                         NormalMapManager& normal_map_manager,
@@ -43,16 +42,12 @@ ShapeResult ParseSphere(const char* base_type_name, const char* type_name,
                         const EmissiveMaterial& front_emissive_material,
                         const EmissiveMaterial& back_emissive_material) {
   SingleFloatMatcher radius("radius", false, false, (float_t)0.0,
-      std::numeric_limits<float_t>::infinity(), kSphereDefaultRadius);
-
-  std::vector<Parameter> unused_parameters;
-  MatchParameters(base_type_name, type_name, tokenizer, {&radius},
-                  &unused_parameters);
-
-  auto material = material_factory.Build(
-      base_type_name, type_name, tokenizer, absl::MakeSpan(unused_parameters),
-      material_manager, named_texture_manager, normal_map_manager,
-      texture_manager, spectrum_manager);
+                            std::numeric_limits<float_t>::infinity(),
+                            kSphereDefaultRadius);
+  auto unused_parameters = parameters.MatchAllowUnused(radius);
+  auto material = material_factory(unused_parameters, material_manager,
+                                   named_texture_manager, normal_map_manager,
+                                   texture_manager, spectrum_manager);
 
   ShapeCoordinateSystem coordinate_system = ShapeCoordinateSystem::Model;
   POINT3 origin = kSphereOrigin;

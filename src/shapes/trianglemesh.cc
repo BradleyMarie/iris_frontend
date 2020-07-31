@@ -21,33 +21,31 @@ static const std::vector<int> kTriangleMeshDefaultIndices;
 
 }  // namespace
 
-ShapeResult ParseTriangleMesh(
-    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
-    const Matrix& model_to_world, MaterialManager& material_manager,
-    const NamedTextureManager& named_texture_manager,
-    NormalMapManager& normal_map_manager, TextureManager& texture_manager,
-    SpectrumManager& spectrum_manager, const MaterialFactory& material_factory,
-    const EmissiveMaterial& front_emissive_material,
-    const EmissiveMaterial& back_emissive_material) {
+ShapeResult ParseTriangleMesh(Parameters& parameters,
+                              const Matrix& model_to_world,
+                              MaterialManager& material_manager,
+                              const NamedTextureManager& named_texture_manager,
+                              NormalMapManager& normal_map_manager,
+                              TextureManager& texture_manager,
+                              SpectrumManager& spectrum_manager,
+                              const MaterialFactory& material_factory,
+                              const EmissiveMaterial& front_emissive_material,
+                              const EmissiveMaterial& back_emissive_material) {
   TriangleMeshPointListMatcher points("P", true, kTriangleMeshDefaultPoints);
   TriangleMeshIndexListMatcher int_indices("indices", true,
                                            kTriangleMeshDefaultIndices);
-
-  std::vector<Parameter> unused_parameters;
-  MatchParameters(base_type_name, type_name, tokenizer, {&points, &int_indices},
-                  &unused_parameters);
-
-  auto material = material_factory.Build(
-      base_type_name, type_name, tokenizer, absl::MakeSpan(unused_parameters),
-      material_manager, named_texture_manager, normal_map_manager,
-      texture_manager, spectrum_manager);
+  auto unused_parameters = parameters.MatchAllowUnused(points, int_indices);
+  auto material = material_factory(unused_parameters, material_manager,
+                                   named_texture_manager, normal_map_manager,
+                                   texture_manager, spectrum_manager);
 
   std::vector<size_t> indices;
   for (const auto& entry : int_indices.Get()) {
     static_assert(INT32_MAX < SIZE_MAX);
     if (entry < 0 || points.Get().size() <= (size_t)entry) {
-      std::cerr << "ERROR: Out of range value for " << type_name << " "
-                << base_type_name << " parameter: indices" << std::endl;
+      std::cerr << "ERROR: Out of range value for " << unused_parameters.Type()
+                << " " << unused_parameters.BaseType() << " parameter: indices"
+                << std::endl;
       exit(EXIT_FAILURE);
     }
     indices.push_back(entry);

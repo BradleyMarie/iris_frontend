@@ -15,7 +15,7 @@ static const uint64_t kPcgRandomDefaultOutputSequence = 0xda3e39cb94b95bdbULL;
 }  // namespace
 
 Random ParsePcg(Parameters& parameters) {
-  parameters.Ignore();
+  parameters.Match();
 
   Random result;
   ISTATUS status = PermutedCongruentialRandomAllocate(

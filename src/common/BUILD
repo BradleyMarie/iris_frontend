@@ -53,9 +53,9 @@ cc_library(
         ":material_manager",
         ":named_texture_manager",
         ":normal_map_manager",
+        ":parameters",
         ":spectrum_manager",
         ":texture_manager",
-        "//src/param_matchers:parser",
     ],
 )
 

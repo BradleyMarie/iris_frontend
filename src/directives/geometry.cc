@@ -73,6 +73,14 @@ class GraphicsStateManager {
 GraphicsStateManager::GraphicsStateManager() {
   ShaderState shader_state;
   shader_state.reverse_orientation = false;
+  shader_state.material =
+      [](Parameters& parameters, MaterialManager& material_manager,
+         const NamedTextureManager& named_texture_manager, NormalMapManager&,
+         TextureManager& texture_manager,
+         SpectrumManager& spectrum_manager) -> std::pair<Material, NormalMap> {
+    parameters.Match();
+    return std::make_pair(Material(), NormalMap());
+  };
   m_shader_state.push(shader_state);
 }
 

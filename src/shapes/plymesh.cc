@@ -623,8 +623,7 @@ PlyData ReadPlyFile(absl::string_view file_name,
 
 }  // namespace
 
-ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
-                         Tokenizer& tokenizer, const Matrix& model_to_world,
+ShapeResult ParsePlyMesh(Parameters& parameters, const Matrix& model_to_world,
                          MaterialManager& material_manager,
                          const NamedTextureManager& named_texture_manager,
                          NormalMapManager& normal_map_manager,
@@ -634,18 +633,13 @@ ShapeResult ParsePlyMesh(const char* base_type_name, const char* type_name,
                          const EmissiveMaterial& front_emissive_material,
                          const EmissiveMaterial& back_emissive_material) {
   SingleStringMatcher filename("filename", true, kPlyMeshDefaultFilename);
-
-  std::vector<Parameter> unused_parameters;
-  MatchParameters(base_type_name, type_name, tokenizer, {&filename},
-                  &unused_parameters);
-
-  auto material = material_factory.Build(
-      base_type_name, type_name, tokenizer, absl::MakeSpan(unused_parameters),
-      material_manager, named_texture_manager, normal_map_manager,
-      texture_manager, spectrum_manager);
+  auto unused_parameters = parameters.MatchAllowUnused(filename);
+  auto material = material_factory(unused_parameters, material_manager,
+                                   named_texture_manager, normal_map_manager,
+                                   texture_manager, spectrum_manager);
 
   PlyData fileData =
-      ReadPlyFile(filename.Get(), tokenizer.ResolvePath(filename.Get()));
+      ReadPlyFile(filename.Get(), parameters.ResolvePath(filename.Get()));
 
   for (auto& point : fileData.GetVertices()) {
     point = PointMatrixMultiply(model_to_world.get(), point);
