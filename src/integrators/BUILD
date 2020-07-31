@@ -22,7 +22,7 @@ cc_library(
     deps = [
         ":result",
         "//src/common:error",
-        "//src/common:tokenizer",
+        "//src/common:parameters",
         "//src/integrators/lightstrategy:parser",
         "//src/param_matchers:float_single",
         "//src/param_matchers:integral_single",

@@ -21,10 +21,10 @@ static const float_t kPathTracerDefaultRRThreshold = (float_t)1.0;
 
 }  // namespace
 
-IntegratorResult ParsePath(const char* base_type_name, const char* type_name,
-                           Tokenizer& tokenizer) {
-  SingleStringMatcher lightsamplestrategy("lightsamplestrategy", false,
-                                          "uniform");  // TODO: Set default to
+IntegratorResult ParsePath(Parameters& parameters) {
+  SingleStringMatcher lightsamplestrategy(
+      "lightsamplestrategy", false,
+      "uniform");  // TODO: Set default to spatial
   NonZeroSingleUInt8Matcher maxdepth("maxdepth", false,
                                      kPathTracerDefaultMaxDepth);
   NonZeroSingleUInt8Matcher rrminbounces("rrminbounces", false,
@@ -34,9 +34,8 @@ IntegratorResult ParsePath(const char* base_type_name, const char* type_name,
   SingleFloatMatcher rrminprobability("rrminprobability", false, true,
                                       (float_t)0.0, (float_t)1.0,
                                       kPathTracerDefaultRRMinProbability);
-  MatchParameters(base_type_name, type_name, tokenizer,
-                  {&lightsamplestrategy, &maxdepth, &rrminbounces,
-                   &rrminprobability, &rrthreshold});
+  parameters.Match(lightsamplestrategy, maxdepth, rrminbounces,
+                   rrminprobability, rrthreshold);
 
   Integrator integrator;
   ISTATUS status = PathTracerAllocate(
