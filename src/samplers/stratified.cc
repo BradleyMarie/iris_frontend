@@ -5,7 +5,6 @@
 #include "iris_camera_toolkit/grid_image_sampler.h"
 #include "src/common/error.h"
 #include "src/param_matchers/integral_single.h"
-#include "src/param_matchers/matcher.h"
 #include "src/param_matchers/single.h"
 
 namespace iris {
@@ -17,15 +16,13 @@ static const uint16_t kStratifiedSamplerDefaultYSamples = 2;
 
 }  // namespace
 
-Sampler ParseStratified(const char* base_type_name, const char* type_name,
-                        Tokenizer& tokenizer) {
+Sampler ParseStratified(Parameters& parameters) {
   SingleBoolMatcher jitter("jitter", false, kStratifiedSamplerDefaultJitter);
   NonZeroSingleUInt16Matcher xsamples("xsamples", false,
                                       kStratifiedSamplerDefaultXSamples);
   NonZeroSingleUInt16Matcher ysamples("ysamples", false,
                                       kStratifiedSamplerDefaultXSamples);
-  MatchParameters(base_type_name, type_name, tokenizer,
-                  {&jitter, &xsamples, &ysamples});
+  parameters.Match(jitter, xsamples, ysamples);
 
   Sampler result;
   ISTATUS status =

@@ -8,10 +8,9 @@ cc_library(
     hdrs = ["halton.h"],
     deps = [
         "//src/common:error",
+        "//src/common:parameters",
         "//src/common:pointer_types",
-        "//src/common:tokenizer",
         "//src/param_matchers:integral_single",
-        "//src/param_matchers:matcher",
         "@com_github_bradleymarie_iris//iris_camera_toolkit:halton_image_sampler",
     ],
 )
@@ -37,10 +36,9 @@ cc_library(
     hdrs = ["sobol.h"],
     deps = [
         "//src/common:error",
+        "//src/common:parameters",
         "//src/common:pointer_types",
-        "//src/common:tokenizer",
         "//src/param_matchers:integral_single",
-        "//src/param_matchers:matcher",
         "@com_github_bradleymarie_iris//iris_camera_toolkit:sobol_image_sampler",
     ],
 )
@@ -51,10 +49,9 @@ cc_library(
     hdrs = ["stratified.h"],
     deps = [
         "//src/common:error",
+        "//src/common:parameters",
         "//src/common:pointer_types",
-        "//src/common:tokenizer",
         "//src/param_matchers:integral_single",
-        "//src/param_matchers:matcher",
         "//src/param_matchers:single",
         "@com_github_bradleymarie_iris//iris_camera_toolkit:grid_image_sampler",
     ],

@@ -8,16 +8,15 @@
 namespace iris {
 
 Sampler ParseSampler(const char* base_type_name, Tokenizer& tokenizer) {
-  return CallDirective<Sampler, 3>(
-      base_type_name, tokenizer,
-      {std::make_pair("halton", ParseHalton),
-       std::make_pair("sobol", ParseSobol),
-       std::make_pair("stratified", ParseStratified)});
+  return CallDirective<Sampler>(base_type_name, tokenizer,
+                                {{"halton", ParseHalton},
+                                 {"sobol", ParseSobol},
+                                 {"stratified", ParseStratified}});
 }
 
 Sampler CreateDefaultSampler() {
-  Tokenizer tokenizer;
-  return ParseHalton("Unused", "Unused", tokenizer);
+  Parameters parameters;
+  return ParseHalton(parameters);
 }
 
 }  // namespace iris

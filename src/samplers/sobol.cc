@@ -5,7 +5,6 @@
 #include "iris_camera_toolkit/sobol_image_sampler.h"
 #include "src/common/error.h"
 #include "src/param_matchers/integral_single.h"
-#include "src/param_matchers/matcher.h"
 
 namespace iris {
 namespace {
@@ -14,11 +13,10 @@ static const uint16_t kSobolSamplerDefaultPixelSamples = 16;
 
 }  // namespace
 
-Sampler ParseSobol(const char* base_type_name, const char* type_name,
-                   Tokenizer& tokenizer) {
+Sampler ParseSobol(Parameters& parameters) {
   NonZeroSingleUInt16Matcher pixelsamples("pixelsamples", false,
                                           kSobolSamplerDefaultPixelSamples);
-  MatchParameters(base_type_name, type_name, tokenizer, {&pixelsamples});
+  parameters.Match(pixelsamples);
 
   Sampler result;
   ISTATUS status = SobolImageSamplerAllocate(pixelsamples.Get(),
