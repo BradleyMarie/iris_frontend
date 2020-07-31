@@ -10,7 +10,6 @@ cc_library(
         ":result",
         "//src/common:error",
         "//src/common:parameters",
-        "//src/param_matchers:matcher",
         "//src/param_matchers:single",
         "//src/param_matchers:spectrum",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:constant_emissive_material",

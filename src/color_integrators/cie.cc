@@ -4,7 +4,6 @@
 
 #include "iris_physx_toolkit/cie_color_integrator.h"
 #include "src/common/error.h"
-#include "src/param_matchers/matcher.h"
 
 namespace iris {
 

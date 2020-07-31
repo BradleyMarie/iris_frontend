@@ -10,7 +10,6 @@
 #include "rplyfile.h"
 #include "src/common/error.h"
 #include "src/common/ostream.h"
-#include "src/param_matchers/matcher.h"
 #include "src/param_matchers/single.h"
 
 namespace iris {

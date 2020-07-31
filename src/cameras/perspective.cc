@@ -5,7 +5,6 @@
 #include "iris_camera_toolkit/pinhole_camera.h"
 #include "src/common/error.h"
 #include "src/param_matchers/float_single.h"
-#include "src/param_matchers/matcher.h"
 
 namespace iris {
 namespace {

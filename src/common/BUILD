@@ -34,6 +34,16 @@ cc_library(
 )
 
 cc_library(
+    name = "flags",
+    srcs = ["flags.cc"],
+    hdrs = ["flags.h"],
+    deps = [
+        "@com_github_bradleymarie_iris//iris_advanced",
+        "@com_google_absl//absl/flags:flag",
+    ],
+)
+
+cc_library(
     name = "matrix_manager",
     srcs = ["matrix_manager.cc"],
     hdrs = ["matrix_manager.h"],
@@ -115,14 +125,38 @@ cc_library(
 )
 
 cc_library(
+    name = "parameter",
+    hdrs = ["parameter.h"],
+    deps = [
+        "@com_google_absl//absl/types:optional",
+        "@com_google_absl//absl/types:variant",
+        "@com_github_bradleymarie_iris//iris_camera",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "parameter_matcher",
+    srcs = ["parameter_matcher.cc"],
+    hdrs = ["parameter_matcher.h"],
+    deps = [
+        ":parameter",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "parameters",
     srcs = ["parameters.cc"],
     hdrs = ["parameters.h"],
     deps = [
+        ":flags",
         ":tokenizer",
-        "//src/param_matchers:matcher",
+        ":parameter_matcher",
+        ":quoted_string",
         "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:span",
+        "@com_google_absl//absl/strings",
     ],
 )
 

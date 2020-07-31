@@ -3,10 +3,10 @@
 
 #include "src/common/error.h"
 #include "src/common/named_texture_manager.h"
+#include "src/common/parameter_matcher.h"
 #include "src/common/pointer_types.h"
 #include "src/common/spectrum_manager.h"
 #include "src/common/texture_manager.h"
-#include "src/param_matchers/matcher.h"
 
 namespace iris {
 

@@ -2,7 +2,6 @@
 
 #include "iris_physx_toolkit/point_light.h"
 #include "src/common/error.h"
-#include "src/param_matchers/matcher.h"
 #include "src/param_matchers/single.h"
 #include "src/param_matchers/spectrum.h"
 

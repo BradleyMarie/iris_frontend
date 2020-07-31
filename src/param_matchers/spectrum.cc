@@ -1,7 +1,7 @@
 #include "src/param_matchers/spectrum.h"
 
 #include "absl/strings/str_join.h"
-#include "src/param_matchers/flags.h"
+#include "src/common/flags.h"
 #include "src/param_matchers/spd_file.h"
 
 namespace iris {

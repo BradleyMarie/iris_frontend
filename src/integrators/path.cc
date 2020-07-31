@@ -8,7 +8,6 @@
 #include "src/integrators/lightstrategy/parser.h"
 #include "src/param_matchers/float_single.h"
 #include "src/param_matchers/integral_single.h"
-#include "src/param_matchers/matcher.h"
 #include "src/param_matchers/single.h"
 
 namespace iris {

@@ -23,7 +23,6 @@ cc_library(
         "//src/common:error",
         "//src/common:parameters",
         "//src/common:pointer_types",
-        "//src/param_matchers:matcher",
         "@com_github_bradleymarie_iris//iris_advanced_toolkit:pcg_random",
     ],
 )

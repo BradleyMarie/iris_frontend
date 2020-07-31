@@ -10,7 +10,6 @@ cc_library(
         "//src/common:error",
         "//src/common:parameters",
         "//src/common:pointer_types",
-        "//src/param_matchers:matcher",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:cie_color_integrator",
     ],
 )

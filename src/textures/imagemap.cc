@@ -6,7 +6,6 @@
 #include "iris_physx_toolkit/png_mipmap.h"
 #include "src/param_matchers/float_single.h"
 #include "src/param_matchers/float_texture.h"
-#include "src/param_matchers/matcher.h"
 #include "src/param_matchers/reflector_texture.h"
 #include "src/param_matchers/single.h"
 

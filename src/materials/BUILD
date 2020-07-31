@@ -11,7 +11,6 @@ cc_library(
         "//src/common:named_texture_manager",
         "//src/common:parameters",
         "//src/param_matchers:float_texture",
-        "//src/param_matchers:matcher",
         "//src/param_matchers:reflector_texture",
     ],
 )
@@ -41,7 +40,6 @@ cc_library(
         "//src/common:named_texture_manager",
         "//src/common:parameters",
         "//src/param_matchers:float_texture",
-        "//src/param_matchers:matcher",
         "//src/param_matchers:reflector_texture",
         "//src/param_matchers:single",
     ],

@@ -4,13 +4,13 @@
 
 #include "src/cameras/parser.h"
 #include "src/color_integrators/parser.h"
+#include "src/common/parameters.h"
 #include "src/common/quoted_string.h"
 #include "src/directives/include.h"
 #include "src/directives/transform.h"
 #include "src/films/parser.h"
 #include "src/integrators/parser.h"
 #include "src/light_propagation/parser.h"
-#include "src/param_matchers/parser.h"
 #include "src/randoms/parser.h"
 #include "src/samplers/parser.h"
 
@@ -113,9 +113,8 @@ bool SkipDirectiveOnce(const char* base_type_name, absl::string_view token,
     exit(EXIT_FAILURE);
   }
 
-  while (ParseNextParam(tokenizer)) {
-    // Do Nothing
-  }
+  Parameters parameters(base_type_name, tokenizer);
+  parameters.Ignore();
 
   std::cerr << "WARNING: Directive " << base_type_name
             << " is not implemented and was ignored." << std::endl;

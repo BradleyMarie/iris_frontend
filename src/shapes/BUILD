@@ -36,7 +36,6 @@ cc_library(
         "//src/common:material_factory",
         "//src/common:ostream",
         "//src/common:parameters",
-        "//src/param_matchers:matcher",
         "//src/param_matchers:single",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle_mesh",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle_mesh_normal_map",
@@ -55,7 +54,6 @@ cc_library(
         "//src/common:ostream",
         "//src/common:parameters",
         "//src/param_matchers:float_single",
-        "//src/param_matchers:matcher",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:sphere",
     ],
 )
@@ -71,7 +69,6 @@ cc_library(
         "//src/common:ostream",
         "//src/common:parameters",
         "//src/param_matchers:list",
-        "//src/param_matchers:matcher",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle_mesh",
     ],
 )

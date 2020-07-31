@@ -3,21 +3,11 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 package(default_visibility = ["//src:__subpackages__"])
 
 cc_library(
-    name = "flags",
-    srcs = ["flags.cc"],
-    hdrs = ["flags.h"],
-    deps = [
-        "@com_github_bradleymarie_iris//iris_advanced",
-        "@com_google_absl//absl/flags:flag",
-    ],
-)
-
-cc_library(
     name = "float_single",
     srcs = ["float_single.cc"],
     hdrs = ["float_single.h"],
     deps = [
-        ":matcher",
+        "//src/common:parameter_matcher",
     ],
 )
 
@@ -26,9 +16,9 @@ cc_library(
     srcs = ["float_texture.cc"],
     hdrs = ["float_texture.h"],
     deps = [
-        ":matcher",
         "//src/common:error",
         "//src/common:named_texture_manager",
+        "//src/common:parameter_matcher",
         "//src/common:pointer_types",
         "//src/common:texture_manager",
     ],
@@ -38,7 +28,7 @@ cc_library(
     name = "integral_single",
     hdrs = ["integral_single.h"],
     deps = [
-        ":matcher",
+        "//src/common:parameter_matcher",
     ],
 )
 
@@ -46,32 +36,7 @@ cc_library(
     name = "list",
     hdrs = ["list.h"],
     deps = [
-        ":matcher",
-    ],
-)
-
-cc_library(
-    name = "matcher",
-    srcs = ["matcher.cc"],
-    hdrs = ["matcher.h"],
-    deps = [
-        ":parser",
-    ],
-)
-
-cc_library(
-    name = "parser",
-    srcs = ["parser.cc"],
-    hdrs = ["parser.h"],
-    deps = [
-        ":flags",
-        "//src/common:pointer_types",
-        "//src/common:quoted_string",
-        "//src/common:tokenizer",
-        "@com_github_bradleymarie_iris//iris_physx",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/types:optional",
-        "@com_google_absl//absl/types:variant",
+        "//src/common:parameter_matcher",
     ],
 )
 
@@ -80,10 +45,10 @@ cc_library(
     srcs = ["reflector_texture.cc"],
     hdrs = ["reflector_texture.h"],
     deps = [
-        ":matcher",
         ":spd_file",
         "//src/common:error",
         "//src/common:named_texture_manager",
+        "//src/common:parameter_matcher",
         "//src/common:pointer_types",
         "//src/common:spectrum_manager",
         "//src/common:texture_manager",
@@ -94,7 +59,7 @@ cc_library(
     name = "single",
     hdrs = ["single.h"],
     deps = [
-        ":matcher",
+        "//src/common:parameter_matcher",
     ],
 )
 
@@ -113,9 +78,9 @@ cc_library(
     srcs = ["spectrum.cc"],
     hdrs = ["spectrum.h"],
     deps = [
-        ":flags",
-        ":matcher",
         ":spd_file",
+        "//src/common:flags",
+        "//src/common:parameter_matcher",
         "//src/common:pointer_types",
         "//src/common:spectrum_manager",
     ],

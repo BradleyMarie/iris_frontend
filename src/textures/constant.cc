@@ -1,7 +1,6 @@
 #include "src/textures/constant.h"
 
 #include "src/param_matchers/float_texture.h"
-#include "src/param_matchers/matcher.h"
 #include "src/param_matchers/reflector_texture.h"
 
 namespace iris {

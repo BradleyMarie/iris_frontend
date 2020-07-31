@@ -5,7 +5,6 @@
 #include "src/common/error.h"
 #include "src/films/output_writers/parser.h"
 #include "src/param_matchers/integral_single.h"
-#include "src/param_matchers/matcher.h"
 #include "src/param_matchers/single.h"
 
 namespace iris {

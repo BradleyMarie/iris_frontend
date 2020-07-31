@@ -6,7 +6,6 @@
 #include "src/common/error.h"
 #include "src/common/ostream.h"
 #include "src/param_matchers/float_single.h"
-#include "src/param_matchers/matcher.h"
 
 namespace iris {
 namespace {

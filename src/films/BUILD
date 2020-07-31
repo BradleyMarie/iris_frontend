@@ -25,7 +25,6 @@ cc_library(
         "//src/common:parameters",
         "//src/films/output_writers:parser",
         "//src/param_matchers:integral_single",
-        "//src/param_matchers:matcher",
         "//src/param_matchers:single",
     ],
 )

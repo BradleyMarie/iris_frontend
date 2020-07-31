@@ -1,15 +1,13 @@
-#ifndef _SRC_PARAM_MATCHERS_PARSER_
-#define _SRC_PARAM_MATCHERS_PARSER_
+#ifndef _SRC_COMMON_PARAMETER_
+#define _SRC_COMMON_PARAMETER_
 
-#include <array>
+#include <string>
 #include <utility>
 #include <vector>
 
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
-#include "iris_physx/iris_physx.h"
-#include "src/common/pointer_types.h"
-#include "src/common/tokenizer.h"
+#include "iris_camera/iris_camera.h"
 
 namespace iris {
 
@@ -63,8 +61,6 @@ typedef absl::variant<BoolParameter, IntParameter, FloatParameter,
 
 typedef std::pair<std::string, ParameterData> Parameter;
 
-absl::optional<Parameter> ParseNextParam(Tokenizer& tokenizer);
-
 }  // namespace iris
 
-#endif  // _SRC_PARAM_MATCHERS_PARSER_
+#endif  // _SRC_COMMON_PARAMETER_

@@ -24,7 +24,6 @@ cc_library(
         "//src/common:error",
         "//src/common:parameters",
         "//src/param_matchers:float_single",
-        "//src/param_matchers:matcher",
         "@com_github_bradleymarie_iris//iris_camera_toolkit:pinhole_camera",
     ],
 )
