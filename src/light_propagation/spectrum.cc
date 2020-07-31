@@ -13,16 +13,14 @@ static const char* kSpectrumLightPropagationColorExtrapolator = "smits";
 
 }  // namespace
 
-LightPropagationResult ParseSpectrum(const char* base_type_name,
-                                     const char* type_name,
-                                     Tokenizer& tokenizer) {
+LightPropagationResult ParseSpectrum(Parameters& parameters) {
   SingleStringMatcher colorextrapolator(
       "colorextrapolator", false, kSpectrumLightPropagationColorExtrapolator);
-  MatchParameters(base_type_name, type_name, tokenizer, {&colorextrapolator});
+  parameters.Match(colorextrapolator);
 
   if (colorextrapolator.Get() != "smits") {
-    std::cerr << "ERROR: Unsupported colorextrapolator for spectrum "
-                 "LightPropagation: "
+    std::cerr << "ERROR: Unsupported colorextrapolator for "
+              << parameters.Type() << " " << parameters.BaseType() << ": "
               << colorextrapolator.Get() << std::endl;
     exit(EXIT_FAILURE);
   }

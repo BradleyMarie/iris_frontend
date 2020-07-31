@@ -8,18 +8,17 @@ namespace iris {
 
 LightPropagationResult ParseLightPropagation(const char* base_type_name,
                                              Tokenizer& tokenizer) {
-  return CallDirective<LightPropagationResult, 2>(
+  return CallDirective<LightPropagationResult>(
       base_type_name, tokenizer,
-      {std::make_pair("color", ParseColor),
-       std::make_pair("spectrum", ParseSpectrum)});
+      {{"color", ParseColor}, {"spectrum", ParseSpectrum}});
 }
 
 LightPropagationResult CreateDefaultLightPropagation(bool spectral) {
-  Tokenizer tokenizer;
+  Parameters parameters;
   if (spectral) {
-    return ParseSpectrum("Unused", "Unused", tokenizer);
+    return ParseSpectrum(parameters);
   }
-  return ParseColor("Unused", "Unused", tokenizer);
+  return ParseColor(parameters);
 }
 
 }  // namespace iris

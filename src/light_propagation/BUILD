@@ -23,7 +23,7 @@ cc_library(
     deps = [
         ":result",
         "//src/common:error",
-        "//src/common:tokenizer",
+        "//src/common:parameters",
         "//src/param_matchers:matcher",
         "//src/param_matchers:single",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:color_spectra",
@@ -46,7 +46,7 @@ cc_library(
     deps = [
         ":result",
         "//src/common:error",
-        "//src/common:tokenizer",
+        "//src/common:parameters",
         "//src/param_matchers:matcher",
         "//src/param_matchers:single",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:smits_color_extrapolator",
