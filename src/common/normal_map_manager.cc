@@ -1,7 +1,5 @@
 #include "src/common/normal_map_manager.h"
 
-#include <iostream>
-
 #include "iris_physx_toolkit/bump_map.h"
 #include "src/common/error.h"
 

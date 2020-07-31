@@ -1,7 +1,5 @@
 #include "src/films/image.h"
 
-#include <iostream>
-
 #include "src/common/error.h"
 #include "src/films/output_writers/parser.h"
 #include "src/param_matchers/integral_single.h"

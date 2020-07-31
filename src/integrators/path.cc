@@ -1,8 +1,5 @@
 #include "src/integrators/path.h"
 
-#include <algorithm>
-#include <iostream>
-
 #include "iris_physx_toolkit/path_tracer.h"
 #include "src/common/error.h"
 #include "src/integrators/lightstrategy/parser.h"

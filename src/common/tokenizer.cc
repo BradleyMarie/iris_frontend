@@ -1,6 +1,7 @@
 #include "src/common/tokenizer.h"
 
 #include <fstream>
+#include <iostream>
 #include <vector>
 
 // TODO: Make this platform independent

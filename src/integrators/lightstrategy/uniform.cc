@@ -1,7 +1,5 @@
 #include "src/integrators/lightstrategy/uniform.h"
 
-#include <iostream>
-
 #include "iris_physx_toolkit/one_light_sampler.h"
 #include "src/common/error.h"
 

@@ -1,7 +1,5 @@
 #include "src/common/material_manager.h"
 
-#include <iostream>
-
 #include "iris_physx_toolkit/matte_material.h"
 #include "iris_physx_toolkit/plastic_material.h"
 #include "src/common/error.h"

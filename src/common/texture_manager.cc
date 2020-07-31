@@ -1,7 +1,5 @@
 #include "src/common/texture_manager.h"
 
-#include <iostream>
-
 #include "iris_physx_toolkit/constant_texture.h"
 #include "iris_physx_toolkit/image_texture.h"
 #include "iris_physx_toolkit/product_texture.h"

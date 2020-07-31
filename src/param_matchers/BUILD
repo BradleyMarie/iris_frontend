@@ -71,8 +71,8 @@ cc_library(
     srcs = ["spd_file.cc"],
     hdrs = ["spd_file.h"],
     deps = [
-        "//src/common:tokenizer",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
     ],
 )
 

@@ -1,5 +1,7 @@
 #include "src/param_matchers/spectrum.h"
 
+#include <iostream>
+
 #include "absl/strings/str_join.h"
 #include "src/common/flags.h"
 #include "src/param_matchers/spd_file.h"

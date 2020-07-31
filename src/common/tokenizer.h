@@ -1,7 +1,7 @@
 #ifndef _SRC_COMMON_TOKENIZER_
 #define _SRC_COMMON_TOKENIZER_
 
-#include <iostream>
+#include <istream>
 #include <memory>
 #include <stack>
 

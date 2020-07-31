@@ -1,5 +1,6 @@
 #include "src/textures/imagemap.h"
 
+#include <iostream>
 #include <limits>
 
 #include "absl/strings/match.h"

@@ -1,7 +1,5 @@
 #include "src/color_integrators/cie.h"
 
-#include <iostream>
-
 #include "iris_physx_toolkit/cie_color_integrator.h"
 #include "src/common/error.h"
 

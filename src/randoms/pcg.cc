@@ -1,7 +1,5 @@
 #include "src/randoms/pcg.h"
 
-#include <iostream>
-
 #include "iris_advanced_toolkit/pcg_random.h"
 #include "src/common/error.h"
 

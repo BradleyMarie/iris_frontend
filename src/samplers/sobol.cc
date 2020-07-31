@@ -1,7 +1,5 @@
 #include "src/samplers/sobol.h"
 
-#include <iostream>
-
 #include "iris_camera_toolkit/sobol_image_sampler.h"
 #include "src/common/error.h"
 #include "src/param_matchers/integral_single.h"

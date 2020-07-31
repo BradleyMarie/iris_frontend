@@ -1,7 +1,5 @@
 #include "src/shapes/sphere.h"
 
-#include <iostream>
-
 #include "iris_physx_toolkit/sphere.h"
 #include "src/common/error.h"
 #include "src/common/ostream.h"

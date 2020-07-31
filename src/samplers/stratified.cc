@@ -1,7 +1,5 @@
 #include "src/samplers/stratified.h"
 
-#include <iostream>
-
 #include "iris_camera_toolkit/grid_image_sampler.h"
 #include "src/common/error.h"
 #include "src/param_matchers/integral_single.h"
