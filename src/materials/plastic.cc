@@ -22,10 +22,10 @@ MaterialFactory ParsePlastic(const char* base_type_name, const char* type_name,
                              TextureManager& texture_manager,
                              SpectrumManager& spectrum_manager) {
   ReflectorTextureMatcher kd = ReflectorTextureMatcher::FromUniformReflectance(
-      "Kd", false, tokenizer, named_texture_manager, texture_manager,
+      "Kd", false, named_texture_manager, texture_manager,
       spectrum_manager, kPlasticMaterialDefaultDiffuse);
   ReflectorTextureMatcher ks = ReflectorTextureMatcher::FromUniformReflectance(
-      "Ks", false, tokenizer, named_texture_manager, texture_manager,
+      "Ks", false, named_texture_manager, texture_manager,
       spectrum_manager, kPlasticMaterialDefaultSpecular);
   FloatTextureMatcher roughness = FloatTextureMatcher::FromValue(
       "roughness", false, true, static_cast<float_t>(0.0),
@@ -53,9 +53,9 @@ MaterialFactory ParsePlastic(const char* base_type_name, const char* type_name,
           const NamedTextureManager& named_texture_manager,
           NormalMapManager& normal_map_manager, TextureManager& texture_manager,
           SpectrumManager& spectrum_manager) -> std::pair<Material, NormalMap> {
-    ReflectorTextureMatcher kd("Kd", false, tokenizer, named_texture_manager,
+    ReflectorTextureMatcher kd("Kd", false, named_texture_manager,
                                texture_manager, spectrum_manager, default_kd);
-    ReflectorTextureMatcher ks("Ks", false, tokenizer, named_texture_manager,
+    ReflectorTextureMatcher ks("Ks", false, named_texture_manager,
                                texture_manager, spectrum_manager, default_ks);
     FloatTextureMatcher roughness(
         "roughness", false, true, static_cast<float_t>(0.0),

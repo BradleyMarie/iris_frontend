@@ -21,8 +21,7 @@ static const char* kImageMapDefaultWrap = "repeat";
 }  // namespace
 
 ReflectorTexture ParseImageMapReflector(
-    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
-    const NamedTextureManager& named_texture_manager,
+    Parameters& parameters, const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager) {
   SingleFloatMatcher u_scale(
       "uscale", false, false, -std::numeric_limits<float_t>::infinity(),
@@ -38,8 +37,7 @@ ReflectorTexture ParseImageMapReflector(
       std::numeric_limits<float_t>::infinity(), kImageMapDefaultUVDeltaValue);
   SingleStringMatcher filename("filename", true, kImageMapDefaultFilename);
   SingleStringMatcher wrap("wrap", true, kImageMapDefaultWrap);
-  MatchParameters(base_type_name, type_name, tokenizer,
-                  {&u_scale, &v_scale, &u_delta, &v_delta, &filename, &wrap});
+  parameters.Match(u_scale, v_scale, u_delta, v_delta, filename, wrap);
 
   if (!absl::EndsWith(filename.Get(), ".png")) {
     std::cerr << "ERROR: png is the only supported image format" << std::endl;
@@ -59,7 +57,7 @@ ReflectorTexture ParseImageMapReflector(
     exit(EXIT_FAILURE);
   }
 
-  std::string resolved_path = tokenizer.ResolvePath(filename.Get());
+  std::string resolved_path = parameters.ResolvePath(filename.Get());
 
   ReflectorMipmap mipmap;
   ISTATUS status =
@@ -83,8 +81,7 @@ ReflectorTexture ParseImageMapReflector(
 }
 
 FloatTexture ParseImageMapFloat(
-    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
-    const NamedTextureManager& named_texture_manager,
+    Parameters& parameters, const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager) {
   SingleFloatMatcher u_scale(
       "uscale", false, false, -std::numeric_limits<float_t>::infinity(),
@@ -100,8 +97,7 @@ FloatTexture ParseImageMapFloat(
       std::numeric_limits<float_t>::infinity(), kImageMapDefaultUVDeltaValue);
   SingleStringMatcher filename("filename", true, kImageMapDefaultFilename);
   SingleStringMatcher wrap("wrap", true, kImageMapDefaultWrap);
-  MatchParameters(base_type_name, type_name, tokenizer,
-                  {&u_scale, &v_scale, &u_delta, &v_delta, &filename, &wrap});
+  parameters.Match(u_scale, v_scale, u_delta, v_delta, filename, wrap);
 
   if (!absl::EndsWith(filename.Get(), ".png")) {
     std::cerr << "ERROR: png is the only supported image format" << std::endl;
@@ -121,7 +117,7 @@ FloatTexture ParseImageMapFloat(
     exit(EXIT_FAILURE);
   }
 
-  std::string resolved_path = tokenizer.ResolvePath(filename.Get());
+  std::string resolved_path = parameters.ResolvePath(filename.Get());
 
   FloatMipmap mipmap;
   ISTATUS status = PngFloatMipmapAllocate(resolved_path.c_str(), wrap_mode,

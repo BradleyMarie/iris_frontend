@@ -19,8 +19,8 @@ MaterialFactory ParseMatte(const char* base_type_name, const char* type_name,
                            TextureManager& texture_manager,
                            SpectrumManager& spectrum_manager) {
   ReflectorTextureMatcher kd = ReflectorTextureMatcher::FromUniformReflectance(
-      "Kd", false, tokenizer, named_texture_manager, texture_manager,
-      spectrum_manager, kMatteMaterialDefaultReflectance);
+      "Kd", false, named_texture_manager, texture_manager, spectrum_manager,
+      kMatteMaterialDefaultReflectance);
   FloatTextureMatcher sigma = FloatTextureMatcher::FromValue(
       "sigma", false, false, -std::numeric_limits<float_t>::infinity(),
       std::numeric_limits<float_t>::infinity(), named_texture_manager,
@@ -42,7 +42,7 @@ MaterialFactory ParseMatte(const char* base_type_name, const char* type_name,
           const NamedTextureManager& named_texture_manager,
           NormalMapManager& normal_map_manager, TextureManager& texture_manager,
           SpectrumManager& spectrum_manager) -> std::pair<Material, NormalMap> {
-    ReflectorTextureMatcher kd("Kd", false, tokenizer, named_texture_manager,
+    ReflectorTextureMatcher kd("Kd", false, named_texture_manager,
                                texture_manager, spectrum_manager, default_kd);
     FloatTextureMatcher sigma(
         "sigma", false, false, -std::numeric_limits<float_t>::infinity(),

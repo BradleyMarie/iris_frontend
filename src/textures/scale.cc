@@ -12,25 +12,23 @@ static const float_t kScaleTextureDefaultValue = (float_t)1.0;
 }  // namespace
 
 ReflectorTexture ParseScaleReflector(
-    const char* base_type_name, const char* type_name, Tokenizer& tokenizer,
-    const NamedTextureManager& named_texture_manager,
+    Parameters& parameters, const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager) {
   ReflectorTextureMatcher tex1 =
       ReflectorTextureMatcher::FromUniformReflectance(
-          "tex1", false, tokenizer, named_texture_manager, texture_manager,
+          "tex1", false, named_texture_manager, texture_manager,
           spectrum_manager, kScaleTextureDefaultValue);
   ReflectorTextureMatcher tex2 =
       ReflectorTextureMatcher::FromUniformReflectance(
-          "tex2", false, tokenizer, named_texture_manager, texture_manager,
+          "tex2", false, named_texture_manager, texture_manager,
           spectrum_manager, kScaleTextureDefaultValue);
-  MatchParameters(base_type_name, type_name, tokenizer, {&tex1, &tex2});
+  parameters.Match(tex1, tex2);
 
   return texture_manager.AllocateProductReflectorTexture(tex1.Get(),
                                                          tex2.Get());
 }
 
-FloatTexture ParseScaleFloat(const char* base_type_name, const char* type_name,
-                             Tokenizer& tokenizer,
+FloatTexture ParseScaleFloat(Parameters& parameters,
                              const NamedTextureManager& named_texture_manager,
                              TextureManager& texture_manager) {
   FloatTextureMatcher tex1 = FloatTextureMatcher::FromValue(
@@ -39,8 +37,7 @@ FloatTexture ParseScaleFloat(const char* base_type_name, const char* type_name,
   FloatTextureMatcher tex2 = FloatTextureMatcher::FromValue(
       "tex2", false, true, (float_t)0.0, (float_t)1.0, named_texture_manager,
       texture_manager, kScaleTextureDefaultValue);
-
-  MatchParameters(base_type_name, type_name, tokenizer, {&tex1, &tex2});
+  parameters.Match(tex1, tex2);
 
   return texture_manager.AllocateProductFloatTexture(tex1.Get(), tex2.Get());
 }

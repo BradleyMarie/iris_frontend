@@ -41,12 +41,12 @@ void ParseTexture(const char* base_type_name, Tokenizer& tokenizer,
       ParseNextQuotedString(base_type_name, tokenizer, "format");
   if (format_name == "spectrum" || format_name == "color") {
     auto reflector_texture =
-        CallDirective<ReflectorTexture, 3, const NamedTextureManager&,
+        CallDirective<ReflectorTexture, const NamedTextureManager&,
                       TextureManager&, SpectrumManager&>(
             base_type_name, tokenizer,
-            {std::make_pair("constant", ParseConstantReflector),
-             std::make_pair("imagemap", ParseImageMapReflector),
-             std::make_pair("scale", ParseScaleReflector)},
+            {{"constant", ParseConstantReflector},
+             {"imagemap", ParseImageMapReflector},
+             {"scale", ParseScaleReflector}},
             named_texture_manager, texture_manager, spectrum_manager);
     named_texture_manager.SetReflectorTexture(name, reflector_texture);
     return;
@@ -54,13 +54,12 @@ void ParseTexture(const char* base_type_name, Tokenizer& tokenizer,
 
   if (format_name == "float") {
     auto float_texture =
-        CallDirective<FloatTexture, 3, const NamedTextureManager&,
-                      TextureManager&>(
-            base_type_name, tokenizer,
-            {std::make_pair("constant", ParseConstantFloat),
-             std::make_pair("imagemap", ParseImageMapFloat),
-             std::make_pair("scale", ParseScaleFloat)},
-            named_texture_manager, texture_manager);
+        CallDirective<FloatTexture, const NamedTextureManager&,
+                      TextureManager&>(base_type_name, tokenizer,
+                                       {{"constant", ParseConstantFloat},
+                                        {"imagemap", ParseImageMapFloat},
+                                        {"scale", ParseScaleFloat}},
+                                       named_texture_manager, texture_manager);
     named_texture_manager.SetFloatTexture(name, float_texture);
     return;
   }
