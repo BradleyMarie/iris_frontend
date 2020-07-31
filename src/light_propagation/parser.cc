@@ -6,7 +6,7 @@
 
 namespace iris {
 
-LightPropagationResult ParseLightPropagation(const char* base_type_name,
+LightPropagationResult ParseLightPropagation(absl::string_view base_type_name,
                                              Tokenizer& tokenizer) {
   return CallDirective<LightPropagationResult>(
       base_type_name, tokenizer,

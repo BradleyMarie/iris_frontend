@@ -6,7 +6,7 @@
 
 namespace iris {
 
-Random ParseRandom(const char* base_type_name, Tokenizer& tokenizer);
+Random ParseRandom(absl::string_view base_type_name, Tokenizer& tokenizer);
 
 Random CreateDefaultRandom();
 

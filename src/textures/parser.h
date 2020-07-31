@@ -8,7 +8,7 @@
 
 namespace iris {
 
-void ParseTexture(const char* base_type_name, Tokenizer& tokenizer,
+void ParseTexture(absl::string_view base_type_name, Tokenizer& tokenizer,
                   NamedTextureManager& named_texture_manager,
                   TextureManager& texture_manager,
                   SpectrumManager& spectrum_manager);

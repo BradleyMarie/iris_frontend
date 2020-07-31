@@ -6,7 +6,7 @@
 
 namespace iris {
 
-ColorIntegrator ParseColorIntegrator(const char* base_type_name,
+ColorIntegrator ParseColorIntegrator(absl::string_view base_type_name,
                                      Tokenizer& tokenizer,
                                      bool spectrum_color_workaround);
 

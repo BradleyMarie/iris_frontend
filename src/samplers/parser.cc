@@ -7,7 +7,7 @@
 
 namespace iris {
 
-Sampler ParseSampler(const char* base_type_name, Tokenizer& tokenizer) {
+Sampler ParseSampler(absl::string_view base_type_name, Tokenizer& tokenizer) {
   return CallDirective<Sampler>(base_type_name, tokenizer,
                                 {{"halton", ParseHalton},
                                  {"sobol", ParseSobol},

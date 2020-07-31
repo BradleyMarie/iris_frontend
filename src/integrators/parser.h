@@ -6,7 +6,7 @@
 
 namespace iris {
 
-IntegratorResult ParseIntegrator(const char* base_type_name,
+IntegratorResult ParseIntegrator(absl::string_view base_type_name,
                                  Tokenizer& tokenizer);
 
 IntegratorResult CreateDefaultIntegrator();

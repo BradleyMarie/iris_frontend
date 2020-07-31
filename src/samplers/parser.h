@@ -6,7 +6,7 @@
 
 namespace iris {
 
-Sampler ParseSampler(const char* base_type_name, Tokenizer& tokenizer);
+Sampler ParseSampler(absl::string_view base_type_name, Tokenizer& tokenizer);
 
 Sampler CreateDefaultSampler();
 

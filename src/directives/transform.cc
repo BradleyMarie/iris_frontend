@@ -10,7 +10,7 @@ namespace iris {
 namespace {
 
 template <size_t N>
-void ParseFiniteFloats(Tokenizer& tokenizer, const char* name,
+void ParseFiniteFloats(Tokenizer& tokenizer, absl::string_view name,
                        std::array<FiniteFloatT, N>& array,
                        std::array<std::string, N>* strings = nullptr) {
   for (size_t i = 0; i < N; i++) {
@@ -35,7 +35,7 @@ void ParseFiniteFloats(Tokenizer& tokenizer, const char* name,
 }
 
 template <size_t N>
-void ParseFiniteNonZeroFloats(Tokenizer& tokenizer, const char* name,
+void ParseFiniteNonZeroFloats(Tokenizer& tokenizer, absl::string_view name,
                               std::array<FiniteNonZeroFloatT, N>& array) {
   for (size_t i = 0; i < N; i++) {
     auto token = tokenizer.Next();

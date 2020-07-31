@@ -68,9 +68,9 @@ GlobalConfig CreateGlobalConfig(
 }
 
 template <typename Result, typename... Args>
-bool CallOnce(const char* base_type_name, absl::string_view token,
+bool CallOnce(absl::string_view base_type_name, absl::string_view token,
               absl::optional<Result>& result,
-              Result (*function)(const char*, Tokenizer&, Args...),
+              Result (*function)(absl::string_view, Tokenizer&, Args...),
               Tokenizer& tokenizer, Args... args) {
   if (token != base_type_name) {
     return false;
@@ -87,8 +87,9 @@ bool CallOnce(const char* base_type_name, absl::string_view token,
   return true;
 }
 
-bool SkipDirectiveOnce(const char* base_type_name, absl::string_view token,
-                       bool called_once, Tokenizer& tokenizer) {
+bool SkipDirectiveOnce(absl::string_view base_type_name,
+                       absl::string_view token, bool called_once,
+                       Tokenizer& tokenizer) {
   if (token != base_type_name) {
     return false;
   }

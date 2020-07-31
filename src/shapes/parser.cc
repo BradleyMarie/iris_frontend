@@ -7,7 +7,7 @@
 
 namespace iris {
 
-ShapeResult ParseShape(const char* base_type_name, Tokenizer& tokenizer,
+ShapeResult ParseShape(absl::string_view base_type_name, Tokenizer& tokenizer,
                        const Matrix& model_to_world,
                        MaterialManager& material_manager,
                        const NamedTextureManager& named_texture_manager,

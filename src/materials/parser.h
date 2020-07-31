@@ -7,21 +7,22 @@
 
 namespace iris {
 
-MaterialFactory ParseMaterial(const char* base_type_name, Tokenizer& tokenizer,
+MaterialFactory ParseMaterial(absl::string_view base_type_name,
+                              Tokenizer& tokenizer,
                               const NamedTextureManager& named_texture_manager,
                               NormalMapManager& normal_map_manager,
                               TextureManager& texture_manager,
                               SpectrumManager& spectrum_manager);
 
 MaterialFactory ParseMakeNamedMaterial(
-    const char* base_type_name, Tokenizer& tokenizer,
+    absl::string_view base_type_name, Tokenizer& tokenizer,
     NamedMaterialManager& named_material_manager,
     const NamedTextureManager& named_texture_manager,
     NormalMapManager& normal_map_manager, TextureManager& texture_manager,
     SpectrumManager& spectrum_manager);
 
 MaterialFactory ParseNamedMaterial(
-    const char* base_type_name, Tokenizer& tokenizer,
+    absl::string_view base_type_name, Tokenizer& tokenizer,
     const NamedMaterialManager& named_material_manager);
 
 }  // namespace iris

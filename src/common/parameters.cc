@@ -34,7 +34,7 @@ static bool ParseQuotedTokenToBool(absl::string_view token, bool* result) {
 }
 
 template <typename Type, bool (*ParseFunc)(absl::string_view, Type*)>
-void ParseSingle(absl::string_view token, const char* lower_type_name,
+void ParseSingle(absl::string_view token, absl::string_view lower_type_name,
                  std::vector<Type>* result) {
   Type value;
   bool success = ParseFunc(token, &value);
@@ -49,8 +49,8 @@ void ParseSingle(absl::string_view token, const char* lower_type_name,
 }
 
 template <typename Type, bool (*ParseFunc)(absl::string_view, Type*)>
-void ParseLoop(Tokenizer& tokenizer, const char* type_name,
-               const char* lower_type_name, std::vector<Type>* result) {
+void ParseLoop(Tokenizer& tokenizer, absl::string_view type_name,
+               absl::string_view lower_type_name, std::vector<Type>* result) {
   for (;;) {
     auto token = tokenizer.Next();
 
@@ -69,8 +69,8 @@ void ParseLoop(Tokenizer& tokenizer, const char* type_name,
 }
 
 template <typename Type, bool (*ParseFunc)(absl::string_view, Type*)>
-std::vector<Type> ParseData(Tokenizer& tokenizer, const char* type_name,
-                            const char* lower_type_name) {
+std::vector<Type> ParseData(Tokenizer& tokenizer, absl::string_view type_name,
+                            absl::string_view lower_type_name) {
   auto token = *tokenizer.Next();
 
   std::vector<Type> result;
@@ -102,8 +102,8 @@ static BoolParameter ParseBool(Tokenizer& tokenizer) {
 template <typename Type, Type (*Create)(float_t x, float_t y, float_t z),
           bool (*Validate)(Type)>
 static std::vector<Type> ParseFloatTuple(Tokenizer& tokenizer,
-                                         const char* type_name,
-                                         const char* lower_type_name) {
+                                         absl::string_view type_name,
+                                         absl::string_view lower_type_name) {
   auto data = ParseData<float_t, absl::SimpleAtof>(tokenizer, type_name,
                                                    lower_type_name);
   if (data.size() % 3 != 0) {
@@ -360,7 +360,7 @@ void MatchParameters(absl::string_view base_type_name,
   }
 }
 
-const char* kInvalidTypeName = "[INVALID_TYPE_NAME]";
+absl::string_view kInvalidTypeName = "[INVALID_TYPE_NAME]";
 
 }  // namespace
 

@@ -6,7 +6,7 @@
 
 namespace iris {
 
-FilmResult ParseFilm(const char* base_type_name, Tokenizer& tokenizer);
+FilmResult ParseFilm(absl::string_view base_type_name, Tokenizer& tokenizer);
 
 FilmResult CreateDefaultFilm();
 

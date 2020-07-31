@@ -5,7 +5,8 @@
 
 namespace iris {
 
-CameraFactory ParseCamera(const char* base_type_name, Tokenizer& tokenizer) {
+CameraFactory ParseCamera(absl::string_view base_type_name,
+                          Tokenizer& tokenizer) {
   return CallDirective<CameraFactory>(base_type_name, tokenizer,
                                       {{"perspective", ParsePerspective}});
 }

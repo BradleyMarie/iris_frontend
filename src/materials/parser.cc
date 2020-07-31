@@ -10,7 +10,7 @@
 namespace iris {
 namespace {
 
-absl::string_view ParseNextQuotedString(const char* base_type_name,
+absl::string_view ParseNextQuotedString(absl::string_view base_type_name,
                                         Tokenizer& tokenizer,
                                         absl::string_view element_name) {
   auto token = tokenizer.Next();
@@ -30,12 +30,13 @@ absl::string_view ParseNextQuotedString(const char* base_type_name,
   return *unquoted;
 }
 
-const char* kMatteTypeName = "matte";
-const char* kPlasticTypeName = "plastic";
+absl::string_view kMatteTypeName = "matte";
+absl::string_view kPlasticTypeName = "plastic";
 
 }  // namespace
 
-MaterialFactory ParseMaterial(const char* base_type_name, Tokenizer& tokenizer,
+MaterialFactory ParseMaterial(absl::string_view base_type_name,
+                              Tokenizer& tokenizer,
                               const NamedTextureManager& named_texture_manager,
                               NormalMapManager& normal_map_manager,
                               TextureManager& texture_manager,
@@ -52,7 +53,7 @@ MaterialFactory ParseMaterial(const char* base_type_name, Tokenizer& tokenizer,
 }
 
 MaterialFactory ParseMakeNamedMaterial(
-    const char* base_type_name, Tokenizer& tokenizer,
+    absl::string_view base_type_name, Tokenizer& tokenizer,
     NamedMaterialManager& named_material_manager,
     const NamedTextureManager& named_texture_manager,
     NormalMapManager& normal_map_manager, TextureManager& texture_manager,
@@ -83,7 +84,7 @@ MaterialFactory ParseMakeNamedMaterial(
 }
 
 MaterialFactory ParseNamedMaterial(
-    const char* base_type_name, Tokenizer& tokenizer,
+    absl::string_view base_type_name, Tokenizer& tokenizer,
     const NamedMaterialManager& named_material_manager) {
   auto name = ParseNextQuotedString(base_type_name, tokenizer, "name");
   return named_material_manager.GetMaterial(name);

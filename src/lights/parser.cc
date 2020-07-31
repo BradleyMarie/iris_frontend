@@ -6,7 +6,7 @@
 
 namespace iris {
 
-Light ParseLight(const char* base_type_name, Tokenizer& tokenizer,
+Light ParseLight(absl::string_view base_type_name, Tokenizer& tokenizer,
                  SpectrumManager& spectrum_manager,
                  const Matrix& model_to_world) {
   return CallDirective<Light, SpectrumManager&, const Matrix&>(

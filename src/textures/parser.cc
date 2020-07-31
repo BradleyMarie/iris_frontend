@@ -10,7 +10,7 @@
 namespace iris {
 namespace {
 
-absl::string_view ParseNextQuotedString(const char* base_type_name,
+absl::string_view ParseNextQuotedString(absl::string_view base_type_name,
                                         Tokenizer& tokenizer,
                                         absl::string_view element_name) {
   auto token = tokenizer.Next();
@@ -32,7 +32,7 @@ absl::string_view ParseNextQuotedString(const char* base_type_name,
 
 }  // namespace
 
-void ParseTexture(const char* base_type_name, Tokenizer& tokenizer,
+void ParseTexture(absl::string_view base_type_name, Tokenizer& tokenizer,
                   NamedTextureManager& named_texture_manager,
                   TextureManager& texture_manager,
                   SpectrumManager& spectrum_manager) {

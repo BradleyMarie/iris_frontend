@@ -14,16 +14,16 @@
 namespace iris {
 
 template <typename Result, typename... Args>
-using DirectiveImpl =
-    std::function<Result(const char* base_type_name, const char* type_name,
-                         Tokenizer&, Args... args)>;
+using DirectiveImpl = std::function<Result(absl::string_view base_type_name,
+                                           absl::string_view type_name,
+                                           Tokenizer&, Args... args)>;
 
 template <typename Result, size_t NumImplementations, typename... Args>
-Result CallDirective(
-    const char* base_type_name, Tokenizer& tokenizer,
-    const std::array<std::pair<const char*, DirectiveImpl<Result, Args...>>,
-                     NumImplementations>& callbacks,
-    Args... args) {
+Result CallDirective(absl::string_view base_type_name, Tokenizer& tokenizer,
+                     const std::array<std::pair<absl::string_view,
+                                                DirectiveImpl<Result, Args...>>,
+                                      NumImplementations>& callbacks,
+                     Args... args) {
   auto token = tokenizer.Next();
   if (!token) {
     std::cerr << "ERROR: " << base_type_name << " type not specified"
