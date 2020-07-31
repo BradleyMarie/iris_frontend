@@ -16,13 +16,12 @@ static const POINT3 kPointLightDefaultFrom =
 
 }  // namespace
 
-Light ParsePoint(const char* base_type_name, const char* type_name,
-                 Tokenizer& tokenizer, SpectrumManager& spectrum_manager,
+Light ParsePoint(Parameters& parameters, SpectrumManager& spectrum_manager,
                  const Matrix& model_to_world) {
   SinglePoint3Matcher from("from", false, kPointLightDefaultFrom);
   SpectrumMatcher spectrum = SpectrumMatcher::FromRgb(
       "L", false, spectrum_manager, kPointLightDefaultL);
-  MatchParameters(base_type_name, type_name, tokenizer, {&from, &spectrum});
+  parameters.Match(from, spectrum);
 
   POINT3 world_from = PointMatrixMultiply(model_to_world.get(), from.Get());
 

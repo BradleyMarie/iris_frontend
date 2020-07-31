@@ -20,23 +20,22 @@ static const POINT3 kPointLightDefaultTo =
 
 }  // namespace
 
-Light ParseDistant(const char* base_type_name, const char* type_name,
-                   Tokenizer& tokenizer, SpectrumManager& spectrum_manager,
+Light ParseDistant(Parameters& parameters, SpectrumManager& spectrum_manager,
                    const Matrix& model_to_world) {
   SinglePoint3Matcher from("from", false, kPointLightDefaultFrom);
   SinglePoint3Matcher to("to", false, kPointLightDefaultTo);
   SpectrumMatcher spectrum = SpectrumMatcher::FromRgb(
       "L", false, spectrum_manager, kPointLightDefaultL);
-  MatchParameters(base_type_name, type_name, tokenizer,
-                  {&from, &to, &spectrum});
+  parameters.Match(from, to, spectrum);
 
   POINT3 world_from = PointMatrixMultiply(model_to_world.get(), from.Get());
   POINT3 world_to = PointMatrixMultiply(model_to_world.get(), to.Get());
   VECTOR3 world_direction = PointSubtract(world_from, world_to);
 
   if (!VectorValidate(world_direction)) {
-    std::cerr << "ERROR: Incompatible values specified for " << type_name << " "
-              << base_type_name << " parameters: from, to" << std::endl;
+    std::cerr << "ERROR: Incompatible values specified for "
+              << parameters.Type() << " " << parameters.BaseType()
+              << " parameters: from, to" << std::endl;
     exit(EXIT_FAILURE);
   }
 

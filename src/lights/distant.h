@@ -3,12 +3,11 @@
 
 #include "src/common/pointer_types.h"
 #include "src/common/spectrum_manager.h"
-#include "src/common/tokenizer.h"
+#include "src/common/parameters.h"
 
 namespace iris {
 
-Light ParseDistant(const char* base_type_name, const char* type_name,
-                   Tokenizer& tokenizer, SpectrumManager& spectrum_manager,
+Light ParseDistant(Parameters& parameters, SpectrumManager& spectrum_manager,
                    const Matrix& model_to_world);
 
 }  // namespace iris

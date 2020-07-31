@@ -8,9 +8,9 @@ cc_library(
     hdrs = ["distant.h"],
     deps = [
         "//src/common:error",
+        "//src/common:parameters",
         "//src/common:pointer_types",
         "//src/common:spectrum_manager",
-        "//src/common:tokenizer",
         "//src/param_matchers:matcher",
         "//src/param_matchers:single",
         "//src/param_matchers:spectrum",
@@ -39,9 +39,9 @@ cc_library(
     hdrs = ["point.h"],
     deps = [
         "//src/common:error",
+        "//src/common:parameters",
         "//src/common:pointer_types",
         "//src/common:spectrum_manager",
-        "//src/common:tokenizer",
         "//src/param_matchers:matcher",
         "//src/param_matchers:single",
         "//src/param_matchers:spectrum",
