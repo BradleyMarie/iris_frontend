@@ -6,13 +6,12 @@
 namespace iris {
 
 Random ParseRandom(const char* base_type_name, Tokenizer& tokenizer) {
-  return CallDirective<Random, 1>(base_type_name, tokenizer,
-                                  {std::make_pair("pcg", ParsePcg)});
+  return CallDirective<Random>(base_type_name, tokenizer, {{"pcg", ParsePcg}});
 }
 
 Random CreateDefaultRandom() {
-  Tokenizer tokenizer;
-  return ParsePcg("Unused", "Unused", tokenizer);
+  Parameters parameters;
+  return ParsePcg(parameters);
 }
 
 }  // namespace iris
