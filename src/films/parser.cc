@@ -6,13 +6,13 @@
 namespace iris {
 
 FilmResult ParseFilm(const char* base_type_name, Tokenizer& tokenizer) {
-  return CallDirective<FilmResult, 1>(base_type_name, tokenizer,
-                                      {std::make_pair("image", ParseImage)});
+  return CallDirective<FilmResult>(base_type_name, tokenizer,
+                                   {{"image", ParseImage}});
 }
 
 FilmResult CreateDefaultFilm() {
-  Tokenizer tokenizer;
-  return ParseImage("Unused", "Unused", tokenizer);
+  Parameters parameters;
+  return ParseImage(parameters);
 }
 
 }  // namespace iris

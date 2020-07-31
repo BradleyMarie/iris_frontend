@@ -16,15 +16,13 @@ static const size_t kImageFilmDefaultYResolution = 480;
 
 }  // namespace
 
-FilmResult ParseImage(const char* base_type_name, const char* type_name,
-                      Tokenizer& tokenizer) {
+FilmResult ParseImage(Parameters& parameters) {
   SingleStringMatcher filename("filename", false, GetDefaultOutputFilename());
   NonZeroSingleSizeTMatcher xresolution("xresolution", false,
                                         kImageFilmDefaultXResolution);
   NonZeroSingleSizeTMatcher yresolution("yresolution", false,
                                         kImageFilmDefaultYResolution);
-  MatchParameters(base_type_name, type_name, tokenizer,
-                  {&filename, &xresolution, &yresolution});
+  parameters.Match(filename, xresolution, yresolution);
 
   Framebuffer framebuffer;
   ISTATUS status = FramebufferAllocate(xresolution.Get(), yresolution.Get(),

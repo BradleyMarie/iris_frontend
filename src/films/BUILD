@@ -22,7 +22,7 @@ cc_library(
     deps = [
         ":result",
         "//src/common:error",
-        "//src/common:tokenizer",
+        "//src/common:parameters",
         "//src/films/output_writers:parser",
         "//src/param_matchers:integral_single",
         "//src/param_matchers:matcher",
