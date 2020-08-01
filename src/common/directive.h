@@ -49,10 +49,30 @@ class Directive {
     return implementations[type_index].second(params, args...);
   }
 
+  template <typename Result, typename... Args>
+  std::pair<std::string, Result> InvokeNamedTyped(
+      Implementations<Result, Args&...> implementations, Args&... args) {
+    absl::InlinedVector<absl::string_view, kMaxVariantsPerDirective> type_names;
+    for (const auto& entry : implementations) {
+      type_names.push_back(entry.first);
+    }
+    std::string name = ParseName();
+    auto match = MatchTyped(type_names);
+    m_tokenizer = nullptr;
+    return std::make_pair(
+        name, implementations[match.second].second(match.first, args...));
+  }
+
+  std::string SingleString(absl::string_view field_name);
+
   void Ignore();
 
  private:
   size_t Match(absl::Span<const absl::string_view> type_names);
+
+  std::string ParseName();
+  std::pair<Parameters, size_t> MatchTyped(
+      absl::Span<const absl::string_view> type_names);
 
   static constexpr size_t kMaxVariantsPerDirective = 20;
   absl::string_view m_base_type_name;

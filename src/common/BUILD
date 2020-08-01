@@ -20,6 +20,7 @@ cc_library(
         ":parameters",
         ":quoted_string",
         ":tokenizer",
+        "//src/param_matchers:single",
         "@com_google_absl//absl/container:inlined_vector",
     ],
 )

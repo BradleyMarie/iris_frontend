@@ -24,9 +24,8 @@ cc_library(
         ":matte",
         ":plastic",
         ":result",
-        "//src/common:call_directive",
+        "//src/common:directive",
         "//src/common:named_texture_manager",
-        "//src/common:tokenizer",
     ],
 )
 

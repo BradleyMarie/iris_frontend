@@ -393,6 +393,7 @@ Parameters::Parameters(Parameters&& other)
       m_unused_parameters(std::move(other.m_unused_parameters)),
       m_tokenizer(other.m_tokenizer) {
   other.m_tokenizer = nullptr;
+  other.m_unused_parameters = absl::nullopt;
 }
 
 Parameters& Parameters::operator=(Parameters&& other) {
@@ -401,6 +402,7 @@ Parameters& Parameters::operator=(Parameters&& other) {
   m_unused_parameters = std::move(other.m_unused_parameters);
   m_tokenizer = other.m_tokenizer;
   other.m_tokenizer = nullptr;
+  other.m_unused_parameters = absl::nullopt;
   return *this;
 }
 
@@ -414,6 +416,11 @@ absl::string_view Parameters::BaseType() {
 absl::string_view Parameters::Type() {
   assert(m_type_name.has_value() && *m_type_name != kInvalidTypeName);
   return *m_type_name;
+}
+
+void Parameters::SetType(absl::string_view type_name) {
+  assert(!m_type_name.has_value() && type_name != kInvalidTypeName);
+  m_type_name = type_name;
 }
 
 Parameters Parameters::MatchAllowUnusedImpl(

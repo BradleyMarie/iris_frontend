@@ -26,6 +26,8 @@ class Parameters {
   absl::string_view BaseType();
   absl::string_view Type();
 
+  void SetType(absl::string_view type_name);
+
   template <typename... Args>
   Parameters MatchAllowUnused(Args&... param_matchers) {
     std::array<ParameterMatcher*, sizeof...(Args)> parameters = {

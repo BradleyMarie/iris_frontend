@@ -250,18 +250,19 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     }
 
     if (token == "Material") {
+      Directive directive("Material", tokenizer);
       auto material = ParseMaterial(
-          "Material", tokenizer, graphics_state.GetNamedTextureManager(),
+          directive, graphics_state.GetNamedTextureManager(),
           normal_map_manager, texture_manager, spectrum_manager);
       graphics_state.SetMaterial(material);
       continue;
     }
 
     if (token == "MakeNamedMaterial") {
+      Directive directive("MakeNamedMaterial", tokenizer);
       auto name_and_material = ParseMakeNamedMaterial(
-          "MakeNamedMaterial", tokenizer,
-          graphics_state.GetNamedTextureManager(), normal_map_manager,
-          texture_manager, spectrum_manager);
+          directive, graphics_state.GetNamedTextureManager(),
+          normal_map_manager, texture_manager, spectrum_manager);
       graphics_state.GetNamedMaterialManager().SetMaterial(
           name_and_material.first, name_and_material.second);
       graphics_state.SetMaterial(name_and_material.second);
@@ -269,7 +270,8 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     }
 
     if (token == "NamedMaterial") {
-      auto name = ParseNamedMaterial("NamedMaterial", tokenizer);
+      Directive directive("NamedMaterial", tokenizer);
+      auto name = ParseNamedMaterial(directive);
       auto material =
           graphics_state.GetNamedMaterialManager().GetMaterial(name);
       graphics_state.SetMaterial(material);
