@@ -26,7 +26,6 @@ cc_library(
         ":result",
         "//src/common:directive",
         "//src/common:parameters",
-        "//src/common:tokenizer",
     ],
 )
 

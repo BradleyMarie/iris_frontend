@@ -4,7 +4,6 @@
 #include "src/area_lights/result.h"
 #include "src/common/directive.h"
 #include "src/common/spectrum_manager.h"
-#include "src/common/tokenizer.h"
 
 namespace iris {
 

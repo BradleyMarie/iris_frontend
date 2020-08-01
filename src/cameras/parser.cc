@@ -1,14 +1,17 @@
 #include "src/cameras/parser.h"
 
 #include "src/cameras/perspective.h"
-#include "src/common/call_directive.h"
 
 namespace iris {
+namespace {
 
-CameraFactory ParseCamera(absl::string_view base_type_name,
-                          Tokenizer& tokenizer) {
-  return CallDirective<CameraFactory>(base_type_name, tokenizer,
-                                      {{"perspective", ParsePerspective}});
+const Directive::Implementations<CameraFactory> kImpls = {
+    {"perspective", ParsePerspective}};
+
+}  // namespace
+
+CameraFactory ParseCamera(Directive& directive) {
+  return directive.Invoke(kImpls);
 }
 
 CameraFactory CreateDefaultCamera() {

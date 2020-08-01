@@ -87,6 +87,27 @@ bool CallOnce(absl::string_view base_type_name, absl::string_view token,
   return true;
 }
 
+template <typename Result, typename... Args>
+bool CallOnce(absl::string_view base_type_name, absl::string_view token,
+              absl::optional<Result>& result,
+              Result (*function)(Directive&, Args...),
+              Tokenizer& tokenizer, Args... args) {
+  if (token != base_type_name) {
+    return false;
+  }
+
+  if (result) {
+    std::cerr << "ERROR: Invalid " << base_type_name
+              << " specified more than once before WorldBegin" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  Directive directive(base_type_name, tokenizer);
+  result = function(directive, args...);
+
+  return true;
+}
+
 bool SkipDirectiveOnce(absl::string_view base_type_name,
                        absl::string_view token, bool called_once,
                        Tokenizer& tokenizer) {

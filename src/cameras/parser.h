@@ -2,13 +2,11 @@
 #define _SRC_CAMERAS_PARSER_
 
 #include "src/cameras/result.h"
-#include "src/common/tokenizer.h"
+#include "src/common/directive.h"
 
 namespace iris {
 
-CameraFactory ParseCamera(absl::string_view base_type_name,
-                          Tokenizer& tokenizer);
-
+CameraFactory ParseCamera(Directive& directive);
 CameraFactory CreateDefaultCamera();
 
 }  // namespace iris

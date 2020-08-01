@@ -6,8 +6,7 @@ namespace iris {
 namespace {
 
 const Directive::Implementations<AreaLightResult, SpectrumManager&> kImpls = {
-  {"diffuse", ParseDiffuse}
-};
+    {"diffuse", ParseDiffuse}};
 
 }  // namespace
 
