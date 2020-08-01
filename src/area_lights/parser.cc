@@ -4,14 +4,19 @@
 #include "src/common/directive.h"
 
 namespace iris {
+namespace {
+
+const Directive::Implementations<AreaLightResult, SpectrumManager&> kImpls = {
+  {"diffuse", ParseDiffuse}
+};
+
+}  // namespace
 
 AreaLightResult ParseAreaLight(absl::string_view base_type_name,
                                Tokenizer& tokenizer,
                                SpectrumManager& spectrum_manager) {
   Directive directive(base_type_name, tokenizer);
-  return directive.Invoke(
-      absl::MakeConstSpan({std::make_pair("diffuse", ParseDiffuse)}),
-      spectrum_manager);
+  return directive.Invoke(kImpls, spectrum_manager);
 }
 
 }  // namespace iris

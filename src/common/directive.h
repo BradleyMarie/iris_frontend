@@ -1,6 +1,9 @@
 #ifndef _SRC_COMMON_DIRECTIVE_
 #define _SRC_COMMON_DIRECTIVE_
 
+#include <map>
+
+#include "absl/container/inlined_vector.h"
 #include "absl/types/span.h"
 #include "src/common/parameters.h"
 
@@ -16,11 +19,16 @@ class Directive {
   ~Directive();
 
   template <typename Result, typename... Args>
-  Result Invoke(absl::Span<const std::pair<const char*,
-                                           Result (*)(Parameters&, Args&...)>>
-                    implementations,
+  using Implementation =
+      std::pair<absl::string_view, Result (*)(Parameters&, Args&...)>;
+
+  template <typename Result, typename... Args>
+  using Implementations = absl::Span<const Implementation<Result, Args...>>;
+
+  template <typename Result, typename... Args>
+  Result Invoke(Implementations<Result, Args...> implementations,
                 Args&... args) {
-    std::vector<absl::string_view> type_names;
+    absl::InlinedVector<absl::string_view, kMaxVariantsPerDirective> type_names;
     for (const auto& entry : implementations) {
       type_names.push_back(entry.first);
     }
@@ -32,6 +40,7 @@ class Directive {
  private:
   size_t Match(absl::Span<const absl::string_view> type_names);
 
+  static constexpr size_t kMaxVariantsPerDirective = 20;
   absl::string_view m_base_type_name;
   Tokenizer* m_tokenizer;
 };
