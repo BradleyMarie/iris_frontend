@@ -33,4 +33,28 @@ size_t Directive::Match(absl::Span<const absl::string_view> type_names) {
   exit(EXIT_FAILURE);
 }
 
+void Directive::Ignore() {
+  auto quoted_subtype = m_tokenizer->Next();
+  if (!quoted_subtype) {
+    std::cerr << "ERROR: " << m_base_type_name << " type not specified"
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  auto subtype = UnquoteToken(*quoted_subtype);
+  if (!subtype) {
+    std::cerr << "ERROR: Invalid " << m_base_type_name
+              << " specified: " << *subtype << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  Parameters parameters(m_base_type_name, *m_tokenizer);
+  parameters.Ignore();
+
+  std::cerr << "WARNING: Directive " << m_base_type_name
+            << " is not implemented and was ignored." << std::endl;
+
+  m_tokenizer = nullptr;
+}
+
 }  // namespace iris

@@ -121,25 +121,8 @@ bool SkipDirectiveOnce(absl::string_view base_type_name,
     exit(EXIT_FAILURE);
   }
 
-  auto quoted_subtype = tokenizer.Next();
-  if (!quoted_subtype) {
-    std::cerr << "ERROR: " << base_type_name << " type not specified"
-              << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  auto subtype = UnquoteToken(*quoted_subtype);
-  if (!subtype) {
-    std::cerr << "ERROR: Invalid " << base_type_name
-              << " specified: " << *subtype << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  Parameters parameters(base_type_name, tokenizer);
-  parameters.Ignore();
-
-  std::cerr << "WARNING: Directive " << base_type_name
-            << " is not implemented and was ignored." << std::endl;
+  Directive directive(base_type_name, tokenizer);
+  directive.Ignore();
 
   return true;
 }

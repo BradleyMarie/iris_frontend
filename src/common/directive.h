@@ -49,6 +49,8 @@ class Directive {
     return implementations[type_index].second(params, args...);
   }
 
+  void Ignore();
+
  private:
   size_t Match(absl::Span<const absl::string_view> type_names);
 
