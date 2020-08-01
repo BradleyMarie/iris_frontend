@@ -1,5 +1,5 @@
-#ifndef _SRC_COMMON_MATERIAL_FACTORY_
-#define _SRC_COMMON_MATERIAL_FACTORY_
+#ifndef _SRC_MATERIAL_RESULT_
+#define _SRC_MATERIAL_RESULT_
 
 #include <functional>
 
@@ -16,8 +16,8 @@ typedef std::function<std::pair<Material, NormalMap>(
     Parameters& parameters, MaterialManager& material_manager,
     const NamedTextureManager& named_texture_manager, NormalMapManager&,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager)>
-    MaterialFactory;
+    MaterialResult;
 
 }  // namespace iris
 
-#endif  // _SRC_COMMON_MATERIAL_FACTORY_
+#endif  // _SRC_MATERIAL_RESULT_

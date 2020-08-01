@@ -13,8 +13,8 @@ cc_library(
         ":sphere",
         ":trianglemesh",
         "//src/common:call_directive",
-        "//src/common:material_factory",
         "//src/common:tokenizer",
+        "//src/materials:result",
     ],
 )
 
@@ -33,9 +33,9 @@ cc_library(
     deps = [
         ":result",
         "//src/common:error",
-        "//src/common:material_factory",
         "//src/common:ostream",
         "//src/common:parameters",
+        "//src/materials:result",
         "//src/param_matchers:single",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle_mesh",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle_mesh_normal_map",
@@ -50,9 +50,9 @@ cc_library(
     deps = [
         ":result",
         "//src/common:error",
-        "//src/common:material_factory",
         "//src/common:ostream",
         "//src/common:parameters",
+        "//src/materials:result",
         "//src/param_matchers:float_single",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:sphere",
     ],
@@ -65,9 +65,9 @@ cc_library(
     deps = [
         ":result",
         "//src/common:error",
-        "//src/common:material_factory",
         "//src/common:ostream",
         "//src/common:parameters",
+        "//src/materials:result",
         "//src/param_matchers:list",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle_mesh",
     ],

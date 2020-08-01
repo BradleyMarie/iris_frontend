@@ -27,16 +27,16 @@ ShapeResult ParseTriangleMesh(Parameters& parameters,
                               NormalMapManager& normal_map_manager,
                               TextureManager& texture_manager,
                               SpectrumManager& spectrum_manager,
-                              const MaterialFactory& material_factory,
+                              const MaterialResult& material_result,
                               const EmissiveMaterial& front_emissive_material,
                               const EmissiveMaterial& back_emissive_material) {
   TriangleMeshPointListMatcher points("P", true, kTriangleMeshDefaultPoints);
   TriangleMeshIndexListMatcher int_indices("indices", true,
                                            kTriangleMeshDefaultIndices);
   auto unused_parameters = parameters.MatchAllowUnused(points, int_indices);
-  auto material = material_factory(unused_parameters, material_manager,
-                                   named_texture_manager, normal_map_manager,
-                                   texture_manager, spectrum_manager);
+  auto material = material_result(unused_parameters, material_manager,
+                                  named_texture_manager, normal_map_manager,
+                                  texture_manager, spectrum_manager);
 
   std::vector<size_t> indices;
   for (const auto& entry : int_indices.Get()) {

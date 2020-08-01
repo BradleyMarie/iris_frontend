@@ -35,14 +35,14 @@ absl::string_view kPlasticTypeName = "plastic";
 
 }  // namespace
 
-MaterialFactory ParseMaterial(absl::string_view base_type_name,
-                              Tokenizer& tokenizer,
-                              const NamedTextureManager& named_texture_manager,
-                              NormalMapManager& normal_map_manager,
-                              TextureManager& texture_manager,
-                              SpectrumManager& spectrum_manager) {
+MaterialResult ParseMaterial(absl::string_view base_type_name,
+                             Tokenizer& tokenizer,
+                             const NamedTextureManager& named_texture_manager,
+                             NormalMapManager& normal_map_manager,
+                             TextureManager& texture_manager,
+                             SpectrumManager& spectrum_manager) {
   auto result =
-      CallDirective<MaterialFactory, const NamedTextureManager&,
+      CallDirective<MaterialResult, const NamedTextureManager&,
                     NormalMapManager&, TextureManager&, SpectrumManager&>(
           base_type_name, tokenizer,
           {{kMatteTypeName, ParseMatte}, {kPlasticTypeName, ParsePlastic}},
@@ -52,7 +52,7 @@ MaterialFactory ParseMaterial(absl::string_view base_type_name,
   return result;
 }
 
-MaterialFactory ParseMakeNamedMaterial(
+MaterialResult ParseMakeNamedMaterial(
     absl::string_view base_type_name, Tokenizer& tokenizer,
     NamedMaterialManager& named_material_manager,
     const NamedTextureManager& named_texture_manager,
@@ -64,7 +64,7 @@ MaterialFactory ParseMakeNamedMaterial(
   Parameters parameters(base_type_name, tokenizer);
   auto unused_params = parameters.MatchAllowUnused(type);
 
-  MaterialFactory result;
+  MaterialResult result;
   if (type.Get() == kMatteTypeName) {
     result = ParseMatte(unused_params, named_texture_manager,
                         normal_map_manager, texture_manager, spectrum_manager);
@@ -83,7 +83,7 @@ MaterialFactory ParseMakeNamedMaterial(
   return result;
 }
 
-MaterialFactory ParseNamedMaterial(
+MaterialResult ParseNamedMaterial(
     absl::string_view base_type_name, Tokenizer& tokenizer,
     const NamedMaterialManager& named_material_manager) {
   auto name = ParseNextQuotedString(base_type_name, tokenizer, "name");

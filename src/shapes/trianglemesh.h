@@ -1,8 +1,8 @@
 #ifndef _SRC_SHAPES_TRIANGLEMESH_
 #define _SRC_SHAPES_TRIANGLEMESH_
 
-#include "src/common/material_factory.h"
 #include "src/common/parameters.h"
+#include "src/materials/result.h"
 #include "src/shapes/result.h"
 
 namespace iris {
@@ -14,7 +14,7 @@ ShapeResult ParseTriangleMesh(Parameters& parameters,
                               NormalMapManager& normal_map_manager,
                               TextureManager& texture_manager,
                               SpectrumManager& spectrum_manager,
-                              const MaterialFactory& material_factory,
+                              const MaterialResult& material_result,
                               const EmissiveMaterial& front_emissive_material,
                               const EmissiveMaterial& back_emissive_material);
 

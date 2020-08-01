@@ -35,16 +35,16 @@ ShapeResult ParseSphere(Parameters& parameters, const Matrix& model_to_world,
                         NormalMapManager& normal_map_manager,
                         TextureManager& texture_manager,
                         SpectrumManager& spectrum_manager,
-                        const MaterialFactory& material_factory,
+                        const MaterialResult& material_result,
                         const EmissiveMaterial& front_emissive_material,
                         const EmissiveMaterial& back_emissive_material) {
   SingleFloatMatcher radius("radius", false, false, (float_t)0.0,
                             std::numeric_limits<float_t>::infinity(),
                             kSphereDefaultRadius);
   auto unused_parameters = parameters.MatchAllowUnused(radius);
-  auto material = material_factory(unused_parameters, material_manager,
-                                   named_texture_manager, normal_map_manager,
-                                   texture_manager, spectrum_manager);
+  auto material = material_result(unused_parameters, material_manager,
+                                  named_texture_manager, normal_map_manager,
+                                  texture_manager, spectrum_manager);
 
   ShapeCoordinateSystem coordinate_system = ShapeCoordinateSystem::Model;
   POINT3 origin = kSphereOrigin;

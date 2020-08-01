@@ -12,11 +12,11 @@ static const FloatTexture kMatteMaterialDefaultBumpMap;
 
 }  // namespace
 
-MaterialFactory ParseMatte(Parameters& parameters,
-                           const NamedTextureManager& named_texture_manager,
-                           NormalMapManager& normal_map_manager,
-                           TextureManager& texture_manager,
-                           SpectrumManager& spectrum_manager) {
+MaterialResult ParseMatte(Parameters& parameters,
+                          const NamedTextureManager& named_texture_manager,
+                          NormalMapManager& normal_map_manager,
+                          TextureManager& texture_manager,
+                          SpectrumManager& spectrum_manager) {
   ReflectorTextureMatcher kd = ReflectorTextureMatcher::FromUniformReflectance(
       "Kd", false, named_texture_manager, texture_manager, spectrum_manager,
       kMatteMaterialDefaultReflectance);

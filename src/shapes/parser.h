@@ -1,8 +1,8 @@
 #ifndef _SRC_SHAPES_PARSER_
 #define _SRC_SHAPES_PARSER_
 
-#include "src/common/material_factory.h"
 #include "src/common/tokenizer.h"
+#include "src/materials/result.h"
 #include "src/shapes/result.h"
 
 namespace iris {
@@ -14,7 +14,7 @@ ShapeResult ParseShape(absl::string_view base_type_name, Tokenizer& tokenizer,
                        NormalMapManager& normal_map_manager,
                        TextureManager& texture_manager,
                        SpectrumManager& spectrum_manager,
-                       const MaterialFactory& material_factory,
+                       const MaterialResult& material,
                        const EmissiveMaterial& front_emissive_material,
                        const EmissiveMaterial& back_emissive_material);
 

@@ -628,14 +628,14 @@ ShapeResult ParsePlyMesh(Parameters& parameters, const Matrix& model_to_world,
                          NormalMapManager& normal_map_manager,
                          TextureManager& texture_manager,
                          SpectrumManager& spectrum_manager,
-                         const MaterialFactory& material_factory,
+                         const MaterialResult& material_result,
                          const EmissiveMaterial& front_emissive_material,
                          const EmissiveMaterial& back_emissive_material) {
   SingleStringMatcher filename("filename", true, kPlyMeshDefaultFilename);
   auto unused_parameters = parameters.MatchAllowUnused(filename);
-  auto material = material_factory(unused_parameters, material_manager,
-                                   named_texture_manager, normal_map_manager,
-                                   texture_manager, spectrum_manager);
+  auto material = material_result(unused_parameters, material_manager,
+                                  named_texture_manager, normal_map_manager,
+                                  texture_manager, spectrum_manager);
 
   PlyData fileData =
       ReadPlyFile(filename.Get(), parameters.ResolvePath(filename.Get()));

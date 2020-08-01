@@ -6,7 +6,6 @@
 
 #include "src/area_lights/parser.h"
 #include "src/common/error.h"
-#include "src/common/material_factory.h"
 #include "src/common/material_manager.h"
 #include "src/common/named_material_manager.h"
 #include "src/common/named_texture_manager.h"
@@ -40,8 +39,8 @@ class GraphicsStateManager {
   void SetEmissiveMaterials(const EmissiveMaterial& front_emissive_material,
                             const EmissiveMaterial& back_emissive_material);
 
-  const MaterialFactory& GetMaterials();
-  void SetMaterial(const MaterialFactory& material);
+  const MaterialResult& GetMaterials();
+  void SetMaterial(const MaterialResult& material);
 
   bool GetReverseOrientation() const;
   void FlipReverseOrientation();
@@ -49,7 +48,7 @@ class GraphicsStateManager {
  private:
   struct ShaderState {
     std::pair<EmissiveMaterial, EmissiveMaterial> emissive_materials;
-    MaterialFactory material;
+    MaterialResult material;
     NamedTextureManager named_texture_manager;
     NamedMaterialManager named_material_manager;
     bool reverse_orientation;
@@ -144,11 +143,11 @@ void GraphicsStateManager::SetEmissiveMaterials(
       std::make_pair(front_emissive_material, back_emissive_material);
 }
 
-const MaterialFactory& GraphicsStateManager::GetMaterials() {
+const MaterialResult& GraphicsStateManager::GetMaterials() {
   return m_shader_state.top().material;
 }
 
-void GraphicsStateManager::SetMaterial(const MaterialFactory& material) {
+void GraphicsStateManager::SetMaterial(const MaterialResult& material) {
   m_shader_state.top().material = material;
 }
 

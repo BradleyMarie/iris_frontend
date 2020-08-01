@@ -15,11 +15,11 @@ static const FloatTexture kPlasticMaterialDefaultBumpMap;
 
 }  // namespace
 
-MaterialFactory ParsePlastic(Parameters& parameters,
-                             const NamedTextureManager& named_texture_manager,
-                             NormalMapManager& normal_map_manager,
-                             TextureManager& texture_manager,
-                             SpectrumManager& spectrum_manager) {
+MaterialResult ParsePlastic(Parameters& parameters,
+                            const NamedTextureManager& named_texture_manager,
+                            NormalMapManager& normal_map_manager,
+                            TextureManager& texture_manager,
+                            SpectrumManager& spectrum_manager) {
   ReflectorTextureMatcher kd = ReflectorTextureMatcher::FromUniformReflectance(
       "Kd", false, named_texture_manager, texture_manager, spectrum_manager,
       kPlasticMaterialDefaultDiffuse);

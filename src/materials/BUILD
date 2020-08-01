@@ -7,7 +7,7 @@ cc_library(
     srcs = ["matte.cc"],
     hdrs = ["matte.h"],
     deps = [
-        "//src/common:material_factory",
+        ":result",
         "//src/common:named_texture_manager",
         "//src/common:parameters",
         "//src/param_matchers:float_texture",
@@ -23,7 +23,7 @@ cc_library(
     deps = [
         ":matte",
         ":plastic",
-        "//src/common:material_factory",
+        ":result",
         "//src/common:call_directive",
         "//src/common:named_material_manager",
         "//src/common:named_texture_manager",
@@ -36,11 +36,25 @@ cc_library(
     srcs = ["plastic.cc"],
     hdrs = ["plastic.h"],
     deps = [
-        "//src/common:material_factory",
+        ":result",
         "//src/common:named_texture_manager",
         "//src/common:parameters",
         "//src/param_matchers:float_texture",
         "//src/param_matchers:reflector_texture",
         "//src/param_matchers:single",
+    ],
+)
+
+cc_library(
+    name = "result",
+    hdrs = ["result.h"],
+    visibility = ["//src:__subpackages__"],
+    deps = [
+        "//src/common:material_manager",
+        "//src/common:named_texture_manager",
+        "//src/common:normal_map_manager",
+        "//src/common:parameters",
+        "//src/common:spectrum_manager",
+        "//src/common:texture_manager",
     ],
 )
