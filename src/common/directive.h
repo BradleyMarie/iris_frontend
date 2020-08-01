@@ -34,6 +34,7 @@ class Directive {
     }
     size_t type_index = Match(type_names);
     Parameters params(m_base_type_name, type_names[type_index], *m_tokenizer);
+    m_tokenizer = nullptr;
     return implementations[type_index].second(params, args...);
   }
 
