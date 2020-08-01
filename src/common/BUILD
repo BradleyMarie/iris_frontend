@@ -6,7 +6,17 @@ cc_library(
     name = "call_directive",
     hdrs = ["call_directive.h"],
     deps = [
-        ":matrix_manager",
+        ":parameters",
+        ":quoted_string",
+        ":tokenizer",
+    ],
+)
+
+cc_library(
+    name = "directive",
+    hdrs = ["directive.h"],
+    srcs = ["directive.cc"],
+    deps = [
         ":parameters",
         ":quoted_string",
         ":tokenizer",
