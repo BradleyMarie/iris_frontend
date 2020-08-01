@@ -1,16 +1,18 @@
 #include "src/light_propagation/parser.h"
 
-#include "src/common/call_directive.h"
 #include "src/light_propagation/color.h"
 #include "src/light_propagation/spectrum.h"
 
 namespace iris {
+namespace {
 
-LightPropagationResult ParseLightPropagation(absl::string_view base_type_name,
-                                             Tokenizer& tokenizer) {
-  return CallDirective<LightPropagationResult>(
-      base_type_name, tokenizer,
-      {{"color", ParseColor}, {"spectrum", ParseSpectrum}});
+const Directive::Implementations<LightPropagationResult> kImpls = {
+    {"color", ParseColor}, {"spectrum", ParseSpectrum}};
+
+}  // namespace
+
+LightPropagationResult ParseLightPropagation(Directive& directive) {
+  return directive.Invoke(kImpls);
 }
 
 LightPropagationResult CreateDefaultLightPropagation(bool spectral) {

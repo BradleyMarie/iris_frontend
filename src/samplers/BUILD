@@ -24,9 +24,7 @@ cc_library(
         ":halton",
         ":sobol",
         ":stratified",
-        "//src/common:call_directive",
-        "//src/common:pointer_types",
-        "//src/common:tokenizer",
+        "//src/common:directive",
     ],
 )
 

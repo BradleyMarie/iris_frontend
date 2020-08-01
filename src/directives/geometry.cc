@@ -242,7 +242,8 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     }
 
     if (token == "LightSource") {
-      auto light = ParseLight("LightSource", tokenizer, spectrum_manager,
+      Directive directive("LightSource", tokenizer);
+      auto light = ParseLight(directive, spectrum_manager,
                               matrix_manager.GetCurrent().first);
       scene_builder.AddLight(light);
       continue;
@@ -279,8 +280,9 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
       auto model_to_world = matrix_manager.GetCurrent().first;
       auto material = graphics_state.GetMaterials();
       auto emissive_materials = graphics_state.GetEmissiveMaterials();
+      Directive directive("Shape", tokenizer);
       auto shape_result = ParseShape(
-          "Shape", tokenizer, model_to_world, material_manager,
+          directive, model_to_world, material_manager,
           graphics_state.GetNamedTextureManager(), normal_map_manager,
           texture_manager, spectrum_manager, material, emissive_materials.first,
           emissive_materials.second);

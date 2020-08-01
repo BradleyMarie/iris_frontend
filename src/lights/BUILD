@@ -25,10 +25,8 @@ cc_library(
     deps = [
         ":distant",
         ":point",
-        "//src/common:call_directive",
-        "//src/common:pointer_types",
+        "//src/common:directive",
         "//src/common:spectrum_manager",
-        "//src/common:tokenizer",
     ],
 )
 

@@ -11,8 +11,7 @@ cc_library(
         ":color",
         ":result",
         ":spectrum",
-        "//src/common:call_directive",
-        "//src/common:tokenizer",
+        "//src/common:directive",
     ],
 )
 

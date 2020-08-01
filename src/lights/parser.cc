@@ -1,18 +1,19 @@
 #include "src/lights/parser.h"
 
-#include "src/common/call_directive.h"
 #include "src/lights/distant.h"
 #include "src/lights/point.h"
 
 namespace iris {
+namespace {
 
-Light ParseLight(absl::string_view base_type_name, Tokenizer& tokenizer,
-                 SpectrumManager& spectrum_manager,
+const Directive::Implementations<Light, SpectrumManager&, const Matrix&>
+    kImpls = {{"point", ParsePoint}, {"distant", ParseDistant}};
+
+}  // namespace
+
+Light ParseLight(Directive& directive, SpectrumManager& spectrum_manager,
                  const Matrix& model_to_world) {
-  return CallDirective<Light, SpectrumManager&, const Matrix&>(
-      base_type_name, tokenizer,
-      {{"point", ParsePoint}, {"distant", ParseDistant}}, spectrum_manager,
-      model_to_world);
+  return directive.Invoke(kImpls, spectrum_manager, model_to_world);
 }
 
 }  // namespace iris

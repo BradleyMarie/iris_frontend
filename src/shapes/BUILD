@@ -12,8 +12,7 @@ cc_library(
         ":result",
         ":sphere",
         ":trianglemesh",
-        "//src/common:call_directive",
-        "//src/common:tokenizer",
+        "//src/common:directive",
         "//src/materials:result",
     ],
 )

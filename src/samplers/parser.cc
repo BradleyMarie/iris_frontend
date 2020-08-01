@@ -1,18 +1,20 @@
 #include "src/samplers/parser.h"
 
-#include "src/common/call_directive.h"
 #include "src/samplers/halton.h"
 #include "src/samplers/sobol.h"
 #include "src/samplers/stratified.h"
 
 namespace iris {
+namespace {
 
-Sampler ParseSampler(absl::string_view base_type_name, Tokenizer& tokenizer) {
-  return CallDirective<Sampler>(base_type_name, tokenizer,
-                                {{"halton", ParseHalton},
-                                 {"sobol", ParseSobol},
-                                 {"stratified", ParseStratified}});
-}
+const Directive::Implementations<Sampler> kImpls = {
+    {"halton", ParseHalton},
+    {"sobol", ParseSobol},
+    {"stratified", ParseStratified}};
+
+}  // namespace
+
+Sampler ParseSampler(Directive& directive) { return directive.Invoke(kImpls); }
 
 Sampler CreateDefaultSampler() {
   Parameters parameters;

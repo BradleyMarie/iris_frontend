@@ -1,12 +1,16 @@
 #include "src/randoms/parser.h"
 
-#include "src/common/call_directive.h"
 #include "src/randoms/pcg.h"
 
 namespace iris {
+namespace {
 
-Random ParseRandom(absl::string_view base_type_name, Tokenizer& tokenizer) {
-  return CallDirective<Random>(base_type_name, tokenizer, {{"pcg", ParsePcg}});
+const Directive::Implementations<Random> kImpls = {{"pcg", ParsePcg}};
+
+}  // namespace
+
+Random ParseRandom(Directive& directive) {
+  return directive.Invoke(kImpls);
 }
 
 Random CreateDefaultRandom() {

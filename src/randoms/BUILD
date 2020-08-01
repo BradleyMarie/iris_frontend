@@ -9,9 +9,8 @@ cc_library(
     visibility = ["//src:__subpackages__"],
     deps = [
         ":pcg",
-        "//src/common:call_directive",
+        "//src/common:directive",
         "//src/common:pointer_types",
-        "//src/common:tokenizer",
     ],
 )
 

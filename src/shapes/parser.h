@@ -1,14 +1,13 @@
 #ifndef _SRC_SHAPES_PARSER_
 #define _SRC_SHAPES_PARSER_
 
-#include "src/common/tokenizer.h"
+#include "src/common/directive.h"
 #include "src/materials/result.h"
 #include "src/shapes/result.h"
 
 namespace iris {
 
-ShapeResult ParseShape(absl::string_view base_type_name, Tokenizer& tokenizer,
-                       const Matrix& model_to_world,
+ShapeResult ParseShape(Directive& directive, const Matrix& model_to_world,
                        MaterialManager& material_manager,
                        const NamedTextureManager& named_texture_manager,
                        NormalMapManager& normal_map_manager,
