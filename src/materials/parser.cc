@@ -52,9 +52,8 @@ MaterialResult ParseMaterial(absl::string_view base_type_name,
   return result;
 }
 
-MaterialResult ParseMakeNamedMaterial(
+std::pair<std::string, MaterialResult> ParseMakeNamedMaterial(
     absl::string_view base_type_name, Tokenizer& tokenizer,
-    NamedMaterialManager& named_material_manager,
     const NamedTextureManager& named_texture_manager,
     NormalMapManager& normal_map_manager, TextureManager& texture_manager,
     SpectrumManager& spectrum_manager) {
@@ -78,16 +77,12 @@ MaterialResult ParseMakeNamedMaterial(
     exit(EXIT_FAILURE);
   }
 
-  named_material_manager.SetMaterial(name, result);
-
-  return result;
+  return std::make_pair(name, result);
 }
 
-MaterialResult ParseNamedMaterial(
-    absl::string_view base_type_name, Tokenizer& tokenizer,
-    const NamedMaterialManager& named_material_manager) {
-  auto name = ParseNextQuotedString(base_type_name, tokenizer, "name");
-  return named_material_manager.GetMaterial(name);
+std::string ParseNamedMaterial(
+    absl::string_view base_type_name, Tokenizer& tokenizer) {
+  return std::string(ParseNextQuotedString(base_type_name, tokenizer, "name"));
 }
 
 }  // namespace iris

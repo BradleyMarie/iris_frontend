@@ -31,12 +31,12 @@ cc_library(
     hdrs = ["geometry.h"],
     deps = [
         ":include",
+        ":named_material_manager",
         ":scene_builder",
         ":transform",
         "//src/area_lights:parser",
         "//src/common:error",
         "//src/common:matrix_manager",
-        "//src/common:named_material_manager",
         "//src/common:named_texture_manager",
         "//src/common:normal_map_manager",
         "//src/common:pointer_types",
@@ -56,6 +56,18 @@ cc_library(
     deps = [
         "//src/common:quoted_string",
         "//src/common:tokenizer",
+    ],
+)
+
+cc_library(
+    name = "named_material_manager",
+    srcs = ["named_material_manager.cc"],
+    hdrs = ["named_material_manager.h"],
+    deps = [
+        "//src/common:pointer_types",
+        "//src/materials:result",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings",
     ],
 )
 

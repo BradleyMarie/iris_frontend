@@ -1,4 +1,4 @@
-#include "src/common/named_material_manager.h"
+#include "src/directives/named_material_manager.h"
 
 #include <iostream>
 

@@ -1,7 +1,6 @@
 #ifndef _SRC_MATERIALS_PARSER_
 #define _SRC_MATERIALS_PARSER_
 
-#include "src/common/named_material_manager.h"
 #include "src/common/tokenizer.h"
 #include "src/materials/result.h"
 
@@ -14,16 +13,14 @@ MaterialResult ParseMaterial(absl::string_view base_type_name,
                              TextureManager& texture_manager,
                              SpectrumManager& spectrum_manager);
 
-MaterialResult ParseMakeNamedMaterial(
+std::pair<std::string, MaterialResult> ParseMakeNamedMaterial(
     absl::string_view base_type_name, Tokenizer& tokenizer,
-    NamedMaterialManager& named_material_manager,
     const NamedTextureManager& named_texture_manager,
     NormalMapManager& normal_map_manager, TextureManager& texture_manager,
     SpectrumManager& spectrum_manager);
 
-MaterialResult ParseNamedMaterial(
-    absl::string_view base_type_name, Tokenizer& tokenizer,
-    const NamedMaterialManager& named_material_manager);
+std::string ParseNamedMaterial(absl::string_view base_type_name,
+                               Tokenizer& tokenizer);
 
 }  // namespace iris
 

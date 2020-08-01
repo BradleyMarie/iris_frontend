@@ -7,11 +7,11 @@
 #include "src/area_lights/parser.h"
 #include "src/common/error.h"
 #include "src/common/material_manager.h"
-#include "src/common/named_material_manager.h"
 #include "src/common/named_texture_manager.h"
 #include "src/common/normal_map_manager.h"
 #include "src/common/texture_manager.h"
 #include "src/directives/include.h"
+#include "src/directives/named_material_manager.h"
 #include "src/directives/scene_builder.h"
 #include "src/directives/transform.h"
 #include "src/lights/parser.h"
@@ -257,18 +257,20 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     }
 
     if (token == "MakeNamedMaterial") {
-      auto material = ParseMakeNamedMaterial(
+      auto name_and_material = ParseMakeNamedMaterial(
           "MakeNamedMaterial", tokenizer,
-          graphics_state.GetNamedMaterialManager(),
           graphics_state.GetNamedTextureManager(), normal_map_manager,
           texture_manager, spectrum_manager);
-      graphics_state.SetMaterial(material);
+      graphics_state.GetNamedMaterialManager().SetMaterial(
+          name_and_material.first, name_and_material.second);
+      graphics_state.SetMaterial(name_and_material.second);
       continue;
     }
 
     if (token == "NamedMaterial") {
-      auto material = ParseNamedMaterial(
-          "NamedMaterial", tokenizer, graphics_state.GetNamedMaterialManager());
+      auto name = ParseNamedMaterial("NamedMaterial", tokenizer);
+      auto material =
+          graphics_state.GetNamedMaterialManager().GetMaterial(name);
       graphics_state.SetMaterial(material);
       continue;
     }

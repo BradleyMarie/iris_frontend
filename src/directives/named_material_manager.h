@@ -1,5 +1,5 @@
-#ifndef _SRC_COMMON_NAMED_MATERIAL_MANAGER_
-#define _SRC_COMMON_NAMED_MATERIAL_MANAGER_
+#ifndef _SRC_DIRECTIVES_NAMED_MATERIAL_MANAGER_
+#define _SRC_DIRECTIVES_NAMED_MATERIAL_MANAGER_
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/string_view.h"
@@ -19,4 +19,4 @@ class NamedMaterialManager {
 
 }  // namespace iris
 
-#endif  // _SRC_COMMON_NAMED_MATERIAL_MANAGER_
+#endif  // _SRC_DIRECTIVES_NAMED_MATERIAL_MANAGER_

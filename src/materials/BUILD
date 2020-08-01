@@ -25,7 +25,6 @@ cc_library(
         ":plastic",
         ":result",
         "//src/common:call_directive",
-        "//src/common:named_material_manager",
         "//src/common:named_texture_manager",
         "//src/common:tokenizer",
     ],
