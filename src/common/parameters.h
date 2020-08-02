@@ -14,8 +14,6 @@ namespace iris {
 class Parameters {
  public:
   Parameters();
-  Parameters(absl::string_view base_type_name, absl::string_view type_name,
-             Tokenizer& tokenizer);
   Parameters(Parameters&& other);
   Parameters& operator=(Parameters&& other);
   Parameters(const Parameters&) = delete;
@@ -49,6 +47,8 @@ class Parameters {
 
  private:
   Parameters(absl::string_view base_type_name, Tokenizer& tokenizer);
+  Parameters(absl::string_view base_type_name, absl::string_view type_name,
+             Tokenizer& tokenizer);
   Parameters(absl::string_view base_type_name,
              absl::optional<absl::string_view> type_name,
              std::vector<Parameter> unused_parameters);

@@ -316,9 +316,9 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     }
 
     if (token == "Texture") {
-      ParseTexture("Texture", tokenizer,
-                   graphics_state.GetNamedTextureManager(), texture_manager,
-                   spectrum_manager);
+      Directive directive("Texture", tokenizer);
+      ParseTexture(directive, graphics_state.GetNamedTextureManager(),
+                   texture_manager, spectrum_manager);
       continue;
     }
 

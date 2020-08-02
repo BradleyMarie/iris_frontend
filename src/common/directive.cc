@@ -9,10 +9,9 @@
 namespace iris {
 namespace {
 
-std::string ParseNextQuotedString(absl::string_view base_type_name,
-                                  Tokenizer& tokenizer,
-                                  absl::string_view element_name) {
-  auto token = tokenizer.Next();
+absl::string_view ParseNextQuotedString(absl::string_view base_type_name,
+                                        absl::optional<absl::string_view> token,
+                                        absl::string_view element_name) {
   if (!token) {
     std::cerr << "ERROR: " << base_type_name << " " << element_name
               << " not specified" << std::endl;
@@ -26,7 +25,14 @@ std::string ParseNextQuotedString(absl::string_view base_type_name,
     exit(EXIT_FAILURE);
   }
 
-  return std::string(*unquoted);
+  return *unquoted;
+}
+
+std::string ParseNextQuotedStringAndCopy(
+    absl::string_view base_type_name, absl::optional<absl::string_view> token,
+    absl::string_view element_name) {
+  auto result = ParseNextQuotedString(base_type_name, token, element_name);
+  return std::string(result);
 }
 
 size_t MatchType(absl::Span<const absl::string_view> type_names,
@@ -51,30 +57,30 @@ size_t MatchType(absl::Span<const absl::string_view> type_names,
 }  // namespace
 
 Directive::Directive(absl::string_view base_type_name, Tokenizer& tokenizer)
-    : m_base_type_name(base_type_name), m_tokenizer(&tokenizer) {}
+    : m_base_type_name(base_type_name), m_tokenizer(&tokenizer) {
+  m_first_token = m_tokenizer->Next();
+}
 
 Directive::~Directive() { assert(!m_tokenizer); }
 
 size_t Directive::Match(absl::Span<const absl::string_view> type_names) {
-  auto token = m_tokenizer->Next();
-  if (!token) {
+  if (!m_first_token) {
     std::cerr << "ERROR: " << m_base_type_name << " type not specified"
               << std::endl;
     exit(EXIT_FAILURE);
   }
 
-  return MatchType(type_names, m_base_type_name, *token, true);
+  return MatchType(type_names, m_base_type_name, *m_first_token, true);
 }
 
 void Directive::Ignore() {
-  auto quoted_subtype = m_tokenizer->Next();
-  if (!quoted_subtype) {
+  if (!m_first_token) {
     std::cerr << "ERROR: " << m_base_type_name << " type not specified"
               << std::endl;
     exit(EXIT_FAILURE);
   }
 
-  auto subtype = UnquoteToken(*quoted_subtype);
+  auto subtype = UnquoteToken(*m_first_token);
   if (!subtype) {
     std::cerr << "ERROR: Invalid " << m_base_type_name
               << " specified: " << *subtype << std::endl;
@@ -90,14 +96,38 @@ void Directive::Ignore() {
   m_tokenizer = nullptr;
 }
 
+void Directive::FormatError [[noreturn]] () {
+  auto format = m_tokenizer->Next();
+  auto format_name = ParseNextQuotedString(m_base_type_name, format, "format");
+  std::cerr << "ERROR: Invalid " << m_base_type_name
+            << " format specified: " << format_name << std::endl;
+  exit(EXIT_FAILURE);
+}
+
 std::string Directive::SingleString(absl::string_view field_name) {
-  auto str = ParseNextQuotedString(m_base_type_name, *m_tokenizer, field_name);
+  auto result =
+      ParseNextQuotedStringAndCopy(m_base_type_name, m_first_token, field_name);
   m_tokenizer = nullptr;
-  return str;
+  return result;
 }
 
 std::string Directive::ParseName() {
-  return ParseNextQuotedString(m_base_type_name, *m_tokenizer, "name");
+  if (m_name.has_value()) {
+    return std::move(*m_name);
+  }
+  return ParseNextQuotedStringAndCopy(m_base_type_name, m_first_token, "name");
+}
+
+bool Directive::MatchesFormat(absl::string_view type_name) {
+  auto format = m_tokenizer->Peek();
+  auto unquoted = ParseNextQuotedString(m_base_type_name, format, "format");
+  if (type_name != unquoted) {
+    return false;
+  }
+  m_name.emplace(*m_first_token);
+  m_tokenizer->Next();
+  m_first_token = absl::nullopt;
+  return true;
 }
 
 std::pair<Parameters, size_t> Directive::MatchTyped(

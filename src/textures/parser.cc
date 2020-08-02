@@ -1,8 +1,5 @@
 #include "src/textures/parser.h"
 
-#include <iostream>
-
-#include "src/common/call_directive.h"
 #include "src/textures/constant.h"
 #include "src/textures/imagemap.h"
 #include "src/textures/scale.h"
@@ -10,63 +7,53 @@
 namespace iris {
 namespace {
 
-absl::string_view ParseNextQuotedString(absl::string_view base_type_name,
-                                        Tokenizer& tokenizer,
-                                        absl::string_view element_name) {
-  auto token = tokenizer.Next();
-  if (!token) {
-    std::cerr << "ERROR: " << base_type_name << " " << element_name
-              << " not specified" << std::endl;
-    exit(EXIT_FAILURE);
-  }
+const Directive::Implementations<ReflectorTexture, const NamedTextureManager&,
+                                 TextureManager&, SpectrumManager&>
+    kReflectorImpls = {{"constant", ParseConstantReflector},
+                       {"imagemap", ParseImageMapReflector},
+                       {"scale", ParseScaleReflector}};
 
-  auto unquoted = UnquoteToken(*token);
-  if (!unquoted) {
-    std::cerr << "ERROR: Invalid " << base_type_name << " " << element_name
-              << " specified: " << *token << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  return *unquoted;
-}
+const Directive::Implementations<FloatTexture, const NamedTextureManager&,
+                                 TextureManager&>
+    kFloatImpls = {{"constant", ParseConstantFloat},
+                   {"imagemap", ParseImageMapFloat},
+                   {"scale", ParseScaleFloat}};
 
 }  // namespace
 
-void ParseTexture(absl::string_view base_type_name, Tokenizer& tokenizer,
+void ParseTexture(Directive& directive,
                   NamedTextureManager& named_texture_manager,
                   TextureManager& texture_manager,
                   SpectrumManager& spectrum_manager) {
-  std::string name(ParseNextQuotedString(base_type_name, tokenizer, "name"));
-  absl::string_view format_name =
-      ParseNextQuotedString(base_type_name, tokenizer, "format");
-  if (format_name == "spectrum" || format_name == "color") {
-    auto reflector_texture =
-        CallDirective<ReflectorTexture, const NamedTextureManager&,
-                      TextureManager&, SpectrumManager&>(
-            base_type_name, tokenizer,
-            {{"constant", ParseConstantReflector},
-             {"imagemap", ParseImageMapReflector},
-             {"scale", ParseScaleReflector}},
-            named_texture_manager, texture_manager, spectrum_manager);
-    named_texture_manager.SetReflectorTexture(name, reflector_texture);
+  const NamedTextureManager& const_named_texture_manager =
+      named_texture_manager;
+  auto float_result = directive.TryInvokeNamedWithFormat(
+      "float", kFloatImpls, const_named_texture_manager, texture_manager);
+  if (float_result.has_value()) {
+    named_texture_manager.SetFloatTexture(float_result->first,
+                                          float_result->second);
     return;
   }
 
-  if (format_name == "float") {
-    auto float_texture =
-        CallDirective<FloatTexture, const NamedTextureManager&,
-                      TextureManager&>(base_type_name, tokenizer,
-                                       {{"constant", ParseConstantFloat},
-                                        {"imagemap", ParseImageMapFloat},
-                                        {"scale", ParseScaleFloat}},
-                                       named_texture_manager, texture_manager);
-    named_texture_manager.SetFloatTexture(name, float_texture);
+  auto reflector_texture = directive.TryInvokeNamedWithFormat(
+      "color", kReflectorImpls, const_named_texture_manager, texture_manager,
+      spectrum_manager);
+  if (reflector_texture.has_value()) {
+    named_texture_manager.SetReflectorTexture(reflector_texture->first,
+                                              reflector_texture->second);
     return;
   }
 
-  std::cerr << "ERROR: Invalid Texture format specified: " << format_name
-            << std::endl;
-  exit(EXIT_FAILURE);
+  reflector_texture = directive.TryInvokeNamedWithFormat(
+      "spectrum", kReflectorImpls, const_named_texture_manager, texture_manager,
+      spectrum_manager);
+  if (reflector_texture.has_value()) {
+    named_texture_manager.SetReflectorTexture(reflector_texture->first,
+                                              reflector_texture->second);
+    return;
+  }
+
+  directive.FormatError();
 }
 
 }  // namespace iris

@@ -39,9 +39,8 @@ cc_library(
         ":constant",
         ":imagemap",
         ":scale",
-        "//src/common:call_directive",
+        "//src/common:directive",
         "//src/common:texture_manager",
-        "//src/common:tokenizer",
     ],
 )
 

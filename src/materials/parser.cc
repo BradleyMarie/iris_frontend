@@ -1,7 +1,5 @@
 #include "src/materials/parser.h"
 
-#include <iostream>
-
 #include "src/materials/matte.h"
 #include "src/materials/plastic.h"
 

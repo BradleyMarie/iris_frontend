@@ -70,26 +70,6 @@ GlobalConfig CreateGlobalConfig(
 template <typename Result, typename... Args>
 bool CallOnce(absl::string_view base_type_name, absl::string_view token,
               absl::optional<Result>& result,
-              Result (*function)(absl::string_view, Tokenizer&, Args...),
-              Tokenizer& tokenizer, Args... args) {
-  if (token != base_type_name) {
-    return false;
-  }
-
-  if (result) {
-    std::cerr << "ERROR: Invalid " << base_type_name
-              << " specified more than once before WorldBegin" << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  result = function(base_type_name, tokenizer, args...);
-
-  return true;
-}
-
-template <typename Result, typename... Args>
-bool CallOnce(absl::string_view base_type_name, absl::string_view token,
-              absl::optional<Result>& result,
               Result (*function)(Directive&, Args...),
               Tokenizer& tokenizer, Args... args) {
   if (token != base_type_name) {

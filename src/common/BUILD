@@ -3,16 +3,6 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 package(default_visibility = ["//src:__subpackages__"])
 
 cc_library(
-    name = "call_directive",
-    hdrs = ["call_directive.h"],
-    deps = [
-        ":parameters",
-        ":quoted_string",
-        ":tokenizer",
-    ],
-)
-
-cc_library(
     name = "directive",
     hdrs = ["directive.h"],
     srcs = ["directive.cc"],
