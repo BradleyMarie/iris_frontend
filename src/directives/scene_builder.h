@@ -6,7 +6,7 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "src/common/pointer_types.h"
-#include "src/common/tokenizer.h"
+#include "src/common/directive.h"
 
 namespace iris {
 
@@ -17,8 +17,8 @@ class SceneBuilder {
   SceneBuilder& operator=(const SceneBuilder&) = delete;
   ~SceneBuilder();
 
-  void ObjectBegin(Tokenizer& tokenizer);
-  void ObjectInstance(Tokenizer& tokenizer, const Matrix& matrix);
+  void ObjectBegin(Directive& directive);
+  void ObjectInstance(Directive& directive, const Matrix& matrix);
   void ObjectEnd();
 
   void AddShape(const Shape& shape, const Matrix& matrix);

@@ -4,32 +4,8 @@
 
 #include "iris_physx_toolkit/kd_tree_scene.h"
 #include "src/common/error.h"
-#include "src/common/quoted_string.h"
 
 namespace iris {
-namespace {
-
-absl::string_view ParseNextQuotedString(absl::string_view base_type_name,
-                                        Tokenizer& tokenizer,
-                                        absl::string_view element_name) {
-  auto token = tokenizer.Next();
-  if (!token) {
-    std::cerr << "ERROR: " << base_type_name << " " << element_name
-              << " not specified" << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  auto unquoted = UnquoteToken(*token);
-  if (!unquoted) {
-    std::cerr << "ERROR: Invalid " << base_type_name << " " << element_name
-              << " specified: " << *token << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  return *unquoted;
-}
-
-}  // namespace
 
 SceneBuilder::~SceneBuilder() {
   for (PMATRIX matrix : m_scene_transforms) {
@@ -41,19 +17,21 @@ SceneBuilder::~SceneBuilder() {
   }
 }
 
-void SceneBuilder::ObjectBegin(Tokenizer& tokenizer) {
+void SceneBuilder::ObjectBegin(Directive& directive) {
   if (m_current) {
     std::cerr << "ERROR: Mismatched ObjectBegin and ObjectEnd directives"
               << std::endl;
     exit(EXIT_FAILURE);
   }
-  std::string name(ParseNextQuotedString("ObjectBegin", tokenizer, "name"));
+
+  auto name = directive.SingleString("name");
+
   m_current = &m_instanced_objects[name];
   m_current->first.clear();
   m_current->second.clear();
 }
 
-void SceneBuilder::ObjectInstance(Tokenizer& tokenizer, const Matrix& matrix) {
+void SceneBuilder::ObjectInstance(Directive& directive, const Matrix& matrix) {
   if (m_current) {
     std::cerr << "ERROR: Invalid directive between ObjectBegin and "
                  "ObjectEnd: ObjectInstance"
@@ -61,7 +39,8 @@ void SceneBuilder::ObjectInstance(Tokenizer& tokenizer, const Matrix& matrix) {
     exit(EXIT_FAILURE);
   }
 
-  std::string name(ParseNextQuotedString("ObjectInstance", tokenizer, "name"));
+  auto name = directive.SingleString("name");
+
   auto iter = m_instanced_objects.find(name);
   if (iter == m_instanced_objects.end()) {
     std::cerr << "ERROR: ObjectInstance not defined: " << name << std::endl;

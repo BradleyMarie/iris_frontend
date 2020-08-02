@@ -91,9 +91,8 @@ cc_library(
     hdrs = ["scene_builder.h"],
     deps = [
         "//src/common:error",
+        "//src/common:directive",
         "//src/common:pointer_types",
-        "//src/common:quoted_string",
-        "//src/common:tokenizer",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:kd_tree_scene",
         "@com_google_absl//absl/container:flat_hash_map",
     ],

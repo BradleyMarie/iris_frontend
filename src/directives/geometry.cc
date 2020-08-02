@@ -213,7 +213,8 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     }
 
     if (token == "ObjectBegin") {
-      scene_builder.ObjectBegin(tokenizer);
+      Directive directive("ObjectBegin", tokenizer);
+      scene_builder.ObjectBegin(directive);
       continue;
     }
 
@@ -223,7 +224,8 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     }
 
     if (token == "ObjectInstance") {
-      scene_builder.ObjectInstance(tokenizer,
+      Directive directive("ObjectInstance", tokenizer);
+      scene_builder.ObjectInstance(directive,
                                    matrix_manager.GetCurrent().first);
       continue;
     }
