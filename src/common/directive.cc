@@ -106,7 +106,7 @@ std::pair<Parameters, size_t> Directive::MatchTyped(
   Parameters parameters(m_base_type_name, *m_tokenizer);
   auto unused_params = parameters.MatchAllowUnused(type);
   auto index = MatchType(type_names, m_base_type_name, type.Get(), false);
-  unused_params.SetType(type_names[index]);
+  unused_params.m_type_name = type_names[index];
   return std::make_pair(std::move(unused_params), index);
 }
 

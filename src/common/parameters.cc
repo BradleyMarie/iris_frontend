@@ -418,11 +418,6 @@ absl::string_view Parameters::Type() {
   return *m_type_name;
 }
 
-void Parameters::SetType(absl::string_view type_name) {
-  assert(!m_type_name.has_value() && type_name != kInvalidTypeName);
-  m_type_name = type_name;
-}
-
 Parameters Parameters::MatchAllowUnusedImpl(
     absl::Span<ParameterMatcher* const> param_matchers) {
   assert(m_tokenizer || m_unused_parameters);
