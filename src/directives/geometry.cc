@@ -160,185 +160,265 @@ void GraphicsStateManager::FlipReverseOrientation() {
       !m_shader_state.top().reverse_orientation;
 }
 
-}  // namespace
+class GeometryParser {
+ public:
+  static std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
+      Tokenizer& tokenizer, MatrixManager& matrix_manager,
+      SpectrumManager& spectrum_manager);
 
-std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
-    Tokenizer& tokenizer, MatrixManager& matrix_manager,
-    SpectrumManager& spectrum_manager) {
-  matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
-  matrix_manager.Identity();
+ private:
+  GeometryParser(Tokenizer& tokenizer, MatrixManager& matrix_manager,
+                 SpectrumManager& spectrum_manager)
+      : m_tokenizer(tokenizer),
+        m_matrix_manager(matrix_manager),
+        m_spectrum_manager(spectrum_manager) {}
 
-  GraphicsStateManager graphics_state;
-  MaterialManager material_manager;
-  NormalMapManager normal_map_manager;
-  SceneBuilder scene_builder;
-  TextureManager texture_manager;
+  bool ParseDirective(absl::string_view name, absl::string_view token,
+                      void (GeometryParser::*implementation)(Directive&));
+  void AreaLightSource(Directive& directive);
+  void LightSource(Directive& directive);
+  void MakeNamedMaterial(Directive& directive);
+  void Material(Directive& directive);
+  void NamedMaterial(Directive& directive);
+  void ObjectBegin(Directive& directive);
+  void ObjectInstance(Directive& directive);
+  void ObjectEnd(Directive& directive);
+  void Shape(Directive& directive);
+  void Texture(Directive& directive);
 
-  for (auto token = tokenizer.Next(); token; token = tokenizer.Next()) {
+  std::pair<Scene, std::vector<Light>> Parse();
+
+  Tokenizer& m_tokenizer;
+  MatrixManager& m_matrix_manager;
+  SpectrumManager& m_spectrum_manager;
+  GraphicsStateManager m_graphics_state;
+  MaterialManager m_material_manager;
+  NormalMapManager m_normal_map_manager;
+  SceneBuilder m_scene_builder;
+  TextureManager m_texture_manager;
+};
+
+bool GeometryParser::ParseDirective(
+    absl::string_view name, absl::string_view token,
+    void (GeometryParser::*implementation)(Directive&)) {
+  if (token != name) {
+    return false;
+  }
+
+  Directive directive(name, m_tokenizer);
+  (this->*implementation)(directive);
+
+  return true;
+}
+
+void GeometryParser::AreaLightSource(Directive& directive) {
+  auto light_state = ParseAreaLight(directive, m_spectrum_manager);
+  if (m_graphics_state.GetReverseOrientation()) {
+    m_graphics_state.SetEmissiveMaterials(std::get<1>(light_state),
+                                          std::get<0>(light_state));
+  } else {
+    m_graphics_state.SetEmissiveMaterials(std::get<0>(light_state),
+                                          std::get<1>(light_state));
+  }
+}
+
+void GeometryParser::LightSource(Directive& directive) {
+  auto light = ParseLight(directive, m_spectrum_manager,
+                          m_matrix_manager.GetCurrent().first);
+  m_scene_builder.AddLight(light);
+}
+
+void GeometryParser::MakeNamedMaterial(Directive& directive) {
+  auto name_and_material = ParseMakeNamedMaterial(
+      directive, m_graphics_state.GetNamedTextureManager(),
+      m_normal_map_manager, m_texture_manager, m_spectrum_manager);
+  m_graphics_state.GetNamedMaterialManager().SetMaterial(
+      name_and_material.first, name_and_material.second);
+  m_graphics_state.SetMaterial(name_and_material.second);
+}
+
+void GeometryParser::Material(Directive& directive) {
+  auto material = ParseMaterial(
+      directive, m_graphics_state.GetNamedTextureManager(),
+      m_normal_map_manager, m_texture_manager, m_spectrum_manager);
+  m_graphics_state.SetMaterial(material);
+}
+
+void GeometryParser::NamedMaterial(Directive& directive) {
+  auto name = ParseNamedMaterial(directive);
+  auto material = m_graphics_state.GetNamedMaterialManager().GetMaterial(name);
+  m_graphics_state.SetMaterial(material);
+}
+
+void GeometryParser::ObjectBegin(Directive& directive) {
+  m_scene_builder.ObjectBegin(directive);
+}
+
+void GeometryParser::ObjectInstance(Directive& directive) {
+  m_scene_builder.ObjectInstance(directive,
+                                 m_matrix_manager.GetCurrent().first);
+}
+
+void GeometryParser::ObjectEnd(Directive& directive) {
+  m_scene_builder.ObjectEnd(directive);
+}
+
+void GeometryParser::Shape(Directive& directive) {
+  auto model_to_world = m_matrix_manager.GetCurrent().first;
+  auto material = m_graphics_state.GetMaterials();
+  auto emissive_materials = m_graphics_state.GetEmissiveMaterials();
+  auto shape_result =
+      ParseShape(directive, model_to_world, m_material_manager,
+                 m_graphics_state.GetNamedTextureManager(),
+                 m_normal_map_manager, m_texture_manager, m_spectrum_manager,
+                 material, emissive_materials.first, emissive_materials.second);
+  if (std::get<2>(shape_result) == ShapeCoordinateSystem::World) {
+    model_to_world.reset();
+  }
+  for (const auto& shape : std::get<0>(shape_result)) {
+    m_scene_builder.AddShape(shape, model_to_world);
+  }
+  for (const auto& light : std::get<1>(shape_result)) {
+    m_scene_builder.AddAreaLight(std::get<0>(light), model_to_world,
+                                 std::get<1>(light), std::get<2>(light));
+  }
+}
+
+void GeometryParser::Texture(Directive& directive) {
+  ParseTexture(directive, m_graphics_state.GetNamedTextureManager(),
+               m_texture_manager, m_spectrum_manager);
+}
+
+std::pair<Scene, std::vector<Light>> GeometryParser::Parse() {
+  m_matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
+  m_matrix_manager.Identity();
+
+  for (auto token = m_tokenizer.Next(); token; token = m_tokenizer.Next()) {
     if (token == "WorldEnd") {
-      return scene_builder.Build();
+      return m_scene_builder.Build();
     }
 
-    if (TryParseTransformDirectives(*token, tokenizer, matrix_manager)) {
+    if (TryParseTransformDirectives(*token, m_tokenizer, m_matrix_manager)) {
       continue;
     }
 
-    if (TryParseInclude(*token, tokenizer)) {
+    if (TryParseInclude(*token, m_tokenizer)) {
       continue;
     }
 
     if (token == "ReverseOrientation") {
-      graphics_state.FlipReverseOrientation();
+      m_graphics_state.FlipReverseOrientation();
       continue;
     }
 
     if (token == "AttributeBegin") {
-      graphics_state.AttributeBegin(matrix_manager);
+      m_graphics_state.AttributeBegin(m_matrix_manager);
       continue;
     }
 
     if (token == "AttributeEnd") {
-      graphics_state.AttributeEnd(matrix_manager);
+      m_graphics_state.AttributeEnd(m_matrix_manager);
       continue;
     }
 
     if (token == "TransformBegin") {
-      graphics_state.TransformBegin(matrix_manager);
+      m_graphics_state.TransformBegin(m_matrix_manager);
       continue;
     }
 
     if (token == "TransformEnd") {
-      graphics_state.TransformEnd(matrix_manager);
+      m_graphics_state.TransformEnd(m_matrix_manager);
       continue;
     }
 
-    if (token == "ObjectBegin") {
-      Directive directive("ObjectBegin", tokenizer);
-      scene_builder.ObjectBegin(directive);
+    if (ParseDirective("ObjectBegin", *token, &GeometryParser::ObjectBegin)) {
       continue;
     }
 
-    if (token == "ObjectEnd") {
-      Directive directive("ObjectEnd", tokenizer);
-      scene_builder.ObjectEnd(directive);
+    if (ParseDirective("ObjectEnd", *token, &GeometryParser::ObjectEnd)) {
       continue;
     }
 
-    if (token == "ObjectInstance") {
-      Directive directive("ObjectInstance", tokenizer);
-      scene_builder.ObjectInstance(directive,
-                                   matrix_manager.GetCurrent().first);
+    if (ParseDirective("ObjectInstance", *token,
+                       &GeometryParser::ObjectInstance)) {
       continue;
     }
 
-    if (token == "AreaLightSource") {
-      Directive directive("AreaLightSource", tokenizer);
-      auto light_state = ParseAreaLight(directive, spectrum_manager);
-      if (graphics_state.GetReverseOrientation()) {
-        graphics_state.SetEmissiveMaterials(std::get<1>(light_state),
-                                            std::get<0>(light_state));
-      } else {
-        graphics_state.SetEmissiveMaterials(std::get<0>(light_state),
-                                            std::get<1>(light_state));
-      }
+    if (ParseDirective("AreaLightSource", *token,
+                       &GeometryParser::AreaLightSource)) {
       continue;
     }
 
-    if (token == "LightSource") {
-      Directive directive("LightSource", tokenizer);
-      auto light = ParseLight(directive, spectrum_manager,
-                              matrix_manager.GetCurrent().first);
-      scene_builder.AddLight(light);
+    if (ParseDirective("LightSource", *token, &GeometryParser::LightSource)) {
       continue;
     }
 
-    if (token == "Material") {
-      Directive directive("Material", tokenizer);
-      auto material = ParseMaterial(
-          directive, graphics_state.GetNamedTextureManager(),
-          normal_map_manager, texture_manager, spectrum_manager);
-      graphics_state.SetMaterial(material);
+    if (ParseDirective("Material", *token, &GeometryParser::Material)) {
       continue;
     }
 
-    if (token == "MakeNamedMaterial") {
-      Directive directive("MakeNamedMaterial", tokenizer);
-      auto name_and_material = ParseMakeNamedMaterial(
-          directive, graphics_state.GetNamedTextureManager(),
-          normal_map_manager, texture_manager, spectrum_manager);
-      graphics_state.GetNamedMaterialManager().SetMaterial(
-          name_and_material.first, name_and_material.second);
-      graphics_state.SetMaterial(name_and_material.second);
+    if (ParseDirective("MakeNamedMaterial", *token,
+                       &GeometryParser::MakeNamedMaterial)) {
       continue;
     }
 
-    if (token == "NamedMaterial") {
-      Directive directive("NamedMaterial", tokenizer);
-      auto name = ParseNamedMaterial(directive);
-      auto material =
-          graphics_state.GetNamedMaterialManager().GetMaterial(name);
-      graphics_state.SetMaterial(material);
+    if (ParseDirective("NamedMaterial", *token,
+                       &GeometryParser::NamedMaterial)) {
       continue;
     }
 
-    if (token == "Shape") {
-      auto model_to_world = matrix_manager.GetCurrent().first;
-      auto material = graphics_state.GetMaterials();
-      auto emissive_materials = graphics_state.GetEmissiveMaterials();
-      Directive directive("Shape", tokenizer);
-      auto shape_result = ParseShape(
-          directive, model_to_world, material_manager,
-          graphics_state.GetNamedTextureManager(), normal_map_manager,
-          texture_manager, spectrum_manager, material, emissive_materials.first,
-          emissive_materials.second);
-      if (std::get<2>(shape_result) == ShapeCoordinateSystem::World) {
-        model_to_world.reset();
-      }
-      for (const auto& shape : std::get<0>(shape_result)) {
-        scene_builder.AddShape(shape, model_to_world);
-      }
-      for (const auto& light : std::get<1>(shape_result)) {
-        scene_builder.AddAreaLight(std::get<0>(light), model_to_world,
-                                   std::get<1>(light), std::get<2>(light));
-      }
+    if (ParseDirective("Shape", *token, &GeometryParser::Shape)) {
       continue;
     }
 
     if (token == "MakeNamedMedium") {
-      std::cerr << "ERROR: Invalid directive before WorldBegin: " << *token
+      std::cerr << "ERROR: Invalid directive after WorldBegin: " << *token
                 << std::endl;
       exit(EXIT_FAILURE);
       continue;
     }
 
     if (token == "MediumInterface") {
-      std::cerr << "ERROR: Invalid directive before WorldBegin: " << *token
+      std::cerr << "ERROR: Invalid directive after WorldBegin: " << *token
                 << std::endl;
       exit(EXIT_FAILURE);
       continue;
     }
 
-    if (token == "Texture") {
-      Directive directive("Texture", tokenizer);
-      ParseTexture(directive, graphics_state.GetNamedTextureManager(),
-                   texture_manager, spectrum_manager);
+    if (ParseDirective("Texture", *token, &GeometryParser::Texture)) {
       continue;
     }
 
     if (token == "TransformTimes") {
-      std::cerr << "ERROR: Invalid directive before WorldBegin: " << *token
+      std::cerr << "ERROR: Invalid directive after WorldBegin: " << *token
                 << std::endl;
       exit(EXIT_FAILURE);
       continue;
     }
 
-    std::cerr << "ERROR: Invalid directive before WorldEnd: " << *token
+    std::cerr << "ERROR: Invalid directive after WorldEnd: " << *token
               << std::endl;
     exit(EXIT_FAILURE);
   }
 
   std::cerr << "ERROR: Missing WorldEnd directive" << std::endl;
   exit(EXIT_FAILURE);
+}
+
+std::pair<Scene, std::vector<Light>> GeometryParser::ParseGeometryDirectives(
+    Tokenizer& tokenizer, MatrixManager& matrix_manager,
+    SpectrumManager& spectrum_manager) {
+  GeometryParser parser(tokenizer, matrix_manager, spectrum_manager);
+  return parser.Parse();
+}
+
+}  // namespace
+
+std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
+    Tokenizer& tokenizer, MatrixManager& matrix_manager,
+    SpectrumManager& spectrum_manager) {
+  return GeometryParser::ParseGeometryDirectives(tokenizer, matrix_manager,
+                                                 spectrum_manager);
 }
 
 }  // namespace iris
