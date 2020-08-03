@@ -57,12 +57,13 @@ void SceneBuilder::ObjectInstance(Directive& directive, const Matrix& matrix) {
   }
 }
 
-void SceneBuilder::ObjectEnd() {
+void SceneBuilder::ObjectEnd(Directive& directive) {
   if (!m_current) {
     std::cerr << "ERROR: Mismatched ObjectBegin and ObjectEnd directives"
               << std::endl;
     exit(EXIT_FAILURE);
   }
+  directive.Empty();
   m_current = nullptr;
 }
 

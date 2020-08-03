@@ -219,7 +219,8 @@ std::pair<Scene, std::vector<Light>> ParseGeometryDirectives(
     }
 
     if (token == "ObjectEnd") {
-      scene_builder.ObjectEnd();
+      Directive directive("ObjectEnd", tokenizer);
+      scene_builder.ObjectEnd(directive);
       continue;
     }
 

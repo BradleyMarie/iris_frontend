@@ -19,7 +19,7 @@ class SceneBuilder {
 
   void ObjectBegin(Directive& directive);
   void ObjectInstance(Directive& directive, const Matrix& matrix);
-  void ObjectEnd();
+  void ObjectEnd(Directive& directive);
 
   void AddShape(const Shape& shape, const Matrix& matrix);
   void AddAreaLight(const Shape& shape, const Matrix& matrix,
