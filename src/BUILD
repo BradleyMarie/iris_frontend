@@ -8,7 +8,7 @@ cc_binary(
     visibility = ["//visibility:public"],
     deps = [
         ":render",
-        "//src/common:parser",
+        "//src/directives:parser",
         "@com_google_absl//absl/flags:config",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
@@ -24,7 +24,7 @@ cc_library(
     deps = [
         "//src/common:error",
         "//src/common:ostream",
-        "//src/common:parser",
+        "//src/directives:parser",
         "//src/directives:parse",
         "@com_github_bradleymarie_iris//iris_camera_toolkit:status_bar_progress_reporter",
         "@com_github_bradleymarie_iris//iris_physx",

@@ -79,9 +79,19 @@ cc_library(
     deps = [
         ":geometry",
         ":global",
+        ":parser",
         "//src/common:pointer_types",
-        "//src/common:parser",
         "//src/films/output_writers:result",
+    ],
+)
+
+cc_library(
+    name = "parser",
+    hdrs = ["parser.h"],
+    srcs = ["parser.cc"],
+    visibility = ["//src:__subpackages__"],
+    deps = [
+        "//src/common:tokenizer",
     ],
 )
 

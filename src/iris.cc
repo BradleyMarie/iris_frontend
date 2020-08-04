@@ -6,7 +6,7 @@
 #include "absl/flags/parse.h"
 #include "absl/flags/usage.h"
 #include "absl/flags/usage_config.h"
-#include "src/common/parser.h"
+#include "src/directives/parser.h"
 #include "src/render.h"
 
 ABSL_FLAG(float_t, epsilon, 0.001,

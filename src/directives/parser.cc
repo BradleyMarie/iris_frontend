@@ -1,4 +1,4 @@
-#include "src/common/parser.h"
+#include "src/directives/parser.h"
 
 namespace iris {
 
@@ -19,7 +19,7 @@ Tokenizer& Parser::GetTokenizer() {
 }
 
 bool Parser::Done() {
-  return m_tokenizer.Peek().has_value();
+  return !m_tokenizer.Peek().has_value();
 }
 
 }  // namespace iris

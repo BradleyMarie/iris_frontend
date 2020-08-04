@@ -1,5 +1,5 @@
-#ifndef _SRC_COMMON_PARSER_
-#define _SRC_COMMON_PARSER_
+#ifndef _SRC_DIRECTIVES_PARSER_
+#define _SRC_DIRECTIVES_PARSER_
 
 #include "src/common/tokenizer.h"
 
@@ -25,4 +25,4 @@ class Parser {
 
 }  // namespace iris
 
-#endif  // _SRC_COMMON_PARSER_
+#endif  // _SRC_DIRECTIVES_PARSER_

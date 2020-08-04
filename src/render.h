@@ -2,7 +2,7 @@
 #define _SRC_RENDER_
 
 #include "src/common/pointer_types.h"
-#include "src/common/parser.h"
+#include "src/directives/parser.h"
 #include "src/films/output_writers/result.h"
 
 namespace iris {
