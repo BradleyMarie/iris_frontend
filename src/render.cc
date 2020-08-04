@@ -12,14 +12,14 @@
 namespace iris {
 
 std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(
-    Tokenizer& tokenizer, size_t render_index, float_t epsilon,
+    Parser& parser, size_t render_index, float_t epsilon,
     size_t num_threads, bool report_progress, bool spectral,
     bool spectrum_color_workaround) {
   assert(isfinite(epsilon) && (float_t)0.0 <= epsilon);
   assert(num_threads != 0);
 
   auto render_config =
-      ParseDirectives(tokenizer, spectral, spectrum_color_workaround);
+      ParseDirectives(parser, spectral, spectrum_color_workaround);
 
   ISTATUS status = IntegratorPrepare(
       std::get<5>(render_config).get(), std::get<0>(render_config).get(),
@@ -35,7 +35,7 @@ std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(
   ProgressReporter progress_reporter;
   if (report_progress) {
     std::string progress_label;
-    if (!tokenizer.Peek().has_value() && render_index == 0) {
+    if (parser.Done() && render_index == 0) {
       progress_label = "Rendering";
     } else {
       progress_label = "Rendering (" + std::to_string(render_index + 1) + ")";
@@ -67,11 +67,11 @@ std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(
                         std::move(std::get<9>(render_config)));
 }
 
-void RenderToOutput(Tokenizer& tokenizer, size_t render_index, float_t epsilon,
+void RenderToOutput(Parser& parser, size_t render_index, float_t epsilon,
                     size_t num_threads, bool report_progress, bool spectral,
                     bool spectrum_color_workaround) {
   auto render_result =
-      RenderToFramebuffer(tokenizer, render_index, epsilon, num_threads,
+      RenderToFramebuffer(parser, render_index, epsilon, num_threads,
                           report_progress, spectral, spectrum_color_workaround);
   render_result.second->Write(render_result.first);
 }

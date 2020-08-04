@@ -80,7 +80,7 @@ cc_library(
         ":geometry",
         ":global",
         "//src/common:pointer_types",
-        "//src/common:tokenizer",
+        "//src/common:parser",
         "//src/films/output_writers:result",
     ],
 )

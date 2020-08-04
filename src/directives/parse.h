@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "src/common/pointer_types.h"
-#include "src/common/tokenizer.h"
+#include "src/common/parser.h"
 #include "src/films/output_writers/result.h"
 
 namespace iris {
@@ -14,7 +14,7 @@ typedef std::tuple<Scene, LightSampler, Camera, Matrix, Sampler,
                    OutputWriter>
     RenderConfiguration;
 
-RenderConfiguration ParseDirectives(Tokenizer& tokenizer, bool spectral,
+RenderConfiguration ParseDirectives(Parser& parser, bool spectral,
                                     bool spectrum_color_workaround);
 
 }  // namespace iris

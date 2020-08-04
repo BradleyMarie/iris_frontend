@@ -6,7 +6,7 @@
 #include "absl/flags/parse.h"
 #include "absl/flags/usage.h"
 #include "absl/flags/usage_config.h"
-#include "src/common/tokenizer.h"
+#include "src/common/parser.h"
 #include "src/render.h"
 
 ABSL_FLAG(float_t, epsilon, 0.001,
@@ -90,19 +90,19 @@ int main(int argc, char** argv) {
     absl::SetFlag(&FLAGS_num_threads, std::thread::hardware_concurrency());
   }
 
-  iris::Tokenizer tokenizer;
+  iris::Parser parser;
   if (unparsed.size() == 1) {
-    tokenizer = iris::Tokenizer::CreateFromStream(std::cin);
+    parser = iris::Parser::CreateFromStream(std::cin);
   } else {
-    tokenizer = iris::Tokenizer::CreateFromFile(unparsed[1]);
+    parser = iris::Parser::CreateFromFile(unparsed[1]);
   }
 
   if (absl::GetFlag(FLAGS_welcome_message)) {
     std::cout << VersionString();
   }
 
-  for (size_t render_index = 0; tokenizer.Peek(); render_index += 1) {
-    iris::RenderToOutput(tokenizer, render_index, absl::GetFlag(FLAGS_epsilon),
+  for (size_t render_index = 0; !parser.Done(); render_index += 1) {
+    iris::RenderToOutput(parser, render_index, absl::GetFlag(FLAGS_epsilon),
                          absl::GetFlag(FLAGS_num_threads),
                          absl::GetFlag(FLAGS_report_progress),
                          absl::GetFlag(FLAGS_spectral),

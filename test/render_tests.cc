@@ -7,7 +7,7 @@
 #include "googletest/include/gtest/gtest.h"
 #include "src/render.h"
 
-using iris::Tokenizer;
+using iris::Parser;
 
 namespace {
 
@@ -97,10 +97,10 @@ void CheckEquals(const char* expected, const iris::Framebuffer& actual,
   fclose(left);
 }
 
-std::pair<Tokenizer, std::unique_ptr<std::stringstream>>
-CreateTokenizerFromString(const std::string& string_to_parse) {
+std::pair<Parser, std::unique_ptr<std::stringstream>>
+CreateParserFromString(const std::string& string_to_parse) {
   auto buffer = absl::make_unique<std::stringstream>(string_to_parse);
-  auto tokenizer = Tokenizer::CreateFromStream(*buffer);
+  auto tokenizer = Parser::CreateFromStream(*buffer);
   return std::make_pair(std::move(tokenizer), std::move(buffer));
 }
 
@@ -114,18 +114,18 @@ static const bool kSpectrumColorWorkaround = false;
 }  // namespace
 
 TEST(RenderTests, CornellBox) {
-  auto tokenizer = Tokenizer::CreateFromFile("test/cornell_box.pbrt");
+  auto parser = Parser::CreateFromFile("test/cornell_box.pbrt");
   auto render_result =
-      RenderToFramebuffer(tokenizer, kRenderIndex, kEpsilon, kNumThreads,
+      RenderToFramebuffer(parser, kRenderIndex, kEpsilon, kNumThreads,
                           kReportProgress, kSpectral, kSpectrumColorWorkaround);
   CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.1);
 }
 
 TEST(RenderTests, IncludeCornellBox) {
-  auto tokenizer =
-      CreateTokenizerFromString("Include \"test/cornell_box.pbrt\"");
+  auto parser =
+      CreateParserFromString("Include \"test/cornell_box.pbrt\"");
   auto render_result =
-      RenderToFramebuffer(tokenizer.first, kRenderIndex, kEpsilon, kNumThreads,
+      RenderToFramebuffer(parser.first, kRenderIndex, kEpsilon, kNumThreads,
                           kReportProgress, kSpectral, kSpectrumColorWorkaround);
   CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.1);
 }

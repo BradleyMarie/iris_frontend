@@ -5,13 +5,15 @@
 
 namespace iris {
 
-RenderConfiguration ParseDirectives(Tokenizer& tokenizer, bool spectral,
+RenderConfiguration ParseDirectives(Parser& parser, bool spectral,
                                     bool spectrum_color_workaround) {
+  assert(!parser.Done());
   MatrixManager matrix_manager;
-  auto global_config = ParseGlobalDirectives(
-      tokenizer, matrix_manager, spectral, spectrum_color_workaround);
-  auto geometry_config = ParseGeometryDirectives(tokenizer, matrix_manager,
-                                                 std::get<6>(global_config));
+  auto global_config =
+      ParseGlobalDirectives(parser.GetTokenizer(), matrix_manager, spectral,
+                            spectrum_color_workaround);
+  auto geometry_config = ParseGeometryDirectives(
+      parser.GetTokenizer(), matrix_manager, std::get<6>(global_config));
   return std::make_tuple(
       std::move(geometry_config.first),
       std::move(std::get<5>(global_config)(geometry_config.second)),

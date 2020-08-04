@@ -138,6 +138,15 @@ cc_library(
 )
 
 cc_library(
+    name = "parser",
+    hdrs = ["parser.h"],
+    srcs = ["parser.cc"],
+    deps = [
+        ":tokenizer",
+    ],
+)
+
+cc_library(
     name = "pointer_types",
     hdrs = ["pointer_types.h"],
     deps = [
