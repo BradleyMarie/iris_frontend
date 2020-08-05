@@ -25,7 +25,6 @@ cc_library(
         "//src/common:error",
         "//src/common:ostream",
         "//src/directives:parser",
-        "//src/directives:parse",
         "@com_github_bradleymarie_iris//iris_camera_toolkit:status_bar_progress_reporter",
         "@com_github_bradleymarie_iris//iris_physx",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:sample_tracer",

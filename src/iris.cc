@@ -90,11 +90,16 @@ int main(int argc, char** argv) {
     absl::SetFlag(&FLAGS_num_threads, std::thread::hardware_concurrency());
   }
 
+  iris::DefaultParserConfiguration default_config;
+  default_config.spectral = absl::GetFlag(FLAGS_spectral);
+  default_config.spectrum_color_workaround =
+      absl::GetFlag(FLAGS_spectrum_color_workaround);
+
   iris::Parser parser;
   if (unparsed.size() == 1) {
-    parser = iris::Parser::CreateFromStream(std::cin);
+    parser = iris::Parser::Create(default_config, std::cin);
   } else {
-    parser = iris::Parser::CreateFromFile(unparsed[1]);
+    parser = iris::Parser::Create(default_config, unparsed[1]);
   }
 
   if (absl::GetFlag(FLAGS_welcome_message)) {
@@ -104,9 +109,7 @@ int main(int argc, char** argv) {
   for (size_t render_index = 0; !parser.Done(); render_index += 1) {
     iris::RenderToOutput(parser, render_index, absl::GetFlag(FLAGS_epsilon),
                          absl::GetFlag(FLAGS_num_threads),
-                         absl::GetFlag(FLAGS_report_progress),
-                         absl::GetFlag(FLAGS_spectral),
-                         absl::GetFlag(FLAGS_spectrum_color_workaround));
+                         absl::GetFlag(FLAGS_report_progress));
   }
 
   return EXIT_SUCCESS;

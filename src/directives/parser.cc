@@ -1,25 +1,50 @@
 #include "src/directives/parser.h"
 
+#include "src/directives/geometry.h"
+#include "src/directives/global.h"
+
 namespace iris {
 
-Parser Parser::CreateFromFile(absl::string_view file) {
+Parser Parser::Create(const DefaultParserConfiguration& defaults,
+                      absl::string_view file) {
   Parser result;
+  result.m_defaults = defaults;
   result.m_tokenizer = Tokenizer::CreateFromFile(file);
   return result;
 }
 
-Parser Parser::CreateFromStream(std::istream& stream) {
+Parser Parser::Create(const DefaultParserConfiguration& defaults,
+                      std::istream& stream) {
   Parser result;
+  result.m_defaults = defaults;
   result.m_tokenizer = Tokenizer::CreateFromStream(stream);
   return result;
 }
 
-Tokenizer& Parser::GetTokenizer() {
-  return m_tokenizer;
+absl::optional<RendererConfiguration> Parser::Next() {
+  if (Done()) {
+    return absl::nullopt;
+  }
+
+  MatrixManager matrix_manager;
+  auto global_config =
+      ParseGlobalDirectives(m_tokenizer, matrix_manager, m_defaults.spectral,
+                            m_defaults.spectrum_color_workaround);
+  auto geometry_config = ParseGeometryDirectives(m_tokenizer, matrix_manager,
+                                                 std::get<6>(global_config));
+  return std::make_tuple(
+      std::move(geometry_config.first),
+      std::move(std::get<5>(global_config)(geometry_config.second)),
+      std::move(std::get<0>(global_config)),
+      std::move(std::get<1>(global_config)),
+      std::move(std::get<2>(global_config)),
+      std::move(std::get<4>(global_config)),
+      std::move(std::get<7>(global_config)),
+      std::move(std::get<9>(global_config)),
+      std::move(std::get<3>(global_config)),
+      std::move(std::get<8>(global_config)));
 }
 
-bool Parser::Done() {
-  return !m_tokenizer.Peek().has_value();
-}
+bool Parser::Done() { return !m_tokenizer.Peek().has_value(); }
 
 }  // namespace iris

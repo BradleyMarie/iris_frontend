@@ -7,6 +7,7 @@
 #include "googletest/include/gtest/gtest.h"
 #include "src/render.h"
 
+using iris::DefaultParserConfiguration;
 using iris::Parser;
 
 namespace {
@@ -97,10 +98,11 @@ void CheckEquals(const char* expected, const iris::Framebuffer& actual,
   fclose(left);
 }
 
-std::pair<Parser, std::unique_ptr<std::stringstream>>
-CreateParserFromString(const std::string& string_to_parse) {
+std::pair<Parser, std::unique_ptr<std::stringstream>> CreateParserFromString(
+    const DefaultParserConfiguration& default_config,
+    const std::string& string_to_parse) {
   auto buffer = absl::make_unique<std::stringstream>(string_to_parse);
-  auto tokenizer = Parser::CreateFromStream(*buffer);
+  auto tokenizer = Parser::Create(default_config, *buffer);
   return std::make_pair(std::move(tokenizer), std::move(buffer));
 }
 
@@ -108,24 +110,21 @@ static const size_t kRenderIndex = 0;
 static const float_t kEpsilon = (float_t)0.001;
 static const size_t kNumThreads = 1;
 static const bool kReportProgress = false;
-static const bool kSpectral = false;
-static const bool kSpectrumColorWorkaround = false;
+static const DefaultParserConfiguration kDefaultConfig = {false, false};
 
 }  // namespace
 
 TEST(RenderTests, CornellBox) {
-  auto parser = Parser::CreateFromFile("test/cornell_box.pbrt");
-  auto render_result =
-      RenderToFramebuffer(parser, kRenderIndex, kEpsilon, kNumThreads,
-                          kReportProgress, kSpectral, kSpectrumColorWorkaround);
+  auto parser = Parser::Create(kDefaultConfig, "test/cornell_box.pbrt");
+  auto render_result = RenderToFramebuffer(parser, kRenderIndex, kEpsilon,
+                                           kNumThreads, kReportProgress);
   CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.1);
 }
 
 TEST(RenderTests, IncludeCornellBox) {
-  auto parser =
-      CreateParserFromString("Include \"test/cornell_box.pbrt\"");
-  auto render_result =
-      RenderToFramebuffer(parser.first, kRenderIndex, kEpsilon, kNumThreads,
-                          kReportProgress, kSpectral, kSpectrumColorWorkaround);
+  auto parser = CreateParserFromString(kDefaultConfig,
+                                       "Include \"test/cornell_box.pbrt\"");
+  auto render_result = RenderToFramebuffer(parser.first, kRenderIndex, kEpsilon,
+                                           kNumThreads, kReportProgress);
   CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.1);
 }

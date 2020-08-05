@@ -7,24 +7,23 @@
 #include "iris_physx_toolkit/sample_tracer.h"
 #include "src/common/error.h"
 #include "src/common/ostream.h"
-#include "src/directives/parse.h"
+#include "src/directives/parser.h"
 
 namespace iris {
 
-std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(
-    Parser& parser, size_t render_index, float_t epsilon,
-    size_t num_threads, bool report_progress, bool spectral,
-    bool spectrum_color_workaround) {
+std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(Parser& parser,
+                                                         size_t render_index,
+                                                         float_t epsilon,
+                                                         size_t num_threads,
+                                                         bool report_progress) {
   assert(isfinite(epsilon) && (float_t)0.0 <= epsilon);
   assert(num_threads != 0);
 
-  auto render_config =
-      ParseDirectives(parser, spectral, spectrum_color_workaround);
+  auto render_config = *parser.Next();
 
   ISTATUS status = IntegratorPrepare(
       std::get<5>(render_config).get(), std::get<0>(render_config).get(),
-      std::get<1>(render_config).get(), std::get<6>(render_config).get(),
-      spectral);
+      std::get<1>(render_config).get(), std::get<6>(render_config).get());
   SuccessOrOOM(status);
 
   SampleTracer sample_tracer;
@@ -68,11 +67,9 @@ std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(
 }
 
 void RenderToOutput(Parser& parser, size_t render_index, float_t epsilon,
-                    size_t num_threads, bool report_progress, bool spectral,
-                    bool spectrum_color_workaround) {
-  auto render_result =
-      RenderToFramebuffer(parser, render_index, epsilon, num_threads,
-                          report_progress, spectral, spectrum_color_workaround);
+                    size_t num_threads, bool report_progress) {
+  auto render_result = RenderToFramebuffer(parser, render_index, epsilon,
+                                           num_threads, report_progress);
   render_result.second->Write(render_result.first);
 }
 

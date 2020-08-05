@@ -95,26 +95,17 @@ cc_library(
 )
 
 cc_library(
-    name = "parse",
-    srcs = ["parse.cc"],
-    hdrs = ["parse.h"],
-    visibility = ["//src:__subpackages__"],
-    deps = [
-        ":geometry",
-        ":global",
-        ":parser",
-        "//src/common:pointer_types",
-        "//src/films/output_writers:result",
-    ],
-)
-
-cc_library(
     name = "parser",
     srcs = ["parser.cc"],
     hdrs = ["parser.h"],
     visibility = ["//src:__subpackages__"],
     deps = [
+        ":geometry",
+        ":global",
+        ":matrix_manager",
+        "//src/common:pointer_types",
         "//src/common:tokenizer",
+        "//src/films/output_writers:result",
     ],
 )
 
