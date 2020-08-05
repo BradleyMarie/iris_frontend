@@ -25,7 +25,6 @@ cc_library(
         ":matrix_manager",
         "//src/common:parameters",
         "//src/common:pointer_types",
-        "//src/common:quoted_string",
         "//src/common:tokenizer",
         "//src/films:parser",
         "//src/integrators:parser",

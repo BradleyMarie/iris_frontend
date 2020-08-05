@@ -5,7 +5,6 @@
 #include "src/cameras/parser.h"
 #include "src/color_integrators/parser.h"
 #include "src/common/parameters.h"
-#include "src/common/quoted_string.h"
 #include "src/directives/include.h"
 #include "src/directives/transform.h"
 #include "src/films/parser.h"
