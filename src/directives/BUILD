@@ -36,30 +36,6 @@ cc_library(
 )
 
 cc_library(
-    name = "geometry",
-    srcs = ["geometry.cc"],
-    hdrs = ["geometry.h"],
-    deps = [
-        ":include",
-        ":matrix_manager",
-        ":named_material_manager",
-        ":scene_builder",
-        ":transform",
-        "//src/area_lights:parser",
-        "//src/common:error",
-        "//src/common:named_texture_manager",
-        "//src/common:normal_map_manager",
-        "//src/common:pointer_types",
-        "//src/common:texture_manager",
-        "//src/common:tokenizer",
-        "//src/lights:parser",
-        "//src/materials:parser",
-        "//src/shapes:parser",
-        "//src/textures:parser",
-    ],
-)
-
-cc_library(
     name = "include",
     srcs = ["include.cc"],
     hdrs = ["include.h"],
@@ -100,12 +76,24 @@ cc_library(
     hdrs = ["parser.h"],
     visibility = ["//src:__subpackages__"],
     deps = [
-        ":geometry",
         ":global",
+        ":include",
         ":matrix_manager",
+        ":named_material_manager",
+        ":scene_builder",
+        ":transform",
+        "//src/area_lights:parser",
+        "//src/common:error",
+        "//src/common:named_texture_manager",
+        "//src/common:normal_map_manager",
         "//src/common:pointer_types",
+        "//src/common:texture_manager",
         "//src/common:tokenizer",
         "//src/films/output_writers:result",
+        "//src/lights:parser",
+        "//src/materials:parser",
+        "//src/shapes:parser",
+        "//src/textures:parser",
     ],
 )
 
