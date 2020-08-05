@@ -1,28 +1,272 @@
 #include "src/directives/parser.h"
 
 #include <iostream>
+#include <set>
 #include <stack>
 #include <vector>
 
 #include "src/area_lights/parser.h"
+#include "src/cameras/parser.h"
+#include "src/color_integrators/parser.h"
 #include "src/common/material_manager.h"
 #include "src/common/named_texture_manager.h"
 #include "src/common/normal_map_manager.h"
 #include "src/common/spectrum_manager.h"
 #include "src/common/texture_manager.h"
-#include "src/directives/global.h"
 #include "src/directives/include.h"
 #include "src/directives/matrix_manager.h"
 #include "src/directives/named_material_manager.h"
 #include "src/directives/scene_builder.h"
 #include "src/directives/transform.h"
+#include "src/films/parser.h"
+#include "src/integrators/parser.h"
+#include "src/light_propagation/parser.h"
 #include "src/lights/parser.h"
 #include "src/materials/parser.h"
+#include "src/randoms/parser.h"
+#include "src/samplers/parser.h"
 #include "src/shapes/parser.h"
 #include "src/textures/parser.h"
 
 namespace iris {
 namespace {
+
+typedef std::tuple<Camera, Matrix, Sampler, Framebuffer, Integrator,
+                   LightSamplerFactory, SpectrumManager, ColorIntegrator,
+                   OutputWriter, Random>
+    GlobalConfig;
+
+class GlobalParser {
+ public:
+  static GlobalConfig Parse(Tokenizer& tokenizer, MatrixManager& matrix_manager,
+                            bool spectral, bool spectrum_color_workaround);
+
+ private:
+  GlobalParser(Tokenizer& tokenizer, MatrixManager& matrix_manager,
+               bool spectral, bool spectrum_color_workaround)
+      : m_tokenizer(tokenizer),
+        m_matrix_manager(matrix_manager),
+        m_spectral(spectral),
+        m_spectrum_color_workaround(spectrum_color_workaround) {}
+
+  bool ParseDirectiveOnce(absl::string_view name, absl::string_view token,
+                          void (GlobalParser::*implementation)(Directive&));
+  void Accelerator(Directive& directive);
+  void Camera(Directive& directive);
+  void ColorIntegrator(Directive& directive);
+  void Film(Directive& directive);
+  void Integrator(Directive& directive);
+  void LightPropagation(Directive& directive);
+  void PixelFilter(Directive& directive);
+  void Random(Directive& directive);
+  void Sampler(Directive& directive);
+
+  void Parse();
+
+  Tokenizer& m_tokenizer;
+  MatrixManager& m_matrix_manager;
+  bool m_spectral;
+  bool m_spectrum_color_workaround;
+
+  std::set<absl::string_view> m_called;
+  absl::optional<CameraFactory> m_camera_factory;
+  absl::optional<iris::ColorIntegrator> m_color_integrator;
+  absl::optional<FilmResult> m_film_result;
+  absl::optional<IntegratorResult> m_integrator_result;
+  absl::optional<LightPropagationResult> m_light_propagation;
+  absl::optional<iris::Random> m_random;
+  absl::optional<iris::Sampler> m_sampler;
+  Matrix m_camera_to_world;
+};
+
+bool GlobalParser::ParseDirectiveOnce(
+    absl::string_view name, absl::string_view token,
+    void (GlobalParser::*implementation)(Directive&)) {
+  if (token != name) {
+    return false;
+  }
+
+  if (!m_called.insert(name).second) {
+    std::cerr << "ERROR: Invalid " << name
+              << " specified more than once before WorldBegin" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  Directive directive(name, m_tokenizer);
+  (this->*implementation)(directive);
+
+  return true;
+}
+
+void GlobalParser::Accelerator(Directive& directive) { directive.Ignore(); }
+
+void GlobalParser::Camera(Directive& directive) {
+  m_camera_factory = ParseCamera(directive);
+  m_camera_to_world = m_matrix_manager.GetCurrent().first;
+}
+
+void GlobalParser::ColorIntegrator(Directive& directive) {
+  m_color_integrator =
+      ParseColorIntegrator(directive, m_spectrum_color_workaround);
+}
+
+void GlobalParser::Film(Directive& directive) {
+  m_film_result = ParseFilm(directive);
+}
+
+void GlobalParser::Integrator(Directive& directive) {
+  m_integrator_result = ParseIntegrator(directive);
+}
+
+void GlobalParser::LightPropagation(Directive& directive) {
+  m_light_propagation = ParseLightPropagation(directive);
+}
+
+void GlobalParser::PixelFilter(Directive& directive) { directive.Ignore(); }
+
+void GlobalParser::Random(Directive& directive) {
+  m_random = ParseRandom(directive);
+}
+
+void GlobalParser::Sampler(Directive& directive) {
+  m_sampler = ParseSampler(directive);
+}
+
+void GlobalParser::Parse() {
+  m_matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
+  m_matrix_manager.Identity();
+
+  for (auto token = m_tokenizer.Next(); token; token = m_tokenizer.Next()) {
+    if (token == "WorldBegin") {
+      return;
+    }
+
+    if (TryParseTransformDirectives(*token, m_tokenizer, m_matrix_manager)) {
+      continue;
+    }
+
+    if (TryParseInclude(*token, m_tokenizer)) {
+      continue;
+    }
+
+    if (ParseDirectiveOnce("Accelerator", *token, &GlobalParser::Accelerator)) {
+      continue;
+    }
+
+    if (ParseDirectiveOnce("Camera", *token, &GlobalParser::Camera)) {
+      continue;
+    }
+
+    if (ParseDirectiveOnce("ColorIntegrator", *token,
+                           &GlobalParser::ColorIntegrator)) {
+      continue;
+    }
+
+    if (ParseDirectiveOnce("Film", *token, &GlobalParser::Film)) {
+      continue;
+    }
+
+    if (ParseDirectiveOnce("Integrator", *token, &GlobalParser::Integrator)) {
+      continue;
+    }
+
+    if (ParseDirectiveOnce("LightPropagation", *token,
+                           &GlobalParser::LightPropagation)) {
+      continue;
+    }
+
+    if (ParseDirectiveOnce("PixelFilter", *token, &GlobalParser::PixelFilter)) {
+      continue;
+    }
+
+    if (ParseDirectiveOnce("Random", *token, &GlobalParser::Random)) {
+      continue;
+    }
+
+    if (ParseDirectiveOnce("Sampler", *token, &GlobalParser::Sampler)) {
+      continue;
+    }
+
+    if (token == "MakeNamedMedium") {
+      std::cerr << "ERROR: Invalid directive before WorldBegin: " << *token
+                << std::endl;
+      exit(EXIT_FAILURE);
+      continue;
+    }
+
+    if (token == "MediumInterface") {
+      std::cerr << "ERROR: Invalid directive before WorldBegin: " << *token
+                << std::endl;
+      exit(EXIT_FAILURE);
+      continue;
+    }
+
+    if (token == "TransformTimes") {
+      std::cerr << "ERROR: Invalid directive before WorldBegin: " << *token
+                << std::endl;
+      exit(EXIT_FAILURE);
+      continue;
+    }
+
+    std::cerr << "ERROR: Invalid directive before WorldBegin: " << *token
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  std::cerr << "ERROR: Missing WorldBegin directive" << std::endl;
+  exit(EXIT_FAILURE);
+}
+
+GlobalConfig GlobalParser::Parse(Tokenizer& tokenizer,
+                                 MatrixManager& matrix_manager, bool spectral,
+                                 bool spectrum_color_workaround) {
+  GlobalParser parser(tokenizer, matrix_manager, spectral,
+                      spectrum_color_workaround);
+  parser.Parse();
+
+  if (!parser.m_sampler.has_value()) {
+    parser.m_sampler = CreateDefaultSampler();
+  }
+
+  if (!parser.m_film_result.has_value()) {
+    parser.m_film_result = CreateDefaultFilm();
+  }
+
+  if (!parser.m_integrator_result.has_value()) {
+    parser.m_integrator_result = CreateDefaultIntegrator();
+  }
+
+  if (!parser.m_camera_factory.has_value()) {
+    parser.m_camera_factory = CreateDefaultCamera();
+  }
+
+  if (!parser.m_light_propagation.has_value()) {
+    parser.m_light_propagation = CreateDefaultLightPropagation(spectral);
+  }
+
+  if (!parser.m_color_integrator.has_value()) {
+    parser.m_color_integrator =
+        CreateDefaultColorIntegrator(spectrum_color_workaround);
+  }
+
+  if (!parser.m_random.has_value()) {
+    parser.m_random = CreateDefaultRandom();
+  }
+
+  auto camera = parser.m_camera_factory.value()(parser.m_film_result->first);
+  auto light_propagation_params =
+      parser.m_light_propagation.value()(parser.m_color_integrator.value());
+
+  return std::make_tuple(std::move(camera), std::move(parser.m_camera_to_world),
+                         std::move(parser.m_sampler.value()),
+                         std::move(parser.m_film_result->first),
+                         std::move(parser.m_integrator_result->first),
+                         std::move(parser.m_integrator_result->second),
+                         std::move(light_propagation_params.first),
+                         std::move(light_propagation_params.second),
+                         std::move(parser.m_film_result->second),
+                         std::move(parser.m_random.value()));
+}
 
 class GraphicsStateManager {
  public:
@@ -69,44 +313,6 @@ class GraphicsStateManager {
 
   std::stack<ShaderState> m_shader_state;
   std::stack<TransformState> m_transform_state;
-};
-
-class GeometryParser {
- public:
-  static std::pair<Scene, std::vector<Light>> Parse(
-      Tokenizer& tokenizer, MatrixManager& matrix_manager,
-      SpectrumManager& spectrum_manager);
-
- private:
-  GeometryParser(Tokenizer& tokenizer, MatrixManager& matrix_manager,
-                 SpectrumManager& spectrum_manager)
-      : m_tokenizer(tokenizer),
-        m_matrix_manager(matrix_manager),
-        m_spectrum_manager(spectrum_manager) {}
-
-  bool ParseDirective(absl::string_view name, absl::string_view token,
-                      void (GeometryParser::*implementation)(Directive&));
-  void AreaLightSource(Directive& directive);
-  void LightSource(Directive& directive);
-  void MakeNamedMaterial(Directive& directive);
-  void Material(Directive& directive);
-  void NamedMaterial(Directive& directive);
-  void ObjectBegin(Directive& directive);
-  void ObjectInstance(Directive& directive);
-  void ObjectEnd(Directive& directive);
-  void Shape(Directive& directive);
-  void Texture(Directive& directive);
-
-  std::pair<Scene, std::vector<Light>> Parse();
-
-  Tokenizer& m_tokenizer;
-  MatrixManager& m_matrix_manager;
-  SpectrumManager& m_spectrum_manager;
-  GraphicsStateManager m_graphics_state;
-  MaterialManager m_material_manager;
-  NormalMapManager m_normal_map_manager;
-  SceneBuilder m_scene_builder;
-  TextureManager m_texture_manager;
 };
 
 GraphicsStateManager::GraphicsStateManager() {
@@ -199,6 +405,44 @@ void GraphicsStateManager::FlipReverseOrientation() {
   m_shader_state.top().reverse_orientation =
       !m_shader_state.top().reverse_orientation;
 }
+
+class GeometryParser {
+ public:
+  static std::pair<Scene, std::vector<Light>> Parse(
+      Tokenizer& tokenizer, MatrixManager& matrix_manager,
+      SpectrumManager& spectrum_manager);
+
+ private:
+  GeometryParser(Tokenizer& tokenizer, MatrixManager& matrix_manager,
+                 SpectrumManager& spectrum_manager)
+      : m_tokenizer(tokenizer),
+        m_matrix_manager(matrix_manager),
+        m_spectrum_manager(spectrum_manager) {}
+
+  bool ParseDirective(absl::string_view name, absl::string_view token,
+                      void (GeometryParser::*implementation)(Directive&));
+  void AreaLightSource(Directive& directive);
+  void LightSource(Directive& directive);
+  void MakeNamedMaterial(Directive& directive);
+  void Material(Directive& directive);
+  void NamedMaterial(Directive& directive);
+  void ObjectBegin(Directive& directive);
+  void ObjectInstance(Directive& directive);
+  void ObjectEnd(Directive& directive);
+  void Shape(Directive& directive);
+  void Texture(Directive& directive);
+
+  std::pair<Scene, std::vector<Light>> Parse();
+
+  Tokenizer& m_tokenizer;
+  MatrixManager& m_matrix_manager;
+  SpectrumManager& m_spectrum_manager;
+  GraphicsStateManager m_graphics_state;
+  MaterialManager m_material_manager;
+  NormalMapManager m_normal_map_manager;
+  SceneBuilder m_scene_builder;
+  TextureManager m_texture_manager;
+};
 
 bool GeometryParser::ParseDirective(
     absl::string_view name, absl::string_view token,
@@ -439,8 +683,8 @@ absl::optional<RendererConfiguration> Parser::Next() {
 
   MatrixManager matrix_manager;
   auto global_config =
-      ParseGlobalDirectives(m_tokenizer, matrix_manager, m_defaults.spectral,
-                            m_defaults.spectrum_color_workaround);
+      GlobalParser::Parse(m_tokenizer, matrix_manager, m_defaults.spectral,
+                          m_defaults.spectrum_color_workaround);
   auto geometry_config = GeometryParser::Parse(m_tokenizer, matrix_manager,
                                                std::get<6>(global_config));
   return std::make_tuple(
