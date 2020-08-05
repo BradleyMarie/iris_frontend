@@ -3,6 +3,17 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 package(default_visibility = ["//visibility:private"])
 
 cc_library(
+    name = "finite_float_t",
+    srcs = ["finite_float_t.cc"],
+    hdrs = ["finite_float_t.h"],
+    deps = [
+        "@com_github_bradleymarie_iris//iris",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
+cc_library(
     name = "global",
     srcs = ["global.cc"],
     hdrs = ["global.h"],
@@ -11,7 +22,7 @@ cc_library(
         ":transform",
         "//src/cameras:parser",
         "//src/color_integrators:parser",
-        "//src/common:matrix_manager",
+        ":matrix_manager",
         "//src/common:parameters",
         "//src/common:pointer_types",
         "//src/common:quoted_string",
@@ -36,7 +47,7 @@ cc_library(
         ":transform",
         "//src/area_lights:parser",
         "//src/common:error",
-        "//src/common:matrix_manager",
+        ":matrix_manager",
         "//src/common:named_texture_manager",
         "//src/common:normal_map_manager",
         "//src/common:pointer_types",
@@ -56,6 +67,19 @@ cc_library(
     deps = [
         "//src/common:quoted_string",
         "//src/common:tokenizer",
+    ],
+)
+
+cc_library(
+    name = "matrix_manager",
+    srcs = ["matrix_manager.cc"],
+    hdrs = ["matrix_manager.h"],
+    deps = [
+        ":finite_float_t",
+        "//src/common:error",
+        "//src/common:pointer_types",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -87,8 +111,8 @@ cc_library(
 
 cc_library(
     name = "parser",
-    hdrs = ["parser.h"],
     srcs = ["parser.cc"],
+    hdrs = ["parser.h"],
     visibility = ["//src:__subpackages__"],
     deps = [
         "//src/common:tokenizer",
@@ -100,8 +124,8 @@ cc_library(
     srcs = ["scene_builder.cc"],
     hdrs = ["scene_builder.h"],
     deps = [
-        "//src/common:error",
         "//src/common:directive",
+        "//src/common:error",
         "//src/common:pointer_types",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:kd_tree_scene",
         "@com_google_absl//absl/container:flat_hash_map",
@@ -113,7 +137,7 @@ cc_library(
     srcs = ["transform.cc"],
     hdrs = ["transform.h"],
     deps = [
-        "//src/common:matrix_manager",
+        ":matrix_manager",
         "//src/common:quoted_string",
         "//src/common:tokenizer",
     ],

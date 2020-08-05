@@ -25,36 +25,12 @@ cc_library(
 )
 
 cc_library(
-    name = "finite_float_t",
-    srcs = ["finite_float_t.cc"],
-    hdrs = ["finite_float_t.h"],
-    deps = [
-        "@com_github_bradleymarie_iris//iris",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/types:optional",
-    ],
-)
-
-cc_library(
     name = "flags",
     srcs = ["flags.cc"],
     hdrs = ["flags.h"],
     deps = [
         "@com_github_bradleymarie_iris//iris_advanced",
         "@com_google_absl//absl/flags:flag",
-    ],
-)
-
-cc_library(
-    name = "matrix_manager",
-    srcs = ["matrix_manager.cc"],
-    hdrs = ["matrix_manager.h"],
-    deps = [
-        ":error",
-        ":finite_float_t",
-        ":pointer_types",
-        "@com_google_absl//absl/container:flat_hash_map",
-        "@com_google_absl//absl/strings",
     ],
 )
 

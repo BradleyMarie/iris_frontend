@@ -1,4 +1,4 @@
-#include "src/common/finite_float_t.h"
+#include "src/directives/finite_float_t.h"
 
 #include "absl/strings/numbers.h"
 

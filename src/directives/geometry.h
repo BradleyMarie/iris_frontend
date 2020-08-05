@@ -3,10 +3,10 @@
 
 #include <vector>
 
-#include "src/common/matrix_manager.h"
 #include "src/common/pointer_types.h"
 #include "src/common/spectrum_manager.h"
 #include "src/common/tokenizer.h"
+#include "src/directives/matrix_manager.h"
 
 namespace iris {
 

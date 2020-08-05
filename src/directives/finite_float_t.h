@@ -1,5 +1,5 @@
-#ifndef _SRC_COMMON_FINITE_FLOAT_T_
-#define _SRC_COMMON_FINITE_FLOAT_T_
+#ifndef _SRC_DIRECTIVES_FINITE_FLOAT_T_
+#define _SRC_DIRECTIVES_FINITE_FLOAT_T_
 
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
@@ -34,4 +34,4 @@ bool ParseFiniteNonZeroFloatT(absl::string_view token,
 
 }  // namespace iris
 
-#endif  // _SRC_COMMON_FINITE_FLOAT_T_
+#endif  // _SRC_DIRECTIVES_FINITE_FLOAT_T_

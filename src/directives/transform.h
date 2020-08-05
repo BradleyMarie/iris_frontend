@@ -1,8 +1,8 @@
 #ifndef _SRC_DIRECTIVES_TRANSFORM_
 #define _SRC_DIRECTIVES_TRANSFORM_
 
-#include "src/common/matrix_manager.h"
 #include "src/common/tokenizer.h"
+#include "src/directives/matrix_manager.h"
 
 namespace iris {
 
