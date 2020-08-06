@@ -36,7 +36,7 @@ ReflectorTexture ParseImageMapReflector(
       "vdelta", false, false, -std::numeric_limits<float_t>::infinity(),
       std::numeric_limits<float_t>::infinity(), kImageMapDefaultUVDeltaValue);
   SingleStringMatcher filename("filename", true, kImageMapDefaultFilename);
-  SingleStringMatcher wrap("wrap", true, kImageMapDefaultWrap);
+  SingleStringMatcher wrap("wrap", false, kImageMapDefaultWrap);
   parameters.Match(u_scale, v_scale, u_delta, v_delta, filename, wrap);
 
   if (!absl::EndsWith(filename.Get(), ".png")) {
@@ -96,7 +96,7 @@ FloatTexture ParseImageMapFloat(
       "vdelta", false, false, -std::numeric_limits<float_t>::infinity(),
       std::numeric_limits<float_t>::infinity(), kImageMapDefaultUVDeltaValue);
   SingleStringMatcher filename("filename", true, kImageMapDefaultFilename);
-  SingleStringMatcher wrap("wrap", true, kImageMapDefaultWrap);
+  SingleStringMatcher wrap("wrap", false, kImageMapDefaultWrap);
   parameters.Match(u_scale, v_scale, u_delta, v_delta, filename, wrap);
 
   if (!absl::EndsWith(filename.Get(), ".png")) {
