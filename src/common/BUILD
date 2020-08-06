@@ -4,14 +4,15 @@ package(default_visibility = ["//src:__subpackages__"])
 
 cc_library(
     name = "directive",
-    hdrs = ["directive.h"],
     srcs = ["directive.cc"],
+    hdrs = ["directive.h"],
     deps = [
         ":parameters",
         ":quoted_string",
         ":tokenizer",
         "//src/param_matchers:single",
         "@com_google_absl//absl/container:inlined_vector",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -81,10 +82,10 @@ cc_library(
     name = "parameter",
     hdrs = ["parameter.h"],
     deps = [
-        "@com_google_absl//absl/types:optional",
-        "@com_google_absl//absl/types:variant",
         "@com_github_bradleymarie_iris//iris_camera",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+        "@com_google_absl//absl/types:variant",
     ],
 )
 
@@ -105,11 +106,11 @@ cc_library(
     hdrs = ["parameters.h"],
     deps = [
         ":flags",
-        ":tokenizer",
         ":parameter_matcher",
         ":quoted_string",
-        "@com_google_absl//absl/types:optional",
+        ":tokenizer",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
     ],
 )
 

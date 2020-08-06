@@ -3,15 +3,16 @@
 #include <algorithm>
 #include <iostream>
 
+#include "absl/strings/numbers.h"
 #include "src/common/quoted_string.h"
 #include "src/param_matchers/single.h"
 
 namespace iris {
 namespace {
 
-absl::string_view InvalidValue [[noreturn]](absl::string_view base_type_name,
-                                            absl::string_view value,
-                                            absl::string_view element_name) {
+absl::string_view InvalidValue
+    [[noreturn]] (absl::string_view base_type_name, absl::string_view value,
+                  absl::string_view element_name) {
   std::cerr << "ERROR: Invalid " << base_type_name << " " << element_name
             << " specified: " << value << std::endl;
   exit(EXIT_FAILURE);
@@ -35,16 +36,15 @@ absl::string_view ParseNextQuotedString(absl::string_view base_type_name,
   return *unquoted;
 }
 
-std::string ParseNextQuotedStringAndCopy(
-    absl::string_view base_type_name, Tokenizer& tokenizer,
-    absl::string_view element_name) {
+std::string ParseNextQuotedStringAndCopy(absl::string_view base_type_name,
+                                         Tokenizer& tokenizer,
+                                         absl::string_view element_name) {
   auto result = ParseNextQuotedString(base_type_name, tokenizer, element_name);
   return std::string(result);
 }
 
 size_t Match(absl::Span<const absl::string_view> values,
-             absl::string_view base_type_name,
-             absl::string_view value,
+             absl::string_view base_type_name, absl::string_view value,
              absl::string_view element_name) {
   auto iter = std::find(values.begin(), values.end(), value);
   if (iter != values.end()) {
@@ -55,17 +55,32 @@ size_t Match(absl::Span<const absl::string_view> values,
 }
 
 size_t ParseAndMatch(absl::Span<const absl::string_view> type_names,
-                     absl::string_view base_type_name,
-                     Tokenizer& tokenizer,
+                     absl::string_view base_type_name, Tokenizer& tokenizer,
                      absl::string_view element_name) {
   auto value = ParseNextQuotedString(base_type_name, tokenizer, element_name);
   return Match(type_names, base_type_name, value, element_name);
 }
 
+bool ParseFiniteFloat(absl::string_view token, float_t* value) {
+  double as_double;
+  bool success = absl::SimpleAtod(token, &as_double);
+  if (!success) {
+    return false;
+  }
+
+  float_t as_float = static_cast<float_t>(as_double);
+  if (!isfinite(as_float)) {
+    return false;
+  }
+
+  *value = as_float;
+  return true;
+}
+
 }  // namespace
 
 Directive::Directive(absl::string_view base_type_name, Tokenizer& tokenizer)
-    : m_base_type_name(base_type_name), m_tokenizer(&tokenizer) { }
+    : m_base_type_name(base_type_name), m_tokenizer(&tokenizer) {}
 
 Directive::~Directive() { assert(!m_tokenizer); }
 
@@ -75,6 +90,31 @@ size_t Directive::MatchType(absl::Span<const absl::string_view> type_names) {
 
 size_t Directive::MatchFormat(absl::Span<const absl::string_view> type_names) {
   return ParseAndMatch(type_names, m_base_type_name, *m_tokenizer, "format");
+}
+
+void Directive::FiniteFloats(absl::Span<float_t> values,
+                             absl::optional<absl::Span<std::string>> strings) {
+  assert(!strings.has_value() || values.size() == strings->size());
+  for (size_t i = 0; i < values.size(); i++) {
+    auto token = m_tokenizer->Next();
+    if (!token) {
+      std::cerr << "ERROR: " << m_base_type_name << " requires "
+                << values.size() << " parameters" << std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    if (!ParseFiniteFloat(*token, &values[i])) {
+      std::cerr << "ERROR: Failed to parse " << m_base_type_name
+                << " parameter to a finite floating point value: " << *token
+                << std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    if (strings) {
+      (*strings)[i].assign(token->begin(), token->size());
+    }
+  }
+  m_tokenizer = nullptr;
 }
 
 std::string Directive::SingleString(absl::string_view field_name) {

@@ -2,12 +2,12 @@
 #define _SRC_COMMON_DIRECTIVE_
 
 #include <functional>
+#include <iostream>
 #include <vector>
 
 #include "absl/container/inlined_vector.h"
 #include "absl/types/span.h"
 #include "src/common/parameters.h"
-#include <iostream>
 namespace iris {
 
 class Directive {
@@ -27,9 +27,9 @@ class Directive {
   using Implementations = std::vector<Implementation<Result, Args...>>;
 
   template <typename... Args>
-  using FormattedImplementations =
-      std::pair<absl::string_view,
-                absl::Span<const Implementation<void, const std::string&, Args...>>>;
+  using FormattedImplementations = std::pair<
+      absl::string_view,
+      absl::Span<const Implementation<void, const std::string&, Args...>>>;
 
   template <typename... Args>
   using AllFormattedImplementations =
@@ -79,7 +79,8 @@ class Directive {
   void InvokeNamedMultiFormat(
       const AllFormattedImplementations<Args&...>& implementations,
       Args&... args) {
-    absl::InlinedVector<absl::string_view, kMaxVariantsPerDirective> format_names;
+    absl::InlinedVector<absl::string_view, kMaxVariantsPerDirective>
+        format_names;
     for (const auto& entry : implementations) {
       format_names.push_back(entry.first);
     }
@@ -92,9 +93,12 @@ class Directive {
     size_t type_index = MatchType(type_names);
     Parameters params(m_base_type_name, type_names[type_index], *m_tokenizer);
     m_tokenizer = nullptr;
-    implementations[format_index].second[type_index].second(params, name, args...);
+    implementations[format_index].second[type_index].second(params, name,
+                                                            args...);
   }
 
+  void FiniteFloats(absl::Span<float_t> values,
+                    absl::optional<absl::Span<std::string>> strings);
   std::string SingleString(absl::string_view field_name);
 
   void Empty();
