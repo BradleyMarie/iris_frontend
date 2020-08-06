@@ -10,7 +10,7 @@
 #include "rplyfile.h"
 #include "src/common/error.h"
 #include "src/common/ostream.h"
-#include "src/param_matchers/single.h"
+#include "src/param_matchers/file.h"
 
 namespace iris {
 namespace {
@@ -631,15 +631,13 @@ ShapeResult ParsePlyMesh(Parameters& parameters, const Matrix& model_to_world,
                          const MaterialResult& material_result,
                          const EmissiveMaterial& front_emissive_material,
                          const EmissiveMaterial& back_emissive_material) {
-  SingleStringMatcher filename("filename", true, kPlyMeshDefaultFilename);
+  SingleFileMatcher filename("filename");
   auto unused_parameters = parameters.MatchAllowUnused(filename);
   auto material = material_result(unused_parameters, material_manager,
                                   named_texture_manager, normal_map_manager,
                                   texture_manager, spectrum_manager);
 
-  PlyData fileData =
-      ReadPlyFile(filename.Get(), parameters.ResolvePath(filename.Get()));
-
+  PlyData fileData = ReadPlyFile(filename.Get().first, filename.Get().second);
   for (auto& point : fileData.GetVertices()) {
     point = PointMatrixMultiply(model_to_world.get(), point);
   }

@@ -25,6 +25,15 @@ cc_library(
 )
 
 cc_library(
+    name = "file",
+    srcs = ["file.cc"],
+    hdrs = ["file.h"],
+    deps = [
+        "//src/common:parameter_matcher",
+    ],
+)
+
+cc_library(
     name = "integral_single",
     hdrs = ["integral_single.h"],
     deps = [

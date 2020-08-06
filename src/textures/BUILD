@@ -21,6 +21,7 @@ cc_library(
     deps = [
         "//src/common:parameters",
         "//src/common:texture_manager",
+        "//src/param_matchers:file",
         "//src/param_matchers:float_single",
         "//src/param_matchers:float_texture",
         "//src/param_matchers:reflector_texture",

@@ -182,7 +182,11 @@ static UnspacedColorParameter ParseRgb(Tokenizer& tokenizer) {
 static StringParameter ParseString(Tokenizer& tokenizer) {
   auto data = ParseData<std::string, ParseQuotedTokenToString>(
       tokenizer, "String", "string");
-  return StringParameter{std::move(data)};
+  std::vector<std::string> resolved;
+  for (const auto& entry : data) {
+    resolved.push_back(tokenizer.ResolvePath(entry));
+  }
+  return StringParameter{std::move(data), std::move(resolved)};
 }
 
 static TextureParameter ParseTexture(Tokenizer& tokenizer) {

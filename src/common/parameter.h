@@ -47,6 +47,7 @@ struct ColorParameter {
 
 struct StringParameter {
   std::vector<std::string> data;
+  std::vector<std::string> resolved;
 };
 
 struct TextureParameter {

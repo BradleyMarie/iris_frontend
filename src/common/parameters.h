@@ -39,12 +39,6 @@ class Parameters {
 
   void Ignore();
 
-  // TODO: Find a way to eliminate this function
-  std::string ResolvePath(absl::string_view path) {
-    assert(m_tokenizer);
-    return m_tokenizer->ResolvePath(path);
-  }
-
  private:
   Parameters(absl::string_view base_type_name, Tokenizer& tokenizer);
   Parameters(absl::string_view base_type_name, absl::string_view type_name,

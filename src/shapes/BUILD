@@ -35,7 +35,7 @@ cc_library(
         "//src/common:ostream",
         "//src/common:parameters",
         "//src/materials:result",
-        "//src/param_matchers:single",
+        "//src/param_matchers:file",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle_mesh",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle_mesh_normal_map",
         "@rply",
