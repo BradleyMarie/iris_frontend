@@ -17,11 +17,12 @@ ReflectorTexture ReflectorFromUniformReflectance(
   return texture_manager.AllocateConstantReflectorTexture(reflector);
 }
 
-const size_t variant_indices[4] = {
+const size_t variant_indices[5] = {
     GetIndex<FloatParameter, ParameterData>(),
     GetIndex<ColorParameter, ParameterData>(),
     GetIndex<SpectrumParameter, ParameterData>(),
-    GetIndex<TextureParameter, ParameterData>()};
+    GetIndex<TextureParameter, ParameterData>(),
+    GetIndex<UnspacedColorParameter, ParameterData>()};
 
 }  // namespace
 
@@ -79,6 +80,21 @@ ReflectorTexture ReflectorTextureMatcher::Match(
   if (!ValidateFloat(parameter.data[0].values[0]) ||
       !ValidateFloat(parameter.data[0].values[1]) ||
       !ValidateFloat(parameter.data[0].values[2])) {
+    ElementRangeError();
+  }
+  Reflector reflector =
+      m_spectrum_manager.AllocateColorReflector(parameter.data[0]).value();
+  return m_texture_manager.AllocateConstantReflectorTexture(reflector);
+}
+
+ReflectorTexture ReflectorTextureMatcher::Match(
+    const UnspacedColorParameter& parameter) {
+  if (parameter.data.size() != 1) {
+    NumberOfElementsError();
+  }
+  if (!ValidateFloat(parameter.data[0][0]) ||
+      !ValidateFloat(parameter.data[0][1]) ||
+      !ValidateFloat(parameter.data[0][2])) {
     ElementRangeError();
   }
   Reflector reflector =
@@ -148,6 +164,8 @@ void ReflectorTextureMatcher::Match(ParameterData& data) {
     m_value = Match(absl::get<FloatParameter>(data));
   } else if (absl::holds_alternative<ColorParameter>(data)) {
     m_value = Match(absl::get<ColorParameter>(data));
+  } else if (absl::holds_alternative<UnspacedColorParameter>(data)) {
+    m_value = Match(absl::get<UnspacedColorParameter>(data));
   } else if (absl::holds_alternative<SpectrumParameter>(data)) {
     m_value = Match(absl::get<SpectrumParameter>(data));
   } else {

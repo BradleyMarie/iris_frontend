@@ -33,6 +33,7 @@ class ReflectorTextureMatcher : public ParameterMatcher {
   ReflectorTexture Match(const ColorParameter& parameter);
   ReflectorTexture Match(const SpectrumParameter& parameter);
   ReflectorTexture Match(const TextureParameter& parameter);
+  ReflectorTexture Match(const UnspacedColorParameter& parameter);
 
   ReflectorTexture Match(
       const std::vector<std::pair<std::string, std::string>>& files);

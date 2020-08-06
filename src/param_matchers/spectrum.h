@@ -25,6 +25,7 @@ class SpectrumMatcher : public ParameterMatcher {
  private:
   Spectrum Match(const ColorParameter& parameter);
   Spectrum Match(const SpectrumParameter& parameter);
+  Spectrum Match(const UnspacedColorParameter& parameter);
 
   Spectrum Match(const std::vector<std::pair<std::string, std::string>>& files);
   Spectrum Match(

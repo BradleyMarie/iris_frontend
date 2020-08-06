@@ -84,6 +84,12 @@ absl::optional<Spectrum> SpectrumManager::AllocateColorSpectrum(
   return result;
 }
 
+absl::optional<Spectrum> SpectrumManager::AllocateColorSpectrum(
+    const std::array<float_t, 3>& color) {
+  return AllocateColorSpectrum(
+      ColorCreate(m_default_color_space, color.data()));
+}
+
 absl::optional<Reflector> SpectrumManager::AllocateInterpolatedReflector(
     const std::vector<float_t>& wavelengths_and_reflectances) {
   if (wavelengths_and_reflectances.size() % 2 != 0) {
@@ -139,6 +145,12 @@ absl::optional<Reflector> SpectrumManager::AllocateColorReflector(
   }
 
   return result;
+}
+
+absl::optional<Reflector> SpectrumManager::AllocateColorReflector(
+    const std::array<float_t, 3>& color) {
+  return AllocateColorReflector(
+      ColorCreate(m_default_color_space, color.data()));
 }
 
 absl::optional<Reflector> SpectrumManager::AllocateUniformReflector(

@@ -3,15 +3,15 @@
 #include <iostream>
 
 #include "absl/strings/str_join.h"
-#include "src/common/flags.h"
 #include "src/param_matchers/spd_file.h"
 
 namespace iris {
 namespace {
 
-const size_t variant_indices[2] = {
+const size_t variant_indices[3] = {
     GetIndex<ColorParameter, ParameterData>(),
-    GetIndex<SpectrumParameter, ParameterData>()};
+    GetIndex<SpectrumParameter, ParameterData>(),
+    GetIndex<UnspacedColorParameter, ParameterData>()};
 
 }  // namespace
 
@@ -29,13 +29,19 @@ SpectrumMatcher SpectrumMatcher::FromRgb(
     absl::string_view parameter_name, bool required,
     SpectrumManager& spectrum_manager,
     const std::array<float_t, 3>& default_rgb) {
-  COLOR3 color =
-      ColorCreate(absl::GetFlag(FLAGS_rgb_color_space), default_rgb.data());
-  return SpectrumMatcher(parameter_name, required, spectrum_manager,
-                         spectrum_manager.AllocateColorSpectrum(color).value());
+  return SpectrumMatcher(
+      parameter_name, required, spectrum_manager,
+      spectrum_manager.AllocateColorSpectrum(default_rgb).value());
 }
 
 Spectrum SpectrumMatcher::Match(const ColorParameter& parameter) {
+  if (parameter.data.size() != 1) {
+    NumberOfElementsError();
+  }
+  return m_spectrum_manager.AllocateColorSpectrum(parameter.data[0]).value();
+}
+
+Spectrum SpectrumMatcher::Match(const UnspacedColorParameter& parameter) {
   if (parameter.data.size() != 1) {
     NumberOfElementsError();
   }
@@ -90,6 +96,8 @@ Spectrum SpectrumMatcher::Match(const SpectrumParameter& parameter) {
 void SpectrumMatcher::Match(ParameterData& data) {
   if (absl::holds_alternative<ColorParameter>(data)) {
     m_value = Match(absl::get<ColorParameter>(data));
+  } if (absl::holds_alternative<UnspacedColorParameter>(data)) {
+    m_value = Match(absl::get<UnspacedColorParameter>(data));
   } else {
     m_value = Match(absl::get<SpectrumParameter>(data));
   }

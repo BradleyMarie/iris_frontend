@@ -26,16 +26,6 @@ cc_library(
 )
 
 cc_library(
-    name = "flags",
-    srcs = ["flags.cc"],
-    hdrs = ["flags.h"],
-    deps = [
-        "@com_github_bradleymarie_iris//iris_advanced",
-        "@com_google_absl//absl/flags:flag",
-    ],
-)
-
-cc_library(
     name = "material_manager",
     srcs = ["material_manager.cc"],
     hdrs = ["material_manager.h"],
@@ -105,7 +95,6 @@ cc_library(
     srcs = ["parameters.cc"],
     hdrs = ["parameters.h"],
     deps = [
-        ":flags",
         ":parameter_matcher",
         ":quoted_string",
         ":tokenizer",

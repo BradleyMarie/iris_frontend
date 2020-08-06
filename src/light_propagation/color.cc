@@ -10,6 +10,8 @@ namespace iris {
 namespace {
 
 static const char* kColorLightPropagationColorSpace = "linearsrgb";
+static const COLOR_SPACE kColorLightPropagationRgbColorSpace =
+    COLOR_SPACE_LINEAR_SRGB;
 
 }  // namespace
 
@@ -42,7 +44,8 @@ LightPropagationResult ParseColor(Parameters& parameters) {
     SuccessOrOOM(status);
 
     return std::make_pair(
-        SpectrumManager(std::move(extrapolator), color_integrator),
+        SpectrumManager(std::move(extrapolator), color_integrator,
+                        kColorLightPropagationRgbColorSpace),
         final_color_integrator);
   };
 }

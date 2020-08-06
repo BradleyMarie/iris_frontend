@@ -82,7 +82,6 @@ cc_library(
     hdrs = ["spectrum.h"],
     deps = [
         ":spd_file",
-        "//src/common:flags",
         "//src/common:parameter_matcher",
         "//src/common:pointer_types",
         "//src/common:spectrum_manager",

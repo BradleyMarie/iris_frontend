@@ -7,7 +7,6 @@
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
-#include "src/common/flags.h"
 #include "src/common/quoted_string.h"
 
 namespace iris {
@@ -158,21 +157,26 @@ static NormalParameter ParseNormal(Tokenizer& tokenizer) {
   return NormalParameter{std::move(data)};
 }
 
-static COLOR3 MakeColor(float_t x, float_t y, float_t z) {
-  float_t values[3] = {x, y, z};
-  return ColorCreate(absl::GetFlag(FLAGS_rgb_color_space), values);
+static std::array<float_t, 3> MakeColor(float_t x, float_t y, float_t z) {
+  return {x, y, z};
 }
 
-static ColorParameter ParseColor(Tokenizer& tokenizer) {
-  auto data = ParseFloatTuple<COLOR3, MakeColor, ColorValidate>(
+static bool ValidateColor(std::array<float_t, 3> color) {
+  return std::isfinite(color[0]) && std::isfinite(color[1]) &&
+         std::isfinite(color[2]) && (float_t)0.0 <= color[0] &&
+         (float_t)0.0 <= color[1] && (float_t)0.0 <= color[2];
+}
+
+static UnspacedColorParameter ParseColor(Tokenizer& tokenizer) {
+  auto data = ParseFloatTuple<std::array<float_t, 3>, MakeColor, ValidateColor>(
       tokenizer, "Color", "color");
-  return ColorParameter{std::move(data)};
+  return UnspacedColorParameter{std::move(data)};
 }
 
-static ColorParameter ParseRgb(Tokenizer& tokenizer) {
-  auto data = ParseFloatTuple<COLOR3, MakeColor, ColorValidate>(tokenizer,
-                                                                "Rgb", "rgb");
-  return ColorParameter{std::move(data)};
+static UnspacedColorParameter ParseRgb(Tokenizer& tokenizer) {
+  auto data = ParseFloatTuple<std::array<float_t, 3>, MakeColor, ValidateColor>(
+      tokenizer, "Rgb", "rgb");
+  return UnspacedColorParameter{std::move(data)};
 }
 
 static StringParameter ParseString(Tokenizer& tokenizer) {
@@ -243,14 +247,14 @@ ParserCallback ToCallback(std::function<Result(Tokenizer&)> func) {
 static const std::map<absl::string_view, ParserCallback> kParsers = {
     // blackbody
     {"bool", ToCallback<BoolParameter>(ParseBool)},
-    {"color", ToCallback<ColorParameter>(ParseColor)},
+    {"color", ToCallback<UnspacedColorParameter>(ParseColor)},
     {"float", ToCallback<FloatParameter>(ParseFloat)},
     {"integer", ToCallback<IntParameter>(ParseInt)},
     {"normal", ToCallback<NormalParameter>(ParseNormal)},
     {"point", ToCallback<Point3Parameter>(ParsePoint)},
     // point2
     {"point3", ToCallback<Point3Parameter>(ParsePoint3)},
-    {"rgb", ToCallback<ColorParameter>(ParseRgb)},
+    {"rgb", ToCallback<UnspacedColorParameter>(ParseRgb)},
     {"spectrum", ToCallback<SpectrumParameter>(ParseSpectrum)},
     {"string", ToCallback<StringParameter>(ParseString)},
     {"texture", ToCallback<TextureParameter>(ParseTexture)},
