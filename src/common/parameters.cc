@@ -416,16 +416,6 @@ Parameters& Parameters::operator=(Parameters&& other) {
 
 Parameters::~Parameters() { assert(!m_unused_parameters && !m_tokenizer); }
 
-absl::string_view Parameters::BaseType() {
-  assert(m_base_type_name != kInvalidTypeName);
-  return m_base_type_name;
-}
-
-absl::string_view Parameters::Type() {
-  assert(m_type_name.has_value() && *m_type_name != kInvalidTypeName);
-  return *m_type_name;
-}
-
 Parameters Parameters::MatchAllowUnusedImpl(
     absl::Span<ParameterMatcher* const> param_matchers) {
   assert(m_tokenizer || m_unused_parameters);
@@ -466,6 +456,13 @@ void Parameters::Ignore() {
   } else {
     m_unused_parameters = absl::nullopt;
   }
+}
+
+std::string Parameters::Name() const {
+  if (!m_type_name) {
+    return std::string(m_base_type_name);
+  }
+  return absl::StrCat(*m_type_name, " ", m_base_type_name);
 }
 
 }  // namespace iris

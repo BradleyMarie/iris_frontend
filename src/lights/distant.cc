@@ -33,8 +33,7 @@ Light ParseDistant(Parameters& parameters, SpectrumManager& spectrum_manager,
 
   if (!VectorValidate(world_direction)) {
     std::cerr << "ERROR: Incompatible values specified for "
-              << parameters.Type() << " " << parameters.BaseType()
-              << " parameters: from, to" << std::endl;
+              << parameters.Name() << " parameters: from, to" << std::endl;
     exit(EXIT_FAILURE);
   }
 

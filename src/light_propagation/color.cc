@@ -26,9 +26,8 @@ LightPropagationResult ParseColor(Parameters& parameters) {
   } else if (colorspace.Get() == "linearsrgb") {
     color_space = COLOR_SPACE_LINEAR_SRGB;
   } else {
-    std::cerr << "ERROR: Unsupported colorspace for " << parameters.Type()
-              << " " << parameters.BaseType() << ": " << colorspace.Get()
-              << std::endl;
+    std::cerr << "ERROR: Unsupported colorspace for " << parameters.Name()
+              << ": " << colorspace.Get() << std::endl;
     exit(EXIT_FAILURE);
   }
 

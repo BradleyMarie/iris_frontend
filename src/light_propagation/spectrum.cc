@@ -22,8 +22,8 @@ LightPropagationResult ParseSpectrum(Parameters& parameters) {
 
   if (colorextrapolator.Get() != "smits") {
     std::cerr << "ERROR: Unsupported colorextrapolator for "
-              << parameters.Type() << " " << parameters.BaseType() << ": "
-              << colorextrapolator.Get() << std::endl;
+              << parameters.Name() << ": " << colorextrapolator.Get()
+              << std::endl;
     exit(EXIT_FAILURE);
   }
 

@@ -42,9 +42,8 @@ ShapeResult ParseTriangleMesh(Parameters& parameters,
   for (const auto& entry : int_indices.Get()) {
     static_assert(INT32_MAX < SIZE_MAX);
     if (entry < 0 || points.Get().size() <= (size_t)entry) {
-      std::cerr << "ERROR: Out of range value for " << unused_parameters.Type()
-                << " " << unused_parameters.BaseType() << " parameter: indices"
-                << std::endl;
+      std::cerr << "ERROR: Out of range value for " << unused_parameters.Name()
+                << " parameter: indices" << std::endl;
       exit(EXIT_FAILURE);
     }
     indices.push_back(entry);
