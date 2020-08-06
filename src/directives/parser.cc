@@ -5,19 +5,19 @@
 #include <stack>
 #include <vector>
 
+#include "absl/strings/str_join.h"
 #include "src/area_lights/parser.h"
 #include "src/cameras/parser.h"
 #include "src/color_integrators/parser.h"
+#include "src/common/error.h"
 #include "src/common/material_manager.h"
 #include "src/common/named_texture_manager.h"
 #include "src/common/normal_map_manager.h"
+#include "src/common/quoted_string.h"
 #include "src/common/spectrum_manager.h"
 #include "src/common/texture_manager.h"
-#include "src/common/quoted_string.h"
-#include "src/directives/matrix_manager.h"
 #include "src/directives/named_material_manager.h"
 #include "src/directives/scene_builder.h"
-#include "src/directives/transform.h"
 #include "src/films/parser.h"
 #include "src/integrators/parser.h"
 #include "src/light_propagation/parser.h"
@@ -53,6 +53,450 @@ bool TryParseInclude(absl::string_view directive, Tokenizer& tokenizer) {
   tokenizer.Include(as_string);
 
   return true;
+}
+
+class MatrixManager {
+ public:
+  MatrixManager();
+
+  enum Active {
+    START_TRANSFORM = 1,
+    END_TRANSFORM = 2,
+    ALL_TRANSFORMS = 3,
+  };
+
+  bool Parse(absl::string_view token, Tokenizer& tokenizer);
+
+  void Reset();
+  Active GetActive() const { return m_active; }
+  const std::pair<Matrix, Matrix>& GetCurrent();
+  void RestoreState(const std::pair<Matrix, Matrix>& transforms,
+                    Active active) {
+    m_current = transforms;
+    m_active = active;
+  }
+
+ private:
+  bool ParseDirective(absl::string_view name, absl::string_view token,
+                      Tokenizer& tokenizer,
+                      void (MatrixManager::*implementation)(Directive&));
+
+  void Identity(Directive& directive);
+  void Translate(Directive& directive);
+  void Scale(Directive& directive);
+  void Rotate(Directive& directive);
+  void LookAt(Directive& directive);
+  void CoordinateSystem(Directive& directive);
+  void CoordSysTransform(Directive& directive);
+  void Transform(Directive& directive);
+  void ConcatTransform(Directive& directive);
+  void ActiveTransform(Directive& directive);
+
+  void Transform(Matrix m);
+  void Set(Matrix m);
+
+  class Cache {
+   public:
+    Matrix Lookup(Matrix matrix) {
+      float_t contents[4][4];
+      MatrixReadContents(matrix.get(), contents);
+      if (contents[0][0] == (float_t)1.0 && contents[0][1] == (float_t)0.0 &&
+          contents[0][2] == (float_t)0.0 && contents[0][3] == (float_t)0.0 &&
+          contents[1][0] == (float_t)0.0 && contents[1][1] == (float_t)1.0 &&
+          contents[1][2] == (float_t)0.0 && contents[1][3] == (float_t)0.0 &&
+          contents[2][0] == (float_t)0.0 && contents[2][1] == (float_t)0.0 &&
+          contents[2][2] == (float_t)1.0 && contents[2][3] == (float_t)0.0 &&
+          contents[3][0] == (float_t)0.0 && contents[3][1] == (float_t)0.0 &&
+          contents[3][2] == (float_t)0.0 && contents[3][3] == (float_t)1.0) {
+        return Matrix();
+      }
+
+      auto it = m_transforms.find(matrix);
+      if (it != m_transforms.end()) {
+        return *it;
+      }
+
+      Matrix inverse;
+      *inverse.release_and_get_address() = MatrixGetInverse(matrix.get());
+
+      m_transforms.insert(matrix);
+      m_transforms.insert(inverse);
+
+      return matrix;
+    }
+
+   private:
+    struct Comparator {
+      bool operator()(const Matrix& lhs, const Matrix& rhs) const {
+        float_t l_contents[4][4];
+        MatrixReadContents(lhs.get(), l_contents);
+
+        float_t r_contents[4][4];
+        MatrixReadContents(rhs.get(), r_contents);
+
+        for (size_t i = 0; i < 4; i++) {
+          for (size_t j = 0; j < 4; j++) {
+            if (l_contents[i][j] != r_contents[i][j]) {
+              return l_contents[i][j] < r_contents[i][j];
+            }
+          }
+        }
+
+        return false;
+      }
+    };
+
+    std::set<Matrix, Comparator> m_transforms;
+  };
+
+  Active m_active;
+  absl::flat_hash_map<std::string, std::pair<Matrix, Matrix>>
+      m_coordinate_systems;
+  std::pair<Matrix, Matrix> m_current;
+  Cache m_cache;
+};
+
+MatrixManager::MatrixManager() : m_active(ALL_TRANSFORMS) {}
+
+const std::pair<Matrix, Matrix>& MatrixManager::GetCurrent() {
+  m_current.first = m_cache.Lookup(m_current.first);
+  m_current.second = m_cache.Lookup(m_current.second);
+  return m_current;
+}
+
+void MatrixManager::Reset() {
+  m_active = MatrixManager::ALL_TRANSFORMS;
+  Set(Matrix());
+}
+
+bool MatrixManager::Parse(absl::string_view token, Tokenizer& tokenizer) {
+  if (ParseDirective("Identity", token, tokenizer, &MatrixManager::Identity)) {
+    return true;
+  }
+
+  if (ParseDirective("Translate", token, tokenizer,
+                     &MatrixManager::Translate)) {
+    return true;
+  }
+
+  if (ParseDirective("Scale", token, tokenizer, &MatrixManager::Scale)) {
+    return true;
+  }
+
+  if (ParseDirective("Rotate", token, tokenizer, &MatrixManager::Rotate)) {
+    return true;
+  }
+
+  if (ParseDirective("LookAt", token, tokenizer, &MatrixManager::LookAt)) {
+    return true;
+  }
+
+  if (ParseDirective("CoordinateSystem", token, tokenizer,
+                     &MatrixManager::CoordinateSystem)) {
+    return true;
+  }
+
+  if (ParseDirective("CoordSysTransform", token, tokenizer,
+                     &MatrixManager::CoordSysTransform)) {
+    return true;
+  }
+
+  if (ParseDirective("Transform", token, tokenizer,
+                     &MatrixManager::Transform)) {
+    return true;
+  }
+
+  if (ParseDirective("ConcatTransform", token, tokenizer,
+                     &MatrixManager::ConcatTransform)) {
+    return true;
+  }
+
+  if (ParseDirective("ActiveTransform", token, tokenizer,
+                     &MatrixManager::ActiveTransform)) {
+    return true;
+  }
+
+  return false;
+}
+
+bool MatrixManager::ParseDirective(
+    absl::string_view name, absl::string_view token, Tokenizer& tokenizer,
+    void (MatrixManager::*implementation)(Directive&)) {
+  if (token != name) {
+    return false;
+  }
+
+  Directive directive(name, tokenizer);
+  (this->*implementation)(directive);
+
+  return true;
+}
+
+void MatrixManager::Identity(Directive& directive) {
+  directive.Empty();
+  Set(Matrix());
+}
+
+void MatrixManager::Translate(Directive& directive) {
+  std::array<float_t, 3> params;
+  directive.FiniteFloats(absl::MakeSpan(params), absl::nullopt);
+
+  Matrix scalar;
+  ISTATUS status = MatrixAllocateTranslation(params[0], params[1], params[2],
+                                             scalar.release_and_get_address());
+  SuccessOrOOM(status);
+
+  Transform(scalar);
+}
+
+void MatrixManager::Scale(Directive& directive) {
+  std::array<float_t, 3> params;
+  directive.FiniteFloats(absl::MakeSpan(params), absl::nullopt);
+
+  Matrix scalar;
+  ISTATUS status = MatrixAllocateScalar(params[0], params[1], params[2],
+                                        scalar.release_and_get_address());
+
+  switch (status) {
+    case ISTATUS_INVALID_ARGUMENT_00:
+      std::cerr << "ERROR: The x parameters of Scale must be non-zero"
+                << std::endl;
+      exit(EXIT_FAILURE);
+    case ISTATUS_INVALID_ARGUMENT_01:
+      std::cerr << "ERROR: The y parameters of Scale must be non-zero"
+                << std::endl;
+      exit(EXIT_FAILURE);
+    case ISTATUS_INVALID_ARGUMENT_02:
+      std::cerr << "ERROR: The z parameters of Scale must be non-zero"
+                << std::endl;
+      exit(EXIT_FAILURE);
+    case ISTATUS_ALLOCATION_FAILED:
+      ReportOOM();
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
+
+  Transform(scalar);
+}
+
+void MatrixManager::Rotate(Directive& directive) {
+  std::array<float_t, 4> params;
+  directive.FiniteFloats(absl::MakeSpan(params), absl::nullopt);
+
+  const float_t to_radians =
+      (float_t)3.1415926535897932384626433832 / (float_t)180.0;
+
+  Matrix rotation;
+  ISTATUS status =
+      MatrixAllocateRotation(params[0] * to_radians, params[1], params[2],
+                             params[3], rotation.release_and_get_address());
+
+  switch (status) {
+    case ISTATUS_INVALID_ARGUMENT_COMBINATION_00:
+      std::cerr << "ERROR: One of the x, y, or z parameters of Rotate must be "
+                   "non-zero"
+                << std::endl;
+      exit(EXIT_FAILURE);
+    case ISTATUS_ALLOCATION_FAILED:
+      ReportOOM();
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
+
+  Transform(rotation);
+}
+
+void MatrixManager::LookAt(Directive& directive) {
+  std::array<float_t, 9> params;
+  directive.FiniteFloats(absl::MakeSpan(params), absl::nullopt);
+
+  if (params[0] == params[3] && params[1] == params[4] &&
+      params[2] == params[5]) {
+    std::cerr << "ERROR: Eye and look parameters of LookAt must be different "
+                 "points"
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  if (params[6] == (float_t)0.0 && params[7] == (float_t)0.0 &&
+      params[8] == (float_t)0.0) {
+    std::cerr << "ERROR: Zero length up paramater to LookAt" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  POINT3 pos = PointCreate(params[0], params[1], params[2]);
+  POINT3 look = PointCreate(params[3], params[4], params[5]);
+
+  VECTOR3 direction = PointSubtract(look, pos);
+  direction = VectorNormalize(direction, nullptr, nullptr);
+
+  VECTOR3 up = VectorCreate(params[6], params[7], params[8]);
+  up = VectorNormalize(up, nullptr, nullptr);
+
+  VECTOR3 right = VectorCrossProduct(up, direction);
+  if (right.x == (float_t)0.0 && right.y == (float_t)0.0 &&
+      right.z == (float_t)0.0) {
+    std::cerr << "ERROR: Parallel look and up vectors for LookAt" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  right = VectorNormalize(right, NULL, NULL);
+  up = VectorCrossProduct(direction, right);
+
+  Matrix transform;
+  ISTATUS status = MatrixAllocate(
+      right.x, up.x, direction.x, pos.x, right.y, up.y, direction.y, pos.y,
+      right.z, up.z, direction.z, pos.z, (float_t)0.0, (float_t)0.0,
+      (float_t)0.0, (float_t)1.0, transform.release_and_get_address());
+
+  switch (status) {
+    case ISTATUS_ARITHMETIC_ERROR:
+      std::cerr << "ERROR: Non-invertible matrix" << std::endl;
+      exit(EXIT_FAILURE);
+    case ISTATUS_ALLOCATION_FAILED:
+      ReportOOM();
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
+
+  Transform(transform);
+}
+
+void MatrixManager::CoordinateSystem(Directive& directive) {
+  auto name = directive.SingleQuotedString("name");
+  m_coordinate_systems[name] = m_current;
+}
+
+void MatrixManager::CoordSysTransform(Directive& directive) {
+  auto name = directive.SingleQuotedString("name");
+  auto result = m_coordinate_systems.find(name);
+  if (result != m_coordinate_systems.end()) {
+    std::cerr << "WARNING: No coordinate system with name '" << name
+              << "' found" << std::endl;
+  } else {
+    m_current = result->second;
+  }
+}
+
+void MatrixManager::Transform(Directive& directive) {
+  std::array<std::string, 16> unparsed_params;
+  std::array<float_t, 16> params;
+  directive.FiniteFloats(absl::MakeSpan(params),
+                         absl::MakeSpan(unparsed_params));
+
+  Matrix transform;
+  ISTATUS status =
+      MatrixAllocate(params[0], params[1], params[2], params[3], params[4],
+                     params[5], params[6], params[7], params[8], params[9],
+                     params[10], params[11], params[12], params[13], params[14],
+                     params[15], transform.release_and_get_address());
+
+  switch (status) {
+    case ISTATUS_ARITHMETIC_ERROR:
+      std::cerr << "ERROR: Transform parameters were non-invertible: ["
+                << absl::StrJoin(unparsed_params, ", ") << " ]" << std::endl;
+      exit(EXIT_FAILURE);
+    case ISTATUS_ALLOCATION_FAILED:
+      ReportOOM();
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
+
+  Set(transform);
+}
+
+void MatrixManager::ConcatTransform(Directive& directive) {
+  std::array<std::string, 16> unparsed_params;
+  std::array<float_t, 16> params;
+  directive.FiniteFloats(absl::MakeSpan(params),
+                         absl::MakeSpan(unparsed_params));
+
+  Matrix transform;
+  ISTATUS status =
+      MatrixAllocate(params[0], params[1], params[2], params[3], params[4],
+                     params[5], params[6], params[7], params[8], params[9],
+                     params[10], params[11], params[12], params[13], params[14],
+                     params[15], transform.release_and_get_address());
+
+  switch (status) {
+    case ISTATUS_ARITHMETIC_ERROR:
+      std::cerr << "ERROR: ConcatTransform parameters were non-invertible: ["
+                << absl::StrJoin(unparsed_params, ", ") << " ]" << std::endl;
+      exit(EXIT_FAILURE);
+    case ISTATUS_ALLOCATION_FAILED:
+      ReportOOM();
+    default:
+      assert(status == ISTATUS_SUCCESS);
+  }
+
+  Transform(transform);
+}
+
+void MatrixManager::ActiveTransform(Directive& directive) {
+  auto parameter = directive.SingleString("parameter");
+
+  if (parameter == "StartTime") {
+    m_active = MatrixManager::START_TRANSFORM;
+    return;
+  }
+
+  if (parameter == "EndTime") {
+    m_active = MatrixManager::END_TRANSFORM;
+    return;
+  }
+
+  if (parameter == "All") {
+    m_active = MatrixManager::ALL_TRANSFORMS;
+    return;
+  }
+
+  std::cerr << "ERROR: Failed to parse ActiveTransform parameter: " << parameter
+            << std::endl;
+  exit(EXIT_FAILURE);
+}
+
+void MatrixManager::Transform(Matrix m) {
+  if (m_active & START_TRANSFORM) {
+    Matrix old_value = m_current.first;
+    ISTATUS status = MatrixAllocateProduct(
+        old_value.get(), m.get(), m_current.first.release_and_get_address());
+
+    switch (status) {
+      case ISTATUS_ARITHMETIC_ERROR:
+        std::cerr << "ERROR: Non-invertible matrix product" << std::endl;
+        exit(EXIT_FAILURE);
+      case ISTATUS_ALLOCATION_FAILED:
+        ReportOOM();
+      default:
+        assert(status == ISTATUS_SUCCESS);
+    }
+  }
+
+  if (m_active & END_TRANSFORM) {
+    Matrix old_value = m_current.second;
+    ISTATUS status = MatrixAllocateProduct(
+        old_value.get(), m.get(), m_current.second.release_and_get_address());
+
+    switch (status) {
+      case ISTATUS_ARITHMETIC_ERROR:
+        std::cerr << "ERROR: Non-invertible matrix product" << std::endl;
+        exit(EXIT_FAILURE);
+      case ISTATUS_ALLOCATION_FAILED:
+        ReportOOM();
+      default:
+        assert(status == ISTATUS_SUCCESS);
+    }
+  }
+}
+
+void MatrixManager::Set(Matrix m) {
+  if (m_active & START_TRANSFORM) {
+    m_current.first = m;
+  }
+
+  if (m_active & END_TRANSFORM) {
+    m_current.second = m;
+  }
 }
 
 typedef std::tuple<Camera, Matrix, Sampler, Framebuffer, Integrator,
@@ -157,15 +601,13 @@ void GlobalParser::Sampler(Directive& directive) {
 }
 
 void GlobalParser::Parse() {
-  m_matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
-  m_matrix_manager.Identity();
-
+  m_matrix_manager.Reset();
   for (auto token = m_tokenizer.Next(); token; token = m_tokenizer.Next()) {
     if (token == "WorldBegin") {
       return;
     }
 
-    if (TryParseTransformDirectives(*token, m_tokenizer, m_matrix_manager)) {
+    if (m_matrix_manager.Parse(*token, m_tokenizer)) {
       continue;
     }
 
@@ -560,19 +1002,17 @@ void GeometryParser::Texture(Directive& directive) {
 }
 
 std::pair<Scene, std::vector<Light>> GeometryParser::Parse() {
-  m_matrix_manager.ActiveTransform(MatrixManager::ALL_TRANSFORMS);
-  m_matrix_manager.Identity();
-
+  m_matrix_manager.Reset();
   for (auto token = m_tokenizer.Next(); token; token = m_tokenizer.Next()) {
     if (token == "WorldEnd") {
       return m_scene_builder.Build();
     }
 
-    if (TryParseTransformDirectives(*token, m_tokenizer, m_matrix_manager)) {
+    if (TryParseInclude(*token, m_tokenizer)) {
       continue;
     }
 
-    if (TryParseInclude(*token, m_tokenizer)) {
+    if (m_matrix_manager.Parse(*token, m_tokenizer)) {
       continue;
     }
 

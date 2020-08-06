@@ -24,7 +24,7 @@ void SceneBuilder::ObjectBegin(Directive& directive) {
     exit(EXIT_FAILURE);
   }
 
-  auto name = directive.SingleString("name");
+  auto name = directive.SingleQuotedString("name");
 
   m_current = &m_instanced_objects[name];
   m_current->first.clear();
@@ -39,7 +39,7 @@ void SceneBuilder::ObjectInstance(Directive& directive, const Matrix& matrix) {
     exit(EXIT_FAILURE);
   }
 
-  auto name = directive.SingleString("name");
+  auto name = directive.SingleQuotedString("name");
 
   auto iter = m_instanced_objects.find(name);
   if (iter == m_instanced_objects.end()) {

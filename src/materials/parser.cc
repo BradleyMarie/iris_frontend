@@ -32,7 +32,7 @@ std::pair<std::string, MaterialResult> ParseMakeNamedMaterial(
 }
 
 std::string ParseNamedMaterial(Directive& directive) {
-  return directive.SingleString("name");
+  return directive.SingleQuotedString("name");
 }
 
 }  // namespace iris

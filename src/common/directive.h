@@ -99,6 +99,7 @@ class Directive {
 
   void FiniteFloats(absl::Span<float_t> values,
                     absl::optional<absl::Span<std::string>> strings);
+  std::string SingleQuotedString(absl::string_view field_name);
   std::string SingleString(absl::string_view field_name);
 
   void Empty();

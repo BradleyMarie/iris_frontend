@@ -117,9 +117,21 @@ void Directive::FiniteFloats(absl::Span<float_t> values,
   m_tokenizer = nullptr;
 }
 
-std::string Directive::SingleString(absl::string_view field_name) {
+std::string Directive::SingleQuotedString(absl::string_view field_name) {
   auto result =
       ParseNextQuotedStringAndCopy(m_base_type_name, *m_tokenizer, field_name);
+  m_tokenizer = nullptr;
+  return result;
+}
+
+std::string Directive::SingleString(absl::string_view field_name) {
+  auto token = m_tokenizer->Next();
+  if (!token.has_value()) {
+    std::cerr << "ERROR: " << m_base_type_name << " " << field_name
+              << " not specified" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  std::string result(*token);
   m_tokenizer = nullptr;
   return result;
 }
