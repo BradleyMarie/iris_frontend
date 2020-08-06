@@ -13,7 +13,7 @@
 #include "src/common/normal_map_manager.h"
 #include "src/common/spectrum_manager.h"
 #include "src/common/texture_manager.h"
-#include "src/directives/include.h"
+#include "src/common/quoted_string.h"
 #include "src/directives/matrix_manager.h"
 #include "src/directives/named_material_manager.h"
 #include "src/directives/scene_builder.h"
@@ -30,6 +30,30 @@
 
 namespace iris {
 namespace {
+
+bool TryParseInclude(absl::string_view directive, Tokenizer& tokenizer) {
+  if (directive != "Include") {
+    return false;
+  }
+
+  auto token = tokenizer.Next();
+  if (!token) {
+    std::cerr << "ERROR: Include requires 1 parameter" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  auto unquoted = UnquoteToken(*token);
+  if (!unquoted) {
+    std::cerr << "ERROR: Failed to parse Include parameter: " << *token
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  std::string as_string(unquoted->data(), unquoted->size());
+  tokenizer.Include(as_string);
+
+  return true;
+}
 
 typedef std::tuple<Camera, Matrix, Sampler, Framebuffer, Integrator,
                    LightSamplerFactory, SpectrumManager, ColorIntegrator,

@@ -14,16 +14,6 @@ cc_library(
 )
 
 cc_library(
-    name = "include",
-    srcs = ["include.cc"],
-    hdrs = ["include.h"],
-    deps = [
-        "//src/common:quoted_string",
-        "//src/common:tokenizer",
-    ],
-)
-
-cc_library(
     name = "matrix_manager",
     srcs = ["matrix_manager.cc"],
     hdrs = ["matrix_manager.h"],
@@ -54,7 +44,6 @@ cc_library(
     hdrs = ["parser.h"],
     visibility = ["//src:__subpackages__"],
     deps = [
-        ":include",
         ":matrix_manager",
         ":named_material_manager",
         ":scene_builder",
@@ -67,6 +56,7 @@ cc_library(
         "//src/common:normal_map_manager",
         "//src/common:parameters",
         "//src/common:pointer_types",
+        "//src/common:quoted_string",
         "//src/common:texture_manager",
         "//src/common:tokenizer",
         "//src/films:parser",
