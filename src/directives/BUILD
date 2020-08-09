@@ -24,6 +24,7 @@ cc_library(
         ":scene_builder",
         "//src/area_lights:parser",
         "//src/cameras:parser",
+        "//src/color_extrapolators:parser",
         "//src/color_integrators:parser",
         "//src/common:error",
         "//src/common:named_texture_manager",
@@ -43,6 +44,8 @@ cc_library(
         "//src/samplers:parser",
         "//src/shapes:parser",
         "//src/textures:parser",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:color_spectra",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:reflective_color_integrator",
     ],
 )
 

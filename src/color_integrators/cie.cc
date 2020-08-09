@@ -5,13 +5,11 @@
 
 namespace iris {
 
-ColorIntegrator ParseCie(Parameters& parameters,
-                         bool spectrum_color_workaround) {
+ColorIntegrator ParseCie(Parameters& parameters) {
   parameters.Match();
 
   ColorIntegrator result;
-  ISTATUS status = CieColorIntegratorAllocate(spectrum_color_workaround,
-                                              result.release_and_get_address());
+  ISTATUS status = CieColorIntegratorAllocate(result.release_and_get_address());
   SuccessOrOOM(status);
 
   return result;

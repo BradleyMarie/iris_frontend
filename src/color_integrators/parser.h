@@ -6,10 +6,8 @@
 
 namespace iris {
 
-ColorIntegrator ParseColorIntegrator(Directive& directive,
-                                     bool spectrum_color_workaround);
-
-ColorIntegrator CreateDefaultColorIntegrator(bool spectrum_color_workaround);
+ColorIntegrator ParseColorIntegrator(Directive& directive);
+ColorIntegrator CreateDefaultColorIntegrator();
 
 }  // namespace iris
 

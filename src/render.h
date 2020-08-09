@@ -7,14 +7,13 @@
 
 namespace iris {
 
-std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(Parser& parser,
-                                                         size_t render_index,
-                                                         float_t epsilon,
-                                                         size_t num_threads,
-                                                         bool report_progress);
+std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(
+    Parser& parser, size_t render_index, float_t epsilon, size_t num_threads,
+    bool report_progress, bool spectral, bool spectrum_color_workaround);
 
 void RenderToOutput(Parser& parser, size_t render_index, float_t epsilon,
-                    size_t num_threads, bool report_progress);
+                    size_t num_threads, bool report_progress, bool spectral,
+                    bool spectrum_color_workaround);
 
 }  // namespace iris
 

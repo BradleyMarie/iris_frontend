@@ -6,8 +6,7 @@
 
 namespace iris {
 
-ColorIntegrator ParseCie(Parameters& parameters,
-                         bool spectrum_color_workaround);
+ColorIntegrator ParseCie(Parameters& parameters);
 
 }  // namespace iris
 

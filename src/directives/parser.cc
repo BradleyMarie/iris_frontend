@@ -6,8 +6,11 @@
 #include <vector>
 
 #include "absl/strings/str_join.h"
+#include "iris_physx_toolkit/color_spectra.h"
+#include "iris_physx_toolkit/reflective_color_integrator.h"
 #include "src/area_lights/parser.h"
 #include "src/cameras/parser.h"
+#include "src/color_extrapolators/parser.h"
 #include "src/color_integrators/parser.h"
 #include "src/common/error.h"
 #include "src/common/material_manager.h"
@@ -500,31 +503,27 @@ void MatrixManager::Set(Matrix m) {
 }
 
 typedef std::tuple<Camera, Matrix, Sampler, Framebuffer, Integrator,
-                   LightSamplerFactory, SpectrumManager, ColorIntegrator,
+                   LightSamplerFactory, ColorExtrapolator, ColorIntegrator,
                    OutputWriter, Random>
     GlobalConfig;
 
 class GlobalParser {
  public:
-  static GlobalConfig Parse(Tokenizer& tokenizer, MatrixManager& matrix_manager,
-                            bool spectral, bool spectrum_color_workaround);
+  static GlobalConfig Parse(Tokenizer& tokenizer,
+                            MatrixManager& matrix_manager);
 
  private:
-  GlobalParser(Tokenizer& tokenizer, MatrixManager& matrix_manager,
-               bool spectral, bool spectrum_color_workaround)
-      : m_tokenizer(tokenizer),
-        m_matrix_manager(matrix_manager),
-        m_spectral(spectral),
-        m_spectrum_color_workaround(spectrum_color_workaround) {}
+  GlobalParser(Tokenizer& tokenizer, MatrixManager& matrix_manager)
+      : m_tokenizer(tokenizer), m_matrix_manager(matrix_manager) {}
 
   bool ParseDirectiveOnce(absl::string_view name, absl::string_view token,
                           void (GlobalParser::*implementation)(Directive&));
   void Accelerator(Directive& directive);
   void Camera(Directive& directive);
+  void ColorExtrapolator(Directive& directive);
   void ColorIntegrator(Directive& directive);
   void Film(Directive& directive);
   void Integrator(Directive& directive);
-  void LightPropagation(Directive& directive);
   void PixelFilter(Directive& directive);
   void Random(Directive& directive);
   void Sampler(Directive& directive);
@@ -533,15 +532,13 @@ class GlobalParser {
 
   Tokenizer& m_tokenizer;
   MatrixManager& m_matrix_manager;
-  bool m_spectral;
-  bool m_spectrum_color_workaround;
 
   std::set<absl::string_view> m_called;
   absl::optional<CameraFactory> m_camera_factory;
+  absl::optional<iris::ColorExtrapolator> m_color_extrapolator;
   absl::optional<iris::ColorIntegrator> m_color_integrator;
   absl::optional<FilmResult> m_film_result;
   absl::optional<IntegratorResult> m_integrator_result;
-  absl::optional<LightPropagationResult> m_light_propagation;
   absl::optional<iris::Random> m_random;
   absl::optional<iris::Sampler> m_sampler;
   Matrix m_camera_to_world;
@@ -573,9 +570,12 @@ void GlobalParser::Camera(Directive& directive) {
   m_camera_to_world = m_matrix_manager.GetCurrent().first;
 }
 
+void GlobalParser::ColorExtrapolator(Directive& directive) {
+  m_color_extrapolator = ParseColorExtrapolator(directive);
+}
+
 void GlobalParser::ColorIntegrator(Directive& directive) {
-  m_color_integrator =
-      ParseColorIntegrator(directive, m_spectrum_color_workaround);
+  m_color_integrator = ParseColorIntegrator(directive);
 }
 
 void GlobalParser::Film(Directive& directive) {
@@ -584,10 +584,6 @@ void GlobalParser::Film(Directive& directive) {
 
 void GlobalParser::Integrator(Directive& directive) {
   m_integrator_result = ParseIntegrator(directive);
-}
-
-void GlobalParser::LightPropagation(Directive& directive) {
-  m_light_propagation = ParseLightPropagation(directive);
 }
 
 void GlobalParser::PixelFilter(Directive& directive) { directive.Ignore(); }
@@ -623,6 +619,11 @@ void GlobalParser::Parse() {
       continue;
     }
 
+    if (ParseDirectiveOnce("ColorExtrapolator", *token,
+                           &GlobalParser::ColorExtrapolator)) {
+      continue;
+    }
+
     if (ParseDirectiveOnce("ColorIntegrator", *token,
                            &GlobalParser::ColorIntegrator)) {
       continue;
@@ -633,11 +634,6 @@ void GlobalParser::Parse() {
     }
 
     if (ParseDirectiveOnce("Integrator", *token, &GlobalParser::Integrator)) {
-      continue;
-    }
-
-    if (ParseDirectiveOnce("LightPropagation", *token,
-                           &GlobalParser::LightPropagation)) {
       continue;
     }
 
@@ -684,10 +680,8 @@ void GlobalParser::Parse() {
 }
 
 GlobalConfig GlobalParser::Parse(Tokenizer& tokenizer,
-                                 MatrixManager& matrix_manager, bool spectral,
-                                 bool spectrum_color_workaround) {
-  GlobalParser parser(tokenizer, matrix_manager, spectral,
-                      spectrum_color_workaround);
+                                 MatrixManager& matrix_manager) {
+  GlobalParser parser(tokenizer, matrix_manager);
   parser.Parse();
 
   if (!parser.m_sampler.has_value()) {
@@ -706,13 +700,12 @@ GlobalConfig GlobalParser::Parse(Tokenizer& tokenizer,
     parser.m_camera_factory = CreateDefaultCamera();
   }
 
-  if (!parser.m_light_propagation.has_value()) {
-    parser.m_light_propagation = CreateDefaultLightPropagation(spectral);
+  if (!parser.m_color_extrapolator.has_value()) {
+    parser.m_color_extrapolator = CreateDefaultColorExtrapolator();
   }
 
   if (!parser.m_color_integrator.has_value()) {
-    parser.m_color_integrator =
-        CreateDefaultColorIntegrator(spectrum_color_workaround);
+    parser.m_color_integrator = CreateDefaultColorIntegrator();
   }
 
   if (!parser.m_random.has_value()) {
@@ -720,16 +713,14 @@ GlobalConfig GlobalParser::Parse(Tokenizer& tokenizer,
   }
 
   auto camera = parser.m_camera_factory.value()(parser.m_film_result->first);
-  auto light_propagation_params =
-      parser.m_light_propagation.value()(parser.m_color_integrator.value());
 
   return std::make_tuple(std::move(camera), std::move(parser.m_camera_to_world),
                          std::move(parser.m_sampler.value()),
                          std::move(parser.m_film_result->first),
                          std::move(parser.m_integrator_result->first),
                          std::move(parser.m_integrator_result->second),
-                         std::move(light_propagation_params.first),
-                         std::move(light_propagation_params.second),
+                         std::move(parser.m_color_extrapolator.value()),
+                         std::move(parser.m_color_integrator.value()),
                          std::move(parser.m_film_result->second),
                          std::move(parser.m_random.value()));
 }
@@ -1122,35 +1113,69 @@ std::pair<Scene, std::vector<Light>> GeometryParser::Parse(
   return parser.Parse();
 }
 
+std::pair<SpectrumManager, ColorIntegrator> CreateSpectrumManager(
+    ColorExtrapolator color_extrapolator, ColorIntegrator color_integrator,
+    bool spectral) {
+  if (spectral) {
+    return std::make_pair(
+        SpectrumManager(std::move(color_extrapolator), COLOR_SPACE_XYZ),
+        color_integrator);
+  }
+
+  ColorIntegrator final_color_integrator;
+  ISTATUS status = ColorColorIntegratorAllocate(
+      COLOR_SPACE_LINEAR_SRGB,
+      final_color_integrator.release_and_get_address());
+  SuccessOrOOM(status);
+
+  ColorExtrapolator extrapolator;
+  status = ColorColorExtrapolatorAllocate(
+      COLOR_SPACE_LINEAR_SRGB, extrapolator.release_and_get_address());
+  SuccessOrOOM(status);
+
+  return std::make_pair(
+      SpectrumManager(std::move(extrapolator), color_integrator,
+                      COLOR_SPACE_LINEAR_SRGB),
+      final_color_integrator);
+}
+
 }  // namespace
 
-Parser Parser::Create(const DefaultParserConfiguration& defaults,
-                      absl::string_view file) {
+Parser Parser::Create(absl::string_view file) {
   Parser result;
-  result.m_defaults = defaults;
   result.m_tokenizer = Tokenizer::CreateFromFile(file);
   return result;
 }
 
-Parser Parser::Create(const DefaultParserConfiguration& defaults,
-                      std::istream& stream) {
+Parser Parser::Create(std::istream& stream) {
   Parser result;
-  result.m_defaults = defaults;
   result.m_tokenizer = Tokenizer::CreateFromStream(stream);
   return result;
 }
 
-absl::optional<RendererConfiguration> Parser::Next() {
+absl::optional<RendererConfiguration> Parser::Next(
+    bool spectral, bool spectrum_color_workaround) {
   if (Done()) {
     return absl::nullopt;
   }
 
   MatrixManager matrix_manager;
-  auto global_config =
-      GlobalParser::Parse(m_tokenizer, matrix_manager, m_defaults.spectral,
-                          m_defaults.spectrum_color_workaround);
+  auto global_config = GlobalParser::Parse(m_tokenizer, matrix_manager);
+
+  if (spectrum_color_workaround) {
+    ColorIntegrator old = std::get<7>(global_config);
+    ISTATUS status = ReflectiveColorIntegratorAllocate(
+        old.get(), std::get<7>(global_config).release_and_get_address());
+    SuccessOrOOM(status);
+  }
+
+  auto manager_and_interpolator =
+      CreateSpectrumManager(std::move(std::get<6>(global_config)),
+                            std::move(std::get<7>(global_config)), spectral);
+
   auto geometry_config = GeometryParser::Parse(m_tokenizer, matrix_manager,
-                                               std::get<6>(global_config));
+                                               manager_and_interpolator.first);
+
   return std::make_tuple(
       std::move(geometry_config.first),
       std::move(std::get<5>(global_config)(geometry_config.second)),
@@ -1158,7 +1183,7 @@ absl::optional<RendererConfiguration> Parser::Next() {
       std::move(std::get<1>(global_config)),
       std::move(std::get<2>(global_config)),
       std::move(std::get<4>(global_config)),
-      std::move(std::get<7>(global_config)),
+      std::move(manager_and_interpolator.second),
       std::move(std::get<9>(global_config)),
       std::move(std::get<3>(global_config)),
       std::move(std::get<8>(global_config)));

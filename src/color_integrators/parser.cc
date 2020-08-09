@@ -5,19 +5,18 @@
 namespace iris {
 namespace {
 
-const Directive::Implementations<ColorIntegrator, bool> kImpls = {
+const Directive::Implementations<ColorIntegrator> kImpls = {
     {"cie", ParseCie}};
 
 }  // namespace
 
-ColorIntegrator ParseColorIntegrator(Directive& directive,
-                                     bool spectrum_color_workaround) {
-  return directive.Invoke(kImpls, spectrum_color_workaround);
+ColorIntegrator ParseColorIntegrator(Directive& directive) {
+  return directive.Invoke(kImpls);
 }
 
-ColorIntegrator CreateDefaultColorIntegrator(bool spectrum_color_workaround) {
+ColorIntegrator CreateDefaultColorIntegrator() {
   Parameters parameters;
-  return ParseCie(parameters, spectrum_color_workaround);
+  return ParseCie(parameters);
 }
 
 }  // namespace iris

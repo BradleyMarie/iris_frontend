@@ -25,9 +25,8 @@ ABSL_FLAG(bool, report_progress, true,
 ABSL_FLAG(bool, spectrum_color_workaround, true,
           "Replicates an erratum in pbrt-v3 which incorrectly scales the color "
           "computed for emissive spectral power distributions by the integral "
-          "of the CIE Y function. If false, the workaround is disabled and "
-          "output. If false, iris the workaround is disabled and the output "
-          "of iris will not match that of pbrt.");
+          "of the CIE Y function. If false, the workaround is disabled and the "
+          "output of iris will not match that of pbrt.");
 
 ABSL_FLAG(bool, spectral, false,
           "Controls whether rendering should be fully spectral or approximate. "
@@ -90,16 +89,11 @@ int main(int argc, char** argv) {
     absl::SetFlag(&FLAGS_num_threads, std::thread::hardware_concurrency());
   }
 
-  iris::DefaultParserConfiguration default_config;
-  default_config.spectral = absl::GetFlag(FLAGS_spectral);
-  default_config.spectrum_color_workaround =
-      absl::GetFlag(FLAGS_spectrum_color_workaround);
-
   iris::Parser parser;
   if (unparsed.size() == 1) {
-    parser = iris::Parser::Create(default_config, std::cin);
+    parser = iris::Parser::Create(std::cin);
   } else {
-    parser = iris::Parser::Create(default_config, unparsed[1]);
+    parser = iris::Parser::Create(unparsed[1]);
   }
 
   if (absl::GetFlag(FLAGS_welcome_message)) {
@@ -109,7 +103,9 @@ int main(int argc, char** argv) {
   for (size_t render_index = 0; !parser.Done(); render_index += 1) {
     iris::RenderToOutput(parser, render_index, absl::GetFlag(FLAGS_epsilon),
                          absl::GetFlag(FLAGS_num_threads),
-                         absl::GetFlag(FLAGS_report_progress));
+                         absl::GetFlag(FLAGS_report_progress),
+                         absl::GetFlag(FLAGS_spectral),
+                         absl::GetFlag(FLAGS_spectrum_color_workaround));
   }
 
   return EXIT_SUCCESS;

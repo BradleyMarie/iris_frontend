@@ -9,11 +9,6 @@
 
 namespace iris {
 
-struct DefaultParserConfiguration {
-  bool spectral;
-  bool spectrum_color_workaround;
-};
-
 typedef std::tuple<Scene, LightSampler, Camera, Matrix, Sampler, Integrator,
                    ColorIntegrator, Random, Framebuffer, OutputWriter>
     RendererConfiguration;
@@ -26,16 +21,14 @@ class Parser {
   Parser(Parser&& other) = default;
   Parser& operator=(Parser&& other) = default;
 
-  static Parser Create(const DefaultParserConfiguration& defaults,
-                       absl::string_view file_path);
-  static Parser Create(const DefaultParserConfiguration& defaults,
-                       std::istream& stream);
+  static Parser Create(absl::string_view file_path);
+  static Parser Create(std::istream& stream);
 
-  absl::optional<RendererConfiguration> Next();
+  absl::optional<RendererConfiguration> Next(bool spectral,
+                                             bool spectrum_color_workaround);
   bool Done();
 
  private:
-  DefaultParserConfiguration m_defaults;
   Tokenizer m_tokenizer;
 };
 
