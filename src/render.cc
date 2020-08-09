@@ -13,11 +13,16 @@ namespace iris {
 
 std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(
     Parser& parser, size_t render_index, float_t epsilon, size_t num_threads,
-    bool report_progress, bool spectral, bool spectrum_color_workaround) {
+    bool report_progress,
+    absl::optional<SpectralRepresentation> spectral_representation_override,
+    absl::optional<COLOR_SPACE> rgb_color_space_override,
+    absl::optional<bool> always_compute_reflective_color_override) {
   assert(isfinite(epsilon) && (float_t)0.0 <= epsilon);
   assert(num_threads != 0);
 
-  auto render_config = *parser.Next(spectral, spectrum_color_workaround);
+  auto render_config =
+      *parser.Next(spectral_representation_override, rgb_color_space_override,
+                   always_compute_reflective_color_override);
 
   ISTATUS status = IntegratorPrepare(
       std::get<5>(render_config).get(), std::get<0>(render_config).get(),
@@ -64,12 +69,16 @@ std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(
                         std::move(std::get<9>(render_config)));
 }
 
-void RenderToOutput(Parser& parser, size_t render_index, float_t epsilon,
-                    size_t num_threads, bool report_progress, bool spectral,
-                    bool spectrum_color_workaround) {
-  auto render_result =
-      RenderToFramebuffer(parser, render_index, epsilon, num_threads,
-                          report_progress, spectral, spectrum_color_workaround);
+void RenderToOutput(
+    Parser& parser, size_t render_index, float_t epsilon, size_t num_threads,
+    bool report_progress,
+    absl::optional<SpectralRepresentation> spectral_representation_override,
+    absl::optional<COLOR_SPACE> rgb_color_space_override,
+    absl::optional<bool> always_compute_reflective_color_override) {
+  auto render_result = RenderToFramebuffer(
+      parser, render_index, epsilon, num_threads, report_progress,
+      spectral_representation_override, rgb_color_space_override,
+      always_compute_reflective_color_override);
   render_result.second->Write(render_result.first);
 }
 

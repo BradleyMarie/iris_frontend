@@ -108,8 +108,10 @@ static const size_t kRenderIndex = 0;
 static const float_t kEpsilon = (float_t)0.001;
 static const size_t kNumThreads = 1;
 static const bool kReportProgress = false;
-static const bool kSpectral = false;
-static const bool kSpectrumColorWorkaround = false;
+static const absl::optional<iris::SpectralRepresentation>
+    kOverrideSpectralRepresentation = absl::nullopt;
+static const absl::optional<COLOR_SPACE> kRgbColorSpace = absl::nullopt;
+static const absl::optional<bool> kSpectrumColorWorkaround = false;
 
 }  // namespace
 
@@ -117,7 +119,8 @@ TEST(RenderTests, CornellBox) {
   auto parser = Parser::Create("test/cornell_box.pbrt");
   auto render_result =
       RenderToFramebuffer(parser, kRenderIndex, kEpsilon, kNumThreads,
-                          kReportProgress, kSpectral, kSpectrumColorWorkaround);
+                          kReportProgress, kOverrideSpectralRepresentation,
+                          kRgbColorSpace, kSpectrumColorWorkaround);
   CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.1);
 }
 
@@ -125,6 +128,7 @@ TEST(RenderTests, IncludeCornellBox) {
   auto parser = CreateParserFromString("Include \"test/cornell_box.pbrt\"");
   auto render_result =
       RenderToFramebuffer(parser.first, kRenderIndex, kEpsilon, kNumThreads,
-                          kReportProgress, kSpectral, kSpectrumColorWorkaround);
+                          kReportProgress, kOverrideSpectralRepresentation,
+                          kRgbColorSpace, kSpectrumColorWorkaround);
   CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.1);
 }

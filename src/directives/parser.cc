@@ -23,7 +23,6 @@
 #include "src/directives/scene_builder.h"
 #include "src/films/parser.h"
 #include "src/integrators/parser.h"
-#include "src/light_propagation/parser.h"
 #include "src/lights/parser.h"
 #include "src/materials/parser.h"
 #include "src/randoms/parser.h"
@@ -1113,30 +1112,39 @@ std::pair<Scene, std::vector<Light>> GeometryParser::Parse(
   return parser.Parse();
 }
 
+const SpectralRepresentation kDefaultSpectralRepresentation = {
+    COLOR_SPACE_LINEAR_SRGB};
+const COLOR_SPACE kDefaultRgbColorSpace = COLOR_SPACE_LINEAR_SRGB;
+
 std::pair<SpectrumManager, ColorIntegrator> CreateSpectrumManager(
     ColorExtrapolator color_extrapolator, ColorIntegrator color_integrator,
-    bool spectral) {
-  if (spectral) {
+    absl::optional<SpectralRepresentation> spectral_representation_override,
+    absl::optional<COLOR_SPACE> rgb_color_space_override) {
+  COLOR_SPACE rgb_color_space =
+      rgb_color_space_override.value_or(kDefaultRgbColorSpace);
+
+  SpectralRepresentation representation =
+      spectral_representation_override.value_or(kDefaultSpectralRepresentation);
+  if (!representation.color_space.has_value()) {
     return std::make_pair(
-        SpectrumManager(std::move(color_extrapolator), COLOR_SPACE_XYZ),
+        SpectrumManager(std::move(color_extrapolator), rgb_color_space),
         color_integrator);
   }
 
   ColorIntegrator final_color_integrator;
   ISTATUS status = ColorColorIntegratorAllocate(
-      COLOR_SPACE_LINEAR_SRGB,
+      *representation.color_space,
       final_color_integrator.release_and_get_address());
   SuccessOrOOM(status);
 
   ColorExtrapolator extrapolator;
   status = ColorColorExtrapolatorAllocate(
-      COLOR_SPACE_LINEAR_SRGB, extrapolator.release_and_get_address());
+      *representation.color_space, extrapolator.release_and_get_address());
   SuccessOrOOM(status);
 
-  return std::make_pair(
-      SpectrumManager(std::move(extrapolator), color_integrator,
-                      COLOR_SPACE_LINEAR_SRGB),
-      final_color_integrator);
+  return std::make_pair(SpectrumManager(std::move(extrapolator),
+                                        color_integrator, rgb_color_space),
+                        final_color_integrator);
 }
 
 }  // namespace
@@ -1154,7 +1162,9 @@ Parser Parser::Create(std::istream& stream) {
 }
 
 absl::optional<RendererConfiguration> Parser::Next(
-    bool spectral, bool spectrum_color_workaround) {
+    absl::optional<SpectralRepresentation> spectral_representation_override,
+    absl::optional<COLOR_SPACE> rgb_color_space_override,
+    absl::optional<bool> always_compute_reflective_color_override) {
   if (Done()) {
     return absl::nullopt;
   }
@@ -1162,16 +1172,17 @@ absl::optional<RendererConfiguration> Parser::Next(
   MatrixManager matrix_manager;
   auto global_config = GlobalParser::Parse(m_tokenizer, matrix_manager);
 
-  if (spectrum_color_workaround) {
+  if (always_compute_reflective_color_override.value_or(false)) {
     ColorIntegrator old = std::get<7>(global_config);
     ISTATUS status = ReflectiveColorIntegratorAllocate(
         old.get(), std::get<7>(global_config).release_and_get_address());
     SuccessOrOOM(status);
   }
 
-  auto manager_and_interpolator =
-      CreateSpectrumManager(std::move(std::get<6>(global_config)),
-                            std::move(std::get<7>(global_config)), spectral);
+  auto manager_and_interpolator = CreateSpectrumManager(
+      std::move(std::get<6>(global_config)),
+      std::move(std::get<7>(global_config)), spectral_representation_override,
+      rgb_color_space_override);
 
   auto geometry_config = GeometryParser::Parse(m_tokenizer, matrix_manager,
                                                manager_and_interpolator.first);

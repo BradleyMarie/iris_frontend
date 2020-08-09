@@ -22,19 +22,125 @@ ABSL_FLAG(bool, report_progress, true,
           "If false, no status bar or progress reporting will be displayed "
           "while rendering.");
 
-ABSL_FLAG(bool, spectrum_color_workaround, true,
-          "Replicates an erratum in pbrt-v3 which incorrectly scales the color "
-          "computed for emissive spectral power distributions by the integral "
-          "of the CIE Y function. If false, the workaround is disabled and the "
-          "output of iris will not match that of pbrt.");
-
-ABSL_FLAG(bool, spectral, false,
-          "Controls whether rendering should be fully spectral or approximate. "
-          "If false, XYZ colors instead of SPD samples will be used in shading "
-          "calculations.");
-
 ABSL_FLAG(bool, welcome_message, true,
           "If true, the welcome message will not be shown.");
+
+template <typename T>
+struct Wrapper {
+  absl::optional<T> opt;
+};
+
+ABSL_FLAG(Wrapper<bool>, always_compute_reflective_color, Wrapper<bool>(),
+          "If true, override the eplicates an erratum in pbrt-v3 which "
+          "incorrectly scales the color computed for emissive spectral power "
+          "distributions by the integral of the CIE Y function. If false, the "
+          "workaround is disabled and the output of iris will not match that "
+          "of pbrt.");
+
+ABSL_FLAG(Wrapper<COLOR_SPACE>, rgb_color_space, Wrapper<COLOR_SPACE>(),
+          "Overrides the color space used to read RGB and color values from the"
+          "input scene.");
+
+ABSL_FLAG(Wrapper<iris::SpectralRepresentation>, spectral_representation,
+          Wrapper<iris::SpectralRepresentation>(),
+          "Overrides the representation used for spectra during rendering.");
+
+bool AbslParseFlag(absl::string_view text, Wrapper<bool>* flag,
+                   std::string* err) {
+  if (text == "default") {
+    flag->opt = absl::nullopt;
+    return true;
+  }
+
+  bool value;
+  bool success = absl::ParseFlag(text, &value, err);
+  if (success) {
+    flag->opt = value;
+  }
+
+  return success;
+}
+
+std::string AbslUnparseFlag(const Wrapper<bool>& flag) {
+  if (!flag.opt.has_value()) {
+    return "default";
+  }
+  return absl::UnparseFlag(flag.opt.value());
+}
+
+bool AbslParseFlag(absl::string_view text, Wrapper<COLOR_SPACE>* flag,
+                   std::string* err) {
+  if (text == "default") {
+    flag->opt = absl::nullopt;
+    return true;
+  }
+
+  if (text == "linear_srgb") {
+    flag->opt = COLOR_SPACE_LINEAR_SRGB;
+    return true;
+  }
+
+  if (text == "xyz") {
+    flag->opt = COLOR_SPACE_XYZ;
+    return true;
+  }
+
+  return false;
+}
+
+std::string AbslUnparseFlag(const Wrapper<COLOR_SPACE>& flag) {
+  if (!flag.opt.has_value()) {
+    return "default";
+  }
+
+  if (flag.opt.value() == COLOR_SPACE_LINEAR_SRGB) {
+    return "linear_srgb";
+  }
+
+  if (flag.opt.value() == COLOR_SPACE_XYZ) {
+    return "xyz";
+  }
+
+  assert(false);
+  return "unknown";
+}
+
+bool AbslParseFlag(absl::string_view text,
+                   Wrapper<iris::SpectralRepresentation>* flag,
+                   std::string* err) {
+  if (text == "default") {
+    flag->opt = absl::nullopt;
+    return true;
+  }
+
+  iris::SpectralRepresentation result;
+  if (text == "spectral") {
+    flag->opt = result;
+    return true;
+  }
+
+  Wrapper<COLOR_SPACE> result_color_space;
+  bool success = AbslParseFlag(text, &result_color_space, err);
+  if (success) {
+    result.color_space = result_color_space.opt;
+    flag->opt = result;
+  }
+
+  return success;
+}
+
+std::string AbslUnparseFlag(const Wrapper<iris::SpectralRepresentation>& flag) {
+  if (!flag.opt.has_value()) {
+    return "default";
+  }
+
+  if (!flag.opt.value().color_space.has_value()) {
+    return "spectral";
+  }
+
+  Wrapper<COLOR_SPACE> color_space = {flag.opt.value().color_space};
+  return AbslUnparseFlag(color_space);
+}
 
 namespace {
 
@@ -101,11 +207,12 @@ int main(int argc, char** argv) {
   }
 
   for (size_t render_index = 0; !parser.Done(); render_index += 1) {
-    iris::RenderToOutput(parser, render_index, absl::GetFlag(FLAGS_epsilon),
-                         absl::GetFlag(FLAGS_num_threads),
-                         absl::GetFlag(FLAGS_report_progress),
-                         absl::GetFlag(FLAGS_spectral),
-                         absl::GetFlag(FLAGS_spectrum_color_workaround));
+    iris::RenderToOutput(
+        parser, render_index, absl::GetFlag(FLAGS_epsilon),
+        absl::GetFlag(FLAGS_num_threads), absl::GetFlag(FLAGS_report_progress),
+        absl::GetFlag(FLAGS_spectral_representation).opt,
+        absl::GetFlag(FLAGS_rgb_color_space).opt,
+        absl::GetFlag(FLAGS_always_compute_reflective_color).opt);
   }
 
   return EXIT_SUCCESS;

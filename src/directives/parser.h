@@ -13,6 +13,10 @@ typedef std::tuple<Scene, LightSampler, Camera, Matrix, Sampler, Integrator,
                    ColorIntegrator, Random, Framebuffer, OutputWriter>
     RendererConfiguration;
 
+struct SpectralRepresentation {
+  absl::optional<COLOR_SPACE> color_space;
+};
+
 class Parser {
  public:
   Parser() = default;
@@ -24,8 +28,10 @@ class Parser {
   static Parser Create(absl::string_view file_path);
   static Parser Create(std::istream& stream);
 
-  absl::optional<RendererConfiguration> Next(bool spectral,
-                                             bool spectrum_color_workaround);
+  absl::optional<RendererConfiguration> Next(
+    absl::optional<SpectralRepresentation> spectral_representation_override,
+    absl::optional<COLOR_SPACE> rgb_color_space_override,
+    absl::optional<bool> always_compute_reflective_color_override);
   bool Done();
 
  private:

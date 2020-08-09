@@ -37,7 +37,6 @@ cc_library(
         "//src/films:parser",
         "//src/films/output_writers:result",
         "//src/integrators:parser",
-        "//src/light_propagation:parser",
         "//src/lights:parser",
         "//src/materials:parser",
         "//src/randoms:parser",

@@ -9,11 +9,17 @@ namespace iris {
 
 std::pair<Framebuffer, OutputWriter> RenderToFramebuffer(
     Parser& parser, size_t render_index, float_t epsilon, size_t num_threads,
-    bool report_progress, bool spectral, bool spectrum_color_workaround);
+    bool report_progress,
+    absl::optional<SpectralRepresentation> spectral_representation_override,
+    absl::optional<COLOR_SPACE> rgb_color_space_override,
+    absl::optional<bool> always_compute_reflective_color_override);
 
-void RenderToOutput(Parser& parser, size_t render_index, float_t epsilon,
-                    size_t num_threads, bool report_progress, bool spectral,
-                    bool spectrum_color_workaround);
+void RenderToOutput(
+    Parser& parser, size_t render_index, float_t epsilon, size_t num_threads,
+    bool report_progress,
+    absl::optional<SpectralRepresentation> spectral_representation_override,
+    absl::optional<COLOR_SPACE> rgb_color_space_override,
+    absl::optional<bool> always_compute_reflective_color_override);
 
 }  // namespace iris
 
