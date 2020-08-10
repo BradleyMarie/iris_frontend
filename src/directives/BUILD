@@ -32,6 +32,7 @@ cc_library(
     visibility = ["//src:__subpackages__"],
     deps = [
         ":named_material_manager",
+        ":pbrt_workaround",
         ":rgb_color_space_parser",
         ":scene_builder",
         ":spectral_representation",
@@ -59,6 +60,15 @@ cc_library(
         "//src/textures:parser",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:color_spectra",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:reflective_color_integrator",
+    ],
+)
+
+cc_library(
+    name = "pbrt_workaround",
+    srcs = ["pbrt_workaround.cc"],
+    hdrs = ["pbrt_workaround.h"],
+    deps = [
+        "//src/common:directive",
     ],
 )
 

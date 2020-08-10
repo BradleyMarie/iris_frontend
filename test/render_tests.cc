@@ -111,7 +111,7 @@ static const bool kReportProgress = false;
 static const absl::optional<iris::SpectralRepresentation>
     kOverrideSpectralRepresentation = absl::nullopt;
 static const absl::optional<COLOR_SPACE> kRgbColorSpace = absl::nullopt;
-static const absl::optional<bool> kSpectrumColorWorkaround = false;
+static const absl::optional<bool> kSpectrumColorWorkaround = absl::nullopt;
 
 }  // namespace
 

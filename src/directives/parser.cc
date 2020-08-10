@@ -20,6 +20,7 @@
 #include "src/common/spectrum_manager.h"
 #include "src/common/texture_manager.h"
 #include "src/directives/named_material_manager.h"
+#include "src/directives/pbrt_workaround.h"
 #include "src/directives/rgb_color_space_parser.h"
 #include "src/directives/scene_builder.h"
 #include "src/directives/spectral_representation_parser.h"
@@ -505,7 +506,8 @@ void MatrixManager::Set(Matrix m) {
 
 typedef std::tuple<Camera, Matrix, Sampler, Framebuffer, Integrator,
                    LightSamplerFactory, ColorExtrapolator, ColorIntegrator,
-                   OutputWriter, Random, SpectralRepresentation, COLOR_SPACE>
+                   OutputWriter, Random, SpectralRepresentation, COLOR_SPACE,
+                   bool>
     GlobalConfig;
 
 class GlobalParser {
@@ -520,6 +522,7 @@ class GlobalParser {
   bool ParseDirectiveOnce(absl::string_view name, absl::string_view token,
                           void (GlobalParser::*implementation)(Directive&));
   void Accelerator(Directive& directive);
+  void AlwaysComputeReflectiveColor(Directive& directive);
   void Camera(Directive& directive);
   void ColorExtrapolator(Directive& directive);
   void ColorIntegrator(Directive& directive);
@@ -537,6 +540,7 @@ class GlobalParser {
   MatrixManager& m_matrix_manager;
 
   std::set<absl::string_view> m_called;
+  absl::optional<bool> m_always_compute_reflective_color;
   absl::optional<CameraFactory> m_camera_factory;
   absl::optional<iris::ColorExtrapolator> m_color_extrapolator;
   absl::optional<iris::ColorIntegrator> m_color_integrator;
@@ -569,6 +573,11 @@ bool GlobalParser::ParseDirectiveOnce(
 }
 
 void GlobalParser::Accelerator(Directive& directive) { directive.Ignore(); }
+
+void GlobalParser::AlwaysComputeReflectiveColor(Directive& directive) {
+  m_always_compute_reflective_color =
+      ParseAlwaysComputeReflectiveColor(directive);
+}
 
 void GlobalParser::Camera(Directive& directive) {
   m_camera_factory = ParseCamera(directive);
@@ -625,6 +634,11 @@ void GlobalParser::Parse() {
     }
 
     if (ParseDirectiveOnce("Accelerator", *token, &GlobalParser::Accelerator)) {
+      continue;
+    }
+
+    if (ParseDirectiveOnce("AlwaysComputeReflectiveColor", *token,
+                           &GlobalParser::AlwaysComputeReflectiveColor)) {
       continue;
     }
 
@@ -743,19 +757,26 @@ GlobalConfig GlobalParser::Parse(Tokenizer& tokenizer,
     parser.m_spectral_representation = CreateDefaultSpectralRepresentation();
   }
 
+  if (!parser.m_always_compute_reflective_color.has_value()) {
+    parser.m_always_compute_reflective_color =
+        CreateDefaultAlwaysComputeReflectiveColor();
+  }
+
   auto camera = parser.m_camera_factory.value()(parser.m_film_result->first);
 
-  return std::make_tuple(std::move(camera), std::move(parser.m_camera_to_world),
-                         std::move(parser.m_sampler.value()),
-                         std::move(parser.m_film_result->first),
-                         std::move(parser.m_integrator_result->first),
-                         std::move(parser.m_integrator_result->second),
-                         std::move(parser.m_color_extrapolator.value()),
-                         std::move(parser.m_color_integrator.value()),
-                         std::move(parser.m_film_result->second),
-                         std::move(parser.m_random.value()),
-                         std::move(parser.m_spectral_representation.value()),
-                         std::move(parser.m_rgb_color_space.value()));
+  return std::make_tuple(
+      std::move(camera), std::move(parser.m_camera_to_world),
+      std::move(parser.m_sampler.value()),
+      std::move(parser.m_film_result->first),
+      std::move(parser.m_integrator_result->first),
+      std::move(parser.m_integrator_result->second),
+      std::move(parser.m_color_extrapolator.value()),
+      std::move(parser.m_color_integrator.value()),
+      std::move(parser.m_film_result->second),
+      std::move(parser.m_random.value()),
+      std::move(parser.m_spectral_representation.value()),
+      std::move(parser.m_rgb_color_space.value()),
+      std::move(parser.m_always_compute_reflective_color.value()));
 }
 
 class GraphicsStateManager {
@@ -1198,7 +1219,8 @@ absl::optional<RendererConfiguration> Parser::Next(
   MatrixManager matrix_manager;
   auto global_config = GlobalParser::Parse(m_tokenizer, matrix_manager);
 
-  if (always_compute_reflective_color_override.value_or(false)) {
+  if (always_compute_reflective_color_override.value_or(
+          std::get<12>(global_config))) {
     ColorIntegrator old = std::get<7>(global_config);
     ISTATUS status = ReflectiveColorIntegratorAllocate(
         old.get(), std::get<7>(global_config).release_and_get_address());
