@@ -8,6 +8,7 @@ cc_binary(
     visibility = ["//visibility:public"],
     deps = [
         ":render",
+        "//src/directives:color_space",
         "//src/directives:parser",
         "@com_google_absl//absl/flags:config",
         "@com_google_absl//absl/flags:flag",

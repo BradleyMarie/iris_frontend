@@ -6,6 +6,7 @@
 #include "absl/flags/parse.h"
 #include "absl/flags/usage.h"
 #include "absl/flags/usage_config.h"
+#include "src/directives/color_space.h"
 #include "src/directives/parser.h"
 #include "src/render.h"
 
@@ -75,17 +76,13 @@ bool AbslParseFlag(absl::string_view text, Wrapper<COLOR_SPACE>* flag,
     return true;
   }
 
-  if (text == "linear_srgb") {
-    flag->opt = COLOR_SPACE_LINEAR_SRGB;
-    return true;
+  COLOR_SPACE parsed;
+  bool success = iris::ParseColorSpace(text, &parsed);
+  if (success) {
+    flag->opt = parsed;
   }
 
-  if (text == "xyz") {
-    flag->opt = COLOR_SPACE_XYZ;
-    return true;
-  }
-
-  return false;
+  return success;
 }
 
 std::string AbslUnparseFlag(const Wrapper<COLOR_SPACE>& flag) {
@@ -93,16 +90,7 @@ std::string AbslUnparseFlag(const Wrapper<COLOR_SPACE>& flag) {
     return "default";
   }
 
-  if (flag.opt.value() == COLOR_SPACE_LINEAR_SRGB) {
-    return "linear_srgb";
-  }
-
-  if (flag.opt.value() == COLOR_SPACE_XYZ) {
-    return "xyz";
-  }
-
-  assert(false);
-  return "unknown";
+  return iris::ColorSpaceToString(*flag.opt);
 }
 
 bool AbslParseFlag(absl::string_view text,
@@ -114,7 +102,7 @@ bool AbslParseFlag(absl::string_view text,
   }
 
   iris::SpectralRepresentation parsed;
-  bool success = ParseSpectralRepresentation(text, &parsed);
+  bool success = iris::ParseSpectralRepresentation(text, &parsed);
   if (success) {
     flag->opt = parsed;
   }
@@ -127,7 +115,7 @@ std::string AbslUnparseFlag(const Wrapper<iris::SpectralRepresentation>& flag) {
     return "default";
   }
 
-  return SpectralRepresentationToString(*flag.opt);
+  return iris::SpectralRepresentationToString(*flag.opt);
 }
 
 namespace {
@@ -145,7 +133,7 @@ static_assert(sizeof(void*) == 4 || sizeof(void*) == 8);
 std::string VersionString() {
   std::stringstream result;
   result << "iris " << kVersion << " (" << kBits << kDebug << ") ["
-         << std::thread::hardware_concurrency() << " cores detected]"
+         << std::thread::hardware_concurrency() << " hardware threads detected]"
          << std::endl;
   result << "Copyright (C) 2020 Brad Weinberger" << std::endl;
   result << "This is free software licensed under version 3 of the GNU General "
