@@ -20,6 +20,7 @@
 #include "src/common/spectrum_manager.h"
 #include "src/common/texture_manager.h"
 #include "src/directives/named_material_manager.h"
+#include "src/directives/rgb_color_space_parser.h"
 #include "src/directives/scene_builder.h"
 #include "src/directives/spectral_representation_parser.h"
 #include "src/films/parser.h"
@@ -504,7 +505,7 @@ void MatrixManager::Set(Matrix m) {
 
 typedef std::tuple<Camera, Matrix, Sampler, Framebuffer, Integrator,
                    LightSamplerFactory, ColorExtrapolator, ColorIntegrator,
-                   OutputWriter, Random, SpectralRepresentation>
+                   OutputWriter, Random, SpectralRepresentation, COLOR_SPACE>
     GlobalConfig;
 
 class GlobalParser {
@@ -526,6 +527,7 @@ class GlobalParser {
   void Integrator(Directive& directive);
   void PixelFilter(Directive& directive);
   void Random(Directive& directive);
+  void RgbColorSpace(Directive& directive);
   void Sampler(Directive& directive);
   void SpectralRepresentation(Directive& directive);
 
@@ -540,6 +542,7 @@ class GlobalParser {
   absl::optional<iris::ColorIntegrator> m_color_integrator;
   absl::optional<FilmResult> m_film_result;
   absl::optional<IntegratorResult> m_integrator_result;
+  absl::optional<COLOR_SPACE> m_rgb_color_space;
   absl::optional<iris::Random> m_random;
   absl::optional<iris::Sampler> m_sampler;
   absl::optional<iris::SpectralRepresentation> m_spectral_representation;
@@ -592,6 +595,10 @@ void GlobalParser::PixelFilter(Directive& directive) { directive.Ignore(); }
 
 void GlobalParser::Random(Directive& directive) {
   m_random = ParseRandom(directive);
+}
+
+void GlobalParser::RgbColorSpace(Directive& directive) {
+  m_rgb_color_space = ParseRgbColorSpace(directive);
 }
 
 void GlobalParser::Sampler(Directive& directive) {
@@ -648,6 +655,11 @@ void GlobalParser::Parse() {
     }
 
     if (ParseDirectiveOnce("Random", *token, &GlobalParser::Random)) {
+      continue;
+    }
+
+    if (ParseDirectiveOnce("RgbColorSpace", *token,
+                           &GlobalParser::RgbColorSpace)) {
       continue;
     }
 
@@ -723,6 +735,10 @@ GlobalConfig GlobalParser::Parse(Tokenizer& tokenizer,
     parser.m_random = CreateDefaultRandom();
   }
 
+  if (!parser.m_rgb_color_space.has_value()) {
+    parser.m_rgb_color_space = CreateDefaultRgbColorSpace();
+  }
+
   if (!parser.m_spectral_representation.has_value()) {
     parser.m_spectral_representation = CreateDefaultSpectralRepresentation();
   }
@@ -738,7 +754,8 @@ GlobalConfig GlobalParser::Parse(Tokenizer& tokenizer,
                          std::move(parser.m_color_integrator.value()),
                          std::move(parser.m_film_result->second),
                          std::move(parser.m_random.value()),
-                         std::move(parser.m_spectral_representation.value()));
+                         std::move(parser.m_spectral_representation.value()),
+                         std::move(parser.m_rgb_color_space.value()));
 }
 
 class GraphicsStateManager {
@@ -1129,15 +1146,10 @@ std::pair<Scene, std::vector<Light>> GeometryParser::Parse(
   return parser.Parse();
 }
 
-const COLOR_SPACE kDefaultRgbColorSpace = COLOR_SPACE_LINEAR_SRGB;
-
 std::pair<SpectrumManager, ColorIntegrator> CreateSpectrumManager(
     ColorExtrapolator color_extrapolator, ColorIntegrator color_integrator,
     SpectralRepresentation spectral_representation,
-    absl::optional<COLOR_SPACE> rgb_color_space_override) {
-  COLOR_SPACE rgb_color_space =
-      rgb_color_space_override.value_or(kDefaultRgbColorSpace);
-
+    COLOR_SPACE rgb_color_space) {
   if (!spectral_representation.color_space.has_value()) {
     return std::make_pair(
         SpectrumManager(std::move(color_extrapolator), rgb_color_space),
@@ -1197,7 +1209,7 @@ absl::optional<RendererConfiguration> Parser::Next(
       std::move(std::get<6>(global_config)),
       std::move(std::get<7>(global_config)),
       spectral_representation_override.value_or(std::get<10>(global_config)),
-      rgb_color_space_override);
+      rgb_color_space_override.value_or(std::get<11>(global_config)));
 
   auto geometry_config = GeometryParser::Parse(m_tokenizer, matrix_manager,
                                                manager_and_interpolator.first);

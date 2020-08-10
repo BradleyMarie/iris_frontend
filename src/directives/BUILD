@@ -3,6 +3,17 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 package(default_visibility = ["//visibility:private"])
 
 cc_library(
+    name = "color_space",
+    srcs = ["color_space.cc"],
+    hdrs = ["color_space.h"],
+    visibility = ["//src:__subpackages__"],
+    deps = [
+        "@com_github_bradleymarie_iris//iris_advanced",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "named_material_manager",
     srcs = ["named_material_manager.cc"],
     hdrs = ["named_material_manager.h"],
@@ -21,6 +32,7 @@ cc_library(
     visibility = ["//src:__subpackages__"],
     deps = [
         ":named_material_manager",
+        ":rgb_color_space_parser",
         ":scene_builder",
         ":spectral_representation",
         ":spectral_representation_parser",
@@ -51,6 +63,16 @@ cc_library(
 )
 
 cc_library(
+    name = "rgb_color_space_parser",
+    srcs = ["rgb_color_space_parser.cc"],
+    hdrs = ["rgb_color_space_parser.h"],
+    deps = [
+        ":color_space",
+        "//src/common:directive",
+    ],
+)
+
+cc_library(
     name = "scene_builder",
     srcs = ["scene_builder.cc"],
     hdrs = ["scene_builder.h"],
@@ -68,6 +90,7 @@ cc_library(
     srcs = ["spectral_representation.cc"],
     hdrs = ["spectral_representation.h"],
     deps = [
+        ":color_space",
         "@com_github_bradleymarie_iris//iris_advanced",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",

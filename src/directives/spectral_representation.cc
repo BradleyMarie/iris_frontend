@@ -1,11 +1,11 @@
 #include "src/directives/spectral_representation.h"
 
+#include "src/directives/color_space.h"
+
 namespace iris {
 namespace {
 
 const char* kSpectralType = "spd";
-const char* kLinearSrgbType = "linear_srgb";
-const char* kXyzType = "xyz";
 
 }  // namespace
 
@@ -16,17 +16,13 @@ bool ParseSpectralRepresentation(absl::string_view text,
     return true;
   }
 
-  if (text == kLinearSrgbType) {
-    representation->color_space = COLOR_SPACE_LINEAR_SRGB;
-    return true;
+  COLOR_SPACE result;
+  bool success = ParseColorSpace(text, &result);
+  if (success) {
+    representation->color_space = result;
   }
 
-  if (text == kXyzType) {
-    representation->color_space = COLOR_SPACE_XYZ;
-    return true;
-  }
-
-  return false;
+  return success;
 }
 
 std::string SpectralRepresentationToString(
@@ -35,14 +31,7 @@ std::string SpectralRepresentationToString(
     return kSpectralType;
   }
 
-  switch (representation.color_space.value()) {
-    default:
-      assert(false);
-    case COLOR_SPACE_LINEAR_SRGB:
-      return kLinearSrgbType;
-    case COLOR_SPACE_XYZ:
-      return kXyzType;
-  }
+  return ColorSpaceToString(representation.color_space.value());
 }
 
 }  // namespace iris
