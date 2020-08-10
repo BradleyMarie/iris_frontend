@@ -22,6 +22,8 @@ cc_library(
     deps = [
         ":named_material_manager",
         ":scene_builder",
+        ":spectral_representation",
+        ":spectral_representation_parser",
         "//src/area_lights:parser",
         "//src/cameras:parser",
         "//src/color_extrapolators:parser",
@@ -58,5 +60,26 @@ cc_library(
         "//src/common:pointer_types",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:kd_tree_scene",
         "@com_google_absl//absl/container:flat_hash_map",
+    ],
+)
+
+cc_library(
+    name = "spectral_representation",
+    srcs = ["spectral_representation.cc"],
+    hdrs = ["spectral_representation.h"],
+    deps = [
+        "@com_github_bradleymarie_iris//iris_advanced",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
+cc_library(
+    name = "spectral_representation_parser",
+    srcs = ["spectral_representation_parser.cc"],
+    hdrs = ["spectral_representation_parser.h"],
+    deps = [
+        ":spectral_representation",
+        "//src/common:directive",
     ],
 )

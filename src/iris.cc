@@ -113,17 +113,10 @@ bool AbslParseFlag(absl::string_view text,
     return true;
   }
 
-  iris::SpectralRepresentation result;
-  if (text == "spectral") {
-    flag->opt = result;
-    return true;
-  }
-
-  Wrapper<COLOR_SPACE> result_color_space;
-  bool success = AbslParseFlag(text, &result_color_space, err);
+  iris::SpectralRepresentation parsed;
+  bool success = ParseSpectralRepresentation(text, &parsed);
   if (success) {
-    result.color_space = result_color_space.opt;
-    flag->opt = result;
+    flag->opt = parsed;
   }
 
   return success;
@@ -134,12 +127,7 @@ std::string AbslUnparseFlag(const Wrapper<iris::SpectralRepresentation>& flag) {
     return "default";
   }
 
-  if (!flag.opt.value().color_space.has_value()) {
-    return "spectral";
-  }
-
-  Wrapper<COLOR_SPACE> color_space = {flag.opt.value().color_space};
-  return AbslUnparseFlag(color_space);
+  return SpectralRepresentationToString(*flag.opt);
 }
 
 namespace {

@@ -21,6 +21,7 @@
 #include "src/common/texture_manager.h"
 #include "src/directives/named_material_manager.h"
 #include "src/directives/scene_builder.h"
+#include "src/directives/spectral_representation_parser.h"
 #include "src/films/parser.h"
 #include "src/integrators/parser.h"
 #include "src/lights/parser.h"
@@ -503,7 +504,7 @@ void MatrixManager::Set(Matrix m) {
 
 typedef std::tuple<Camera, Matrix, Sampler, Framebuffer, Integrator,
                    LightSamplerFactory, ColorExtrapolator, ColorIntegrator,
-                   OutputWriter, Random>
+                   OutputWriter, Random, SpectralRepresentation>
     GlobalConfig;
 
 class GlobalParser {
@@ -526,6 +527,7 @@ class GlobalParser {
   void PixelFilter(Directive& directive);
   void Random(Directive& directive);
   void Sampler(Directive& directive);
+  void SpectralRepresentation(Directive& directive);
 
   void Parse();
 
@@ -540,6 +542,7 @@ class GlobalParser {
   absl::optional<IntegratorResult> m_integrator_result;
   absl::optional<iris::Random> m_random;
   absl::optional<iris::Sampler> m_sampler;
+  absl::optional<iris::SpectralRepresentation> m_spectral_representation;
   Matrix m_camera_to_world;
 };
 
@@ -595,6 +598,10 @@ void GlobalParser::Sampler(Directive& directive) {
   m_sampler = ParseSampler(directive);
 }
 
+void GlobalParser::SpectralRepresentation(Directive& directive) {
+  m_spectral_representation = ParseSpectralRepresentation(directive);
+}
+
 void GlobalParser::Parse() {
   m_matrix_manager.Reset();
   for (auto token = m_tokenizer.Next(); token; token = m_tokenizer.Next()) {
@@ -645,6 +652,11 @@ void GlobalParser::Parse() {
     }
 
     if (ParseDirectiveOnce("Sampler", *token, &GlobalParser::Sampler)) {
+      continue;
+    }
+
+    if (ParseDirectiveOnce("SpectralRepresentation", *token,
+                           &GlobalParser::SpectralRepresentation)) {
       continue;
     }
 
@@ -711,6 +723,10 @@ GlobalConfig GlobalParser::Parse(Tokenizer& tokenizer,
     parser.m_random = CreateDefaultRandom();
   }
 
+  if (!parser.m_spectral_representation.has_value()) {
+    parser.m_spectral_representation = CreateDefaultSpectralRepresentation();
+  }
+
   auto camera = parser.m_camera_factory.value()(parser.m_film_result->first);
 
   return std::make_tuple(std::move(camera), std::move(parser.m_camera_to_world),
@@ -721,7 +737,8 @@ GlobalConfig GlobalParser::Parse(Tokenizer& tokenizer,
                          std::move(parser.m_color_extrapolator.value()),
                          std::move(parser.m_color_integrator.value()),
                          std::move(parser.m_film_result->second),
-                         std::move(parser.m_random.value()));
+                         std::move(parser.m_random.value()),
+                         std::move(parser.m_spectral_representation.value()));
 }
 
 class GraphicsStateManager {
@@ -1112,20 +1129,16 @@ std::pair<Scene, std::vector<Light>> GeometryParser::Parse(
   return parser.Parse();
 }
 
-const SpectralRepresentation kDefaultSpectralRepresentation = {
-    COLOR_SPACE_LINEAR_SRGB};
 const COLOR_SPACE kDefaultRgbColorSpace = COLOR_SPACE_LINEAR_SRGB;
 
 std::pair<SpectrumManager, ColorIntegrator> CreateSpectrumManager(
     ColorExtrapolator color_extrapolator, ColorIntegrator color_integrator,
-    absl::optional<SpectralRepresentation> spectral_representation_override,
+    SpectralRepresentation spectral_representation,
     absl::optional<COLOR_SPACE> rgb_color_space_override) {
   COLOR_SPACE rgb_color_space =
       rgb_color_space_override.value_or(kDefaultRgbColorSpace);
 
-  SpectralRepresentation representation =
-      spectral_representation_override.value_or(kDefaultSpectralRepresentation);
-  if (!representation.color_space.has_value()) {
+  if (!spectral_representation.color_space.has_value()) {
     return std::make_pair(
         SpectrumManager(std::move(color_extrapolator), rgb_color_space),
         color_integrator);
@@ -1133,13 +1146,14 @@ std::pair<SpectrumManager, ColorIntegrator> CreateSpectrumManager(
 
   ColorIntegrator final_color_integrator;
   ISTATUS status = ColorColorIntegratorAllocate(
-      *representation.color_space,
+      *spectral_representation.color_space,
       final_color_integrator.release_and_get_address());
   SuccessOrOOM(status);
 
   ColorExtrapolator extrapolator;
-  status = ColorColorExtrapolatorAllocate(
-      *representation.color_space, extrapolator.release_and_get_address());
+  status =
+      ColorColorExtrapolatorAllocate(*spectral_representation.color_space,
+                                     extrapolator.release_and_get_address());
   SuccessOrOOM(status);
 
   return std::make_pair(SpectrumManager(std::move(extrapolator),
@@ -1181,7 +1195,8 @@ absl::optional<RendererConfiguration> Parser::Next(
 
   auto manager_and_interpolator = CreateSpectrumManager(
       std::move(std::get<6>(global_config)),
-      std::move(std::get<7>(global_config)), spectral_representation_override,
+      std::move(std::get<7>(global_config)),
+      spectral_representation_override.value_or(std::get<10>(global_config)),
       rgb_color_space_override);
 
   auto geometry_config = GeometryParser::Parse(m_tokenizer, matrix_manager,

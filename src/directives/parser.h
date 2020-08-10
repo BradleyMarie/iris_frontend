@@ -5,6 +5,7 @@
 
 #include "src/common/pointer_types.h"
 #include "src/common/tokenizer.h"
+#include "src/directives/spectral_representation.h"
 #include "src/films/output_writers/result.h"
 
 namespace iris {
@@ -12,10 +13,6 @@ namespace iris {
 typedef std::tuple<Scene, LightSampler, Camera, Matrix, Sampler, Integrator,
                    ColorIntegrator, Random, Framebuffer, OutputWriter>
     RendererConfiguration;
-
-struct SpectralRepresentation {
-  absl::optional<COLOR_SPACE> color_space;
-};
 
 class Parser {
  public:
