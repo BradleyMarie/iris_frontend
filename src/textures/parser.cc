@@ -14,7 +14,8 @@ WrapFunction(ReflectorTexture (*function)(Parameters&,
                                           TextureManager&, SpectrumManager&),
              NamedTextureManager& named_texture_manager) {
   return
-      [&](Parameters& parameters, const std::string& name,
+      [function, &named_texture_manager](
+          Parameters& parameters, const std::string& name,
           const NamedTextureManager& const_named_texture_manager,
           TextureManager& texture_manager, SpectrumManager& spectrum_manager) {
         auto result = function(parameters, const_named_texture_manager,
@@ -29,7 +30,8 @@ WrapFunction(FloatTexture (*function)(Parameters&, const NamedTextureManager&,
                                       TextureManager&),
              NamedTextureManager& named_texture_manager) {
   return
-      [&](Parameters& parameters, const std::string& name,
+      [function, &named_texture_manager](
+          Parameters& parameters, const std::string& name,
           const NamedTextureManager& const_named_texture_manager,
           TextureManager& texture_manager, SpectrumManager& spectrum_manager) {
         auto result =
