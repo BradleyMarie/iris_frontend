@@ -59,7 +59,9 @@ ReflectorTexture ParseImageMapReflector(
 
   ReflectorMipmap mipmap;
   ISTATUS status =
-      PngReflectorMipmapAllocate(filename.Get().second.c_str(), wrap_mode,
+      PngReflectorMipmapAllocate(filename.Get().second.c_str(),
+                                 TEXTURE_FILTERING_ALGORITHM_TRILINEAR,
+                                 wrap_mode,
                                  spectrum_manager.GetColorExtrapolator().get(),
                                  mipmap.release_and_get_address());
   switch (status) {
@@ -117,7 +119,9 @@ FloatTexture ParseImageMapFloat(
 
   FloatMipmap mipmap;
   ISTATUS status =
-      PngFloatMipmapAllocate(filename.Get().second.c_str(), wrap_mode,
+      PngFloatMipmapAllocate(filename.Get().second.c_str(),
+                             TEXTURE_FILTERING_ALGORITHM_TRILINEAR,
+                             wrap_mode,
                              mipmap.release_and_get_address());
   switch (status) {
     case ISTATUS_IO_ERROR:
