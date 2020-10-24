@@ -116,19 +116,22 @@ static const absl::optional<bool> kSpectrumColorWorkaround = absl::nullopt;
 }  // namespace
 
 TEST(RenderTests, CornellBox) {
-  auto parser = Parser::Create("test/cornell_box.pbrt");
+  auto parser = Parser::Create("test/cornell_box/cornell_box.pbrt");
   auto render_result =
       RenderToFramebuffer(parser, kRenderIndex, kEpsilon, kNumThreads,
                           kReportProgress, kOverrideSpectralRepresentation,
                           kRgbColorSpace, kSpectrumColorWorkaround);
-  CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.1);
+  CheckEquals("test/cornell_box/cornell_box.pfm", render_result.first,
+              (float_t)0.1);
 }
 
 TEST(RenderTests, IncludeCornellBox) {
-  auto parser = CreateParserFromString("Include \"test/cornell_box.pbrt\"");
+  auto parser =
+      CreateParserFromString("Include \"test/cornell_box/cornell_box.pbrt\"");
   auto render_result =
       RenderToFramebuffer(parser.first, kRenderIndex, kEpsilon, kNumThreads,
                           kReportProgress, kOverrideSpectralRepresentation,
                           kRgbColorSpace, kSpectrumColorWorkaround);
-  CheckEquals("test/cornell_box.pfm", render_result.first, (float_t)0.1);
+  CheckEquals("test/cornell_box/cornell_box.pfm", render_result.first,
+              (float_t)0.1);
 }
