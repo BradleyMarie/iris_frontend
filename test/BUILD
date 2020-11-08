@@ -5,11 +5,8 @@ package(default_visibility = ["//visibility:private"])
 cc_test(
     name = "render_tests",
     srcs = ["render_tests.cc"],
-    data = [
-        "cornell_box/cornell_box.pbrt",
-        "cornell_box/cornell_box.pfm",
-    ],
-    shard_count = 2,
+    data = glob(["**/*.p*"]),
+    shard_count = 3,
     deps = [
         "//src:render",
         "@com_google_googletest//:gtest_main",

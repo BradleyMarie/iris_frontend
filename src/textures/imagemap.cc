@@ -14,6 +14,8 @@
 namespace iris {
 namespace {
 
+static const bool kImageMapDefaultTrilinear = false;
+static const float_t kImageMapDefaultMaxAnisotropy = (float_t)8.0;
 static const float_t kImageMapDefaultUVScaleValue = (float_t)1.0;
 static const float_t kImageMapDefaultUVDeltaValue = (float_t)0.0;
 static const char* kImageMapDefaultWrap = "repeat";
@@ -23,6 +25,10 @@ static const char* kImageMapDefaultWrap = "repeat";
 ReflectorTexture ParseImageMapReflector(
     Parameters& parameters, const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager) {
+  SingleBoolMatcher trilinear("trilinear", false, kImageMapDefaultTrilinear);
+  SingleFloatMatcher maxanisotropy("maxanisotropy", false, false, (float_t)0.0,
+                                   std::numeric_limits<float_t>::infinity(),
+                                   kImageMapDefaultMaxAnisotropy);
   SingleFloatMatcher u_scale(
       "uscale", false, false, -std::numeric_limits<float_t>::infinity(),
       std::numeric_limits<float_t>::infinity(), kImageMapDefaultUVScaleValue);
@@ -37,7 +43,8 @@ ReflectorTexture ParseImageMapReflector(
       std::numeric_limits<float_t>::infinity(), kImageMapDefaultUVDeltaValue);
   SingleFileMatcher filename("filename");
   SingleStringMatcher wrap("wrap", false, kImageMapDefaultWrap);
-  parameters.Match(u_scale, v_scale, u_delta, v_delta, filename, wrap);
+  parameters.Match(trilinear, maxanisotropy, u_scale, v_scale, u_delta, v_delta,
+                   filename, wrap);
 
   if (!absl::EndsWith(filename.Get().first, ".png")) {
     std::cerr << "ERROR: png is the only supported image format" << std::endl;
@@ -57,13 +64,15 @@ ReflectorTexture ParseImageMapReflector(
     exit(EXIT_FAILURE);
   }
 
+  TEXTURE_FILTERING_ALGORITHM algorithm =
+      trilinear.Get() ? TEXTURE_FILTERING_ALGORITHM_TRILINEAR
+                      : TEXTURE_FILTERING_ALGORITHM_EWA;
+
   ReflectorMipmap mipmap;
-  ISTATUS status =
-      PngReflectorMipmapAllocate(filename.Get().second.c_str(),
-                                 TEXTURE_FILTERING_ALGORITHM_TRILINEAR,
-                                 wrap_mode,
-                                 spectrum_manager.GetColorExtrapolator().get(),
-                                 mipmap.release_and_get_address());
+  ISTATUS status = PngReflectorMipmapAllocate(
+      filename.Get().second.c_str(), algorithm, *maxanisotropy.Get(), wrap_mode,
+      spectrum_manager.GetColorExtrapolator().get(),
+      mipmap.release_and_get_address());
   switch (status) {
     case ISTATUS_IO_ERROR:
       std::cerr << "ERROR: Failed to read PNG file: " << filename.Get().first
@@ -83,6 +92,10 @@ ReflectorTexture ParseImageMapReflector(
 FloatTexture ParseImageMapFloat(
     Parameters& parameters, const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager) {
+  SingleBoolMatcher trilinear("trilinear", false, kImageMapDefaultTrilinear);
+  SingleFloatMatcher maxanisotropy("maxanisotropy", false, false, (float_t)0.0,
+                                   std::numeric_limits<float_t>::infinity(),
+                                   kImageMapDefaultMaxAnisotropy);
   SingleFloatMatcher u_scale(
       "uscale", false, false, -std::numeric_limits<float_t>::infinity(),
       std::numeric_limits<float_t>::infinity(), kImageMapDefaultUVScaleValue);
@@ -97,7 +110,8 @@ FloatTexture ParseImageMapFloat(
       std::numeric_limits<float_t>::infinity(), kImageMapDefaultUVDeltaValue);
   SingleFileMatcher filename("filename");
   SingleStringMatcher wrap("wrap", false, kImageMapDefaultWrap);
-  parameters.Match(u_scale, v_scale, u_delta, v_delta, filename, wrap);
+  parameters.Match(trilinear, maxanisotropy, u_scale, v_scale, u_delta, v_delta,
+                   filename, wrap);
 
   if (!absl::EndsWith(filename.Get().first, ".png")) {
     std::cerr << "ERROR: png is the only supported image format" << std::endl;
@@ -117,12 +131,14 @@ FloatTexture ParseImageMapFloat(
     exit(EXIT_FAILURE);
   }
 
+  TEXTURE_FILTERING_ALGORITHM algorithm =
+      trilinear.Get() ? TEXTURE_FILTERING_ALGORITHM_TRILINEAR
+                      : TEXTURE_FILTERING_ALGORITHM_EWA;
+
   FloatMipmap mipmap;
-  ISTATUS status =
-      PngFloatMipmapAllocate(filename.Get().second.c_str(),
-                             TEXTURE_FILTERING_ALGORITHM_TRILINEAR,
-                             wrap_mode,
-                             mipmap.release_and_get_address());
+  ISTATUS status = PngFloatMipmapAllocate(
+      filename.Get().second.c_str(), algorithm, *maxanisotropy.Get(), wrap_mode,
+      mipmap.release_and_get_address());
   switch (status) {
     case ISTATUS_IO_ERROR:
       std::cerr << "ERROR: Failed to read PNG file: " << filename.Get().first
