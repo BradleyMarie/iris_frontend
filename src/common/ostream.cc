@@ -12,6 +12,8 @@ std::ostream& operator<<(std::ostream& os, const ISTATUS& status) {
       return os << "ISTATUS_INTEGER_OVERFLOW";
     case ISTATUS_IO_ERROR:
       return os << "ISTATUS_IO_ERROR";
+    case ISTATUS_OUT_OF_ENTROPY:
+      return os << "ISTATUS_OUT_OF_ENTROPY";
     case ISTATUS_NO_INTERSECTION:
       return os << "ISTATUS_NO_INTERSECTION";
     case ISTATUS_INVALID_ARGUMENT_00:
