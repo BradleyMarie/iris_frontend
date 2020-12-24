@@ -135,3 +135,13 @@ TEST(RenderTests, IncludeCornellBox) {
   CheckEquals("test/cornell_box/cornell_box.pfm", render_result.first,
               (float_t)0.1);
 }
+
+TEST(RenderTests, PbrtBook) {
+  auto parser = Parser::Create("test/pbrt_book/pbrt_book.pbrt");
+  auto render_result =
+      RenderToFramebuffer(parser, kRenderIndex, kEpsilon, kNumThreads,
+                          kReportProgress, kOverrideSpectralRepresentation,
+                          kRgbColorSpace, kSpectrumColorWorkaround);
+  CheckEquals("test/pbrt_book/pbrt_book.pfm", render_result.first,
+              (float_t)0.1);
+}
