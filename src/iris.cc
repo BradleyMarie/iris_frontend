@@ -2,6 +2,10 @@
 #include <sstream>
 #include <thread>
 
+#ifdef INSTRUMENTED_BUILD
+#include <gperftools/profiler.h>
+#endif  // INSTRUMENTED_BUILD
+
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
 #include "absl/flags/usage.h"
@@ -9,6 +13,13 @@
 #include "src/directives/color_space.h"
 #include "src/directives/parser.h"
 #include "src/render.h"
+
+#ifdef INSTRUMENTED_BUILD
+ABSL_FLAG(
+    std::string, cpu_profile, "",
+    "If non-empty, enable CPU profiling and save traces to the file specified. "
+    "If empty, CPU profiling is disabled and no output is generated.");
+#endif  // INSTRUMENTED_BUILD
 
 ABSL_FLAG(float_t, epsilon, 0.001,
           "The amount of error tolerated in distance calculations. Must be "
@@ -135,7 +146,7 @@ std::string VersionString() {
   result << "iris " << kVersion << " (" << kBits << kDebug << ") ["
          << std::thread::hardware_concurrency() << " hardware threads detected]"
          << std::endl;
-  result << "Copyright (C) 2020 Brad Weinberger" << std::endl;
+  result << "Copyright (C) 2021 Brad Weinberger" << std::endl;
   result << "This is free software licensed under version 3 of the GNU General "
             "Public License"
          << std::endl;
@@ -182,6 +193,13 @@ int main(int argc, char** argv) {
     std::cout << VersionString();
   }
 
+#ifdef INSTRUMENTED_BUILD
+  const auto& cpu_profile = absl::GetFlag(FLAGS_cpu_profile);
+  if (!cpu_profile.empty()) {
+    ProfilerStart(cpu_profile.c_str());
+  }
+#endif  // INSTRUMENTED_BUILD
+
   for (size_t render_index = 0; !parser.Done(); render_index += 1) {
     iris::RenderToOutput(
         parser, render_index, absl::GetFlag(FLAGS_epsilon),
@@ -190,6 +208,10 @@ int main(int argc, char** argv) {
         absl::GetFlag(FLAGS_rgb_color_space).opt,
         absl::GetFlag(FLAGS_always_compute_reflective_color).opt);
   }
+
+#ifdef INSTRUMENTED_BUILD
+  ProfilerStop();
+#endif  // INSTRUMENTED_BUILD
 
   return EXIT_SUCCESS;
 }

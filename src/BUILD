@@ -17,6 +17,23 @@ cc_binary(
     ],
 )
 
+cc_binary(
+    name = "iris_instrumented",
+    defines = ["INSTRUMENTED_BUILD"],
+    srcs = ["iris.cc"],
+    visibility = ["//visibility:public"],
+    linkopts = ["-lprofiler"],
+    deps = [
+        ":render",
+        "//src/directives:color_space",
+        "//src/directives:parser",
+        "@com_google_absl//absl/flags:config",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/flags:usage",
+    ],
+)
+
 cc_library(
     name = "render",
     srcs = ["render.cc"],
