@@ -26,8 +26,6 @@ Sampler ParseHalton(Parameters& parameters) {
       sequence.get(), pixelsamples.Get(), result.release_and_get_address());
   SuccessOrOOM(status);
 
-  sequence.detach();
-
   return result;
 }
 
