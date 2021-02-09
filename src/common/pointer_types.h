@@ -1,6 +1,7 @@
 #ifndef _SRC_COMMON_POINTER_TYPES_
 #define _SRC_COMMON_POINTER_TYPES_
 
+#include "iris_advanced_toolkit/low_discrepancy_sequence.h"
 #include "iris_camera/iris_camera.h"
 #include "iris_physx/iris_physx.h"
 #include "iris_physx_toolkit/color_extrapolator.h"
@@ -32,6 +33,8 @@ typedef SharedPtr<NORMAL_MAP, NormalMapRetain, NormalMapRelease> NormalMap;
 typedef SharedPtr<LIGHT, LightRetain, LightRelease> Light;
 typedef SharedPtr<LIGHT_SAMPLER, LightSamplerRetain, LightSamplerRelease>
     LightSampler;
+typedef UniquePtr<LOW_DISCREPANCY_SEQUENCE, LowDiscrepancySequenceFree>
+    LowDiscrepancySequence;
 typedef UniquePtr<PROGRESS_REPORTER, ProgressReporterFree> ProgressReporter;
 typedef UniquePtr<RANDOM, RandomFree> Random;
 typedef SharedPtr<REFLECTOR, ReflectorRetain, ReflectorRelease> Reflector;

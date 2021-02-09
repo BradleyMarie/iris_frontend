@@ -1,6 +1,7 @@
 #include "src/samplers/halton.h"
 
-#include "iris_camera_toolkit/halton_image_sampler.h"
+#include "iris_advanced_toolkit/halton_sequence.h"
+#include "iris_camera_toolkit/low_discrepancy_image_sampler.h"
 #include "src/common/error.h"
 #include "src/param_matchers/integral_single.h"
 
@@ -16,10 +17,16 @@ Sampler ParseHalton(Parameters& parameters) {
                                           kHaltonSamplerDefaultPixelSamples);
   parameters.Match(pixelsamples);
 
-  Sampler result;
-  ISTATUS status = HaltonImageSamplerAllocate(pixelsamples.Get(),
-                                              result.release_and_get_address());
+  LowDiscrepancySequence sequence;
+  ISTATUS status = HaltonSequenceAllocate(sequence.release_and_get_address());
   SuccessOrOOM(status);
+
+  Sampler result;
+  status = LowDiscrepancyImageSamplerAllocate(
+      sequence.get(), pixelsamples.Get(), result.release_and_get_address());
+  SuccessOrOOM(status);
+
+  sequence.detach();
 
   return result;
 }

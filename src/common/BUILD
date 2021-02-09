@@ -109,6 +109,7 @@ cc_library(
     deps = [
         ":shared_ptr",
         ":unique_ptr",
+        "@com_github_bradleymarie_iris//iris_advanced_toolkit:low_discrepancy_sequence",
         "@com_github_bradleymarie_iris//iris_camera",
         "@com_github_bradleymarie_iris//iris_physx",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:color_extrapolator",

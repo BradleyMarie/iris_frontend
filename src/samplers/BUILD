@@ -11,7 +11,8 @@ cc_library(
         "//src/common:parameters",
         "//src/common:pointer_types",
         "//src/param_matchers:integral_single",
-        "@com_github_bradleymarie_iris//iris_camera_toolkit:halton_image_sampler",
+        "@com_github_bradleymarie_iris//iris_advanced_toolkit:halton_sequence",
+        "@com_github_bradleymarie_iris//iris_camera_toolkit:low_discrepancy_image_sampler",
     ],
 )
 
@@ -37,7 +38,8 @@ cc_library(
         "//src/common:parameters",
         "//src/common:pointer_types",
         "//src/param_matchers:integral_single",
-        "@com_github_bradleymarie_iris//iris_camera_toolkit:sobol_image_sampler",
+        "@com_github_bradleymarie_iris//iris_advanced_toolkit:sobol_sequence",
+        "@com_github_bradleymarie_iris//iris_camera_toolkit:low_discrepancy_image_sampler",
     ],
 )
 

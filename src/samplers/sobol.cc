@@ -1,6 +1,7 @@
 #include "src/samplers/sobol.h"
 
-#include "iris_camera_toolkit/sobol_image_sampler.h"
+#include "iris_advanced_toolkit/sobol_sequence.h"
+#include "iris_camera_toolkit/low_discrepancy_image_sampler.h"
 #include "src/common/error.h"
 #include "src/param_matchers/integral_single.h"
 
@@ -16,10 +17,16 @@ Sampler ParseSobol(Parameters& parameters) {
                                           kSobolSamplerDefaultPixelSamples);
   parameters.Match(pixelsamples);
 
-  Sampler result;
-  ISTATUS status = SobolImageSamplerAllocate(pixelsamples.Get(),
-                                             result.release_and_get_address());
+  LowDiscrepancySequence sequence;
+  ISTATUS status = SobolSequenceAllocate(sequence.release_and_get_address());
   SuccessOrOOM(status);
+
+  Sampler result;
+  status = LowDiscrepancyImageSamplerAllocate(
+      sequence.get(), pixelsamples.Get(), result.release_and_get_address());
+  SuccessOrOOM(status);
+
+  sequence.detach();
 
   return result;
 }
