@@ -115,7 +115,7 @@ std::pair<Scene, std::vector<Light>> SceneBuilder::Build() {
   Scene result;
   ISTATUS status = KdTreeSceneAllocate(
       m_scene_shapes.data(), m_scene_transforms.data(), premultiplied.get(),
-      m_scene_shapes.size(), result.release_and_get_address());
+      m_scene_shapes.size(), nullptr, result.release_and_get_address());
   SuccessOrOOM(status);
 
   return std::make_pair(result, m_scene_lights);
