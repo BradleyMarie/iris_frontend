@@ -51,6 +51,7 @@ typedef UniquePtr<SAMPLE_TRACER, SampleTracerFree> SampleTracer;
 typedef SharedPtr<SCENE, SceneRetain, SceneRelease> Scene;
 typedef SharedPtr<SHAPE, ShapeRetain, ShapeRelease> Shape;
 typedef SharedPtr<SPECTRUM, SpectrumRetain, SpectrumRelease> Spectrum;
+typedef UniquePtr<SPECTRUM_MIPMAP, SpectrumMipmapFree> SpectrumMipmap;
 typedef SharedPtr<SPECTRUM_TEXTURE, SpectrumTextureRetain,
                   SpectrumTextureRelease>
     SpectrumTexture;

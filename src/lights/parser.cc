@@ -1,13 +1,16 @@
 #include "src/lights/parser.h"
 
 #include "src/lights/distant.h"
+#include "src/lights/infinite.h"
 #include "src/lights/point.h"
 
 namespace iris {
 namespace {
 
 const Directive::Implementations<LightResult, SpectrumManager&, const Matrix&>
-    kImpls = {{"point", ParsePoint}, {"distant", ParseDistant}};
+    kImpls = {{"point", ParsePoint},
+              {"infinite", ParseInfinite},
+              {"distant", ParseDistant}};
 
 }  // namespace
 

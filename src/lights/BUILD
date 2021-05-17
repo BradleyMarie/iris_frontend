@@ -19,12 +19,33 @@ cc_library(
 )
 
 cc_library(
+    name = "infinite",
+    srcs = ["infinite.cc"],
+    hdrs = ["infinite.h"],
+    deps = [
+        ":result",
+        "//src/common:error",
+        "//src/common:parameters",
+        "//src/common:pointer_types",
+        "//src/common:spectrum_manager",
+        "//src/param_matchers:file",
+        "@com_github_bradleymarie_iris//iris_advanced_toolkit:color_io",
+        "@com_github_bradleymarie_iris//iris_advanced_toolkit:lanczos_upscale",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:image_spectrum_texture",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:infinite_environmental_light",
+        "@com_google_absl//absl/strings",
+        "@tinyexr",
+    ],
+)
+
+cc_library(
     name = "parser",
     srcs = ["parser.cc"],
     hdrs = ["parser.h"],
     visibility = ["//src:__subpackages__"],
     deps = [
         ":distant",
+        ":infinite",
         ":point",
         ":result",
         "//src/common:directive",
