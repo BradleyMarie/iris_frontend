@@ -90,6 +90,7 @@ cc_library(
         "//src/common:directive",
         "//src/common:error",
         "//src/common:pointer_types",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:aggregate_environmental_light",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:kd_tree_scene",
         "@com_google_absl//absl/container:flat_hash_map",
     ],

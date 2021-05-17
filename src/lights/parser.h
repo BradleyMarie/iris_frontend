@@ -3,11 +3,12 @@
 
 #include "src/common/directive.h"
 #include "src/common/spectrum_manager.h"
+#include "src/lights/result.h"
 
 namespace iris {
 
-Light ParseLight(Directive& directive, SpectrumManager& spectrum_manager,
-                 const Matrix& model_to_world);
+LightResult ParseLight(Directive& directive, SpectrumManager& spectrum_manager,
+                       const Matrix& model_to_world);
 
 }  // namespace iris
 

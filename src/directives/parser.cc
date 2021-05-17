@@ -982,7 +982,7 @@ void GeometryParser::AreaLightSource(Directive& directive) {
 void GeometryParser::LightSource(Directive& directive) {
   auto light = ParseLight(directive, m_spectrum_manager,
                           m_matrix_manager.GetCurrent().first);
-  m_scene_builder.AddLight(light);
+  m_scene_builder.AddLight(std::get<0>(light), std::get<1>(light));
 }
 
 void GeometryParser::MakeNamedMaterial(Directive& directive) {

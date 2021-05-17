@@ -8,6 +8,7 @@
 #include "iris_physx_toolkit/float_texture.h"
 #include "iris_physx_toolkit/mipmap.h"
 #include "iris_physx_toolkit/reflector_texture.h"
+#include "iris_physx_toolkit/spectrum_texture.h"
 #include "src/common/shared_ptr.h"
 #include "src/common/unique_ptr.h"
 
@@ -22,6 +23,9 @@ typedef SharedPtr<COLOR_INTEGRATOR, ColorIntegratorRetain,
 typedef SharedPtr<EMISSIVE_MATERIAL, EmissiveMaterialRetain,
                   EmissiveMaterialRelease>
     EmissiveMaterial;
+typedef SharedPtr<ENVIRONMENTAL_LIGHT, EnvironmentalLightRetain,
+                  EnvironmentalLightRelease>
+    EnvironmentalLight;
 typedef UniquePtr<FLOAT_MIPMAP, FloatMipmapFree> FloatMipmap;
 typedef SharedPtr<FLOAT_TEXTURE, FloatTextureRetain, FloatTextureRelease>
     FloatTexture;
@@ -47,6 +51,9 @@ typedef UniquePtr<SAMPLE_TRACER, SampleTracerFree> SampleTracer;
 typedef SharedPtr<SCENE, SceneRetain, SceneRelease> Scene;
 typedef SharedPtr<SHAPE, ShapeRetain, ShapeRelease> Shape;
 typedef SharedPtr<SPECTRUM, SpectrumRetain, SpectrumRelease> Spectrum;
+typedef SharedPtr<SPECTRUM_TEXTURE, SpectrumTextureRetain,
+                  SpectrumTextureRelease>
+    SpectrumTexture;
 
 }  // namespace iris
 

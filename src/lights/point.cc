@@ -15,8 +15,9 @@ static const POINT3 kPointLightDefaultFrom =
 
 }  // namespace
 
-Light ParsePoint(Parameters& parameters, SpectrumManager& spectrum_manager,
-                 const Matrix& model_to_world) {
+LightResult ParsePoint(Parameters& parameters,
+                       SpectrumManager& spectrum_manager,
+                       const Matrix& model_to_world) {
   SinglePoint3Matcher from("from", false, kPointLightDefaultFrom);
   SpectrumMatcher spectrum = SpectrumMatcher::FromRgb(
       "L", false, spectrum_manager, kPointLightDefaultL);
@@ -29,7 +30,7 @@ Light ParsePoint(Parameters& parameters, SpectrumManager& spectrum_manager,
                                       result.release_and_get_address());
   SuccessOrOOM(status);
 
-  return result;
+  return std::make_tuple(std::move(result), EnvironmentalLight());
 }
 
 }  // namespace iris

@@ -6,13 +6,13 @@
 namespace iris {
 namespace {
 
-const Directive::Implementations<Light, SpectrumManager&, const Matrix&>
+const Directive::Implementations<LightResult, SpectrumManager&, const Matrix&>
     kImpls = {{"point", ParsePoint}, {"distant", ParseDistant}};
 
 }  // namespace
 
-Light ParseLight(Directive& directive, SpectrumManager& spectrum_manager,
-                 const Matrix& model_to_world) {
+LightResult ParseLight(Directive& directive, SpectrumManager& spectrum_manager,
+                       const Matrix& model_to_world) {
   return directive.Invoke(kImpls, spectrum_manager, model_to_world);
 }
 

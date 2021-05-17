@@ -7,6 +7,7 @@ cc_library(
     srcs = ["distant.cc"],
     hdrs = ["distant.h"],
     deps = [
+        ":result",
         "//src/common:error",
         "//src/common:parameters",
         "//src/common:pointer_types",
@@ -25,6 +26,7 @@ cc_library(
     deps = [
         ":distant",
         ":point",
+        ":result",
         "//src/common:directive",
         "//src/common:spectrum_manager",
     ],
@@ -35,6 +37,7 @@ cc_library(
     srcs = ["point.cc"],
     hdrs = ["point.h"],
     deps = [
+        ":result",
         "//src/common:error",
         "//src/common:parameters",
         "//src/common:pointer_types",
@@ -42,5 +45,13 @@ cc_library(
         "//src/param_matchers:single",
         "//src/param_matchers:spectrum",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:point_light",
+    ],
+)
+
+cc_library(
+    name = "result",
+    hdrs = ["result.h"],
+    deps = [
+        "//src/common:pointer_types",
     ],
 )

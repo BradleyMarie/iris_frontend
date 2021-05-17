@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "iris_physx_toolkit/aggregate_environmental_light.h"
 #include "iris_physx_toolkit/kd_tree_scene.h"
 #include "src/common/error.h"
 
@@ -104,21 +105,50 @@ void SceneBuilder::AddAreaLight(const Shape& shape, const Matrix& matrix,
   }
 }
 
-void SceneBuilder::AddLight(const Light& light) {
-  m_scene_lights.push_back(light);
+void SceneBuilder::AddLight(const Light& light,
+                            const EnvironmentalLight& environmental_light) {
+  if (environmental_light.get()) {
+    m_environmental_lights.push_back(
+        std::make_tuple(light, environmental_light));
+  } else {
+    m_scene_lights.push_back(light);
+  }
 }
 
 std::pair<Scene, std::vector<Light>> SceneBuilder::Build() {
   assert(m_scene_shapes.size() == m_scene_transforms.size());
 
+  std::vector<Light> result_lights = m_scene_lights;
+
+  EnvironmentalLight environmental_light;
+  if (m_environmental_lights.size() == 1) {
+    environmental_light = std::get<1>(m_environmental_lights[0]);
+    result_lights.push_back(std::get<0>(m_environmental_lights[0]));
+  } else if (m_environmental_lights.size() != 0) {
+    std::vector<PENVIRONMENTAL_LIGHT> environmental_lights;
+    for (const auto& entry : m_environmental_lights) {
+      environmental_lights.push_back(std::get<1>(entry).get());
+    }
+
+    Light environmental_light_as_light;
+    ISTATUS status = AggregateEnvironmentalLightAllocate(
+        environmental_lights.data(), environmental_lights.size(),
+        environmental_light.release_and_get_address(),
+        environmental_light_as_light.release_and_get_address());
+    SuccessOrOOM(status);
+
+    result_lights.push_back(environmental_light_as_light);
+  }
+
   std::unique_ptr<bool[]> premultiplied(new bool[m_scene_shapes.size()]());
   Scene result;
   ISTATUS status = KdTreeSceneAllocate(
       m_scene_shapes.data(), m_scene_transforms.data(), premultiplied.get(),
-      m_scene_shapes.size(), nullptr, result.release_and_get_address());
+      m_scene_shapes.size(), environmental_light.get(),
+      result.release_and_get_address());
   SuccessOrOOM(status);
 
-  return std::make_pair(result, m_scene_lights);
+  return std::make_pair(result, result_lights);
 }
 
 }  // namespace iris

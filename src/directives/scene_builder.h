@@ -5,8 +5,8 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
-#include "src/common/pointer_types.h"
 #include "src/common/directive.h"
+#include "src/common/pointer_types.h"
 
 namespace iris {
 
@@ -24,7 +24,8 @@ class SceneBuilder {
   void AddShape(const Shape& shape, const Matrix& matrix);
   void AddAreaLight(const Shape& shape, const Matrix& matrix,
                     const EmissiveMaterial& material, uint32_t face_index);
-  void AddLight(const Light& light);
+  void AddLight(const Light& light,
+                const EnvironmentalLight& environmental_light);
 
   std::pair<Scene, std::vector<Light>> Build();
 
@@ -39,6 +40,7 @@ class SceneBuilder {
       m_instanced_objects;
 
   std::vector<Light> m_scene_lights;
+  std::vector<std::tuple<Light, EnvironmentalLight>> m_environmental_lights;
   std::vector<PMATRIX> m_scene_transforms;
   std::vector<PSHAPE> m_scene_shapes;
 };
