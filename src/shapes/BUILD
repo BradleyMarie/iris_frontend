@@ -38,6 +38,7 @@ cc_library(
         "//src/param_matchers:file",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle_mesh",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle_mesh_normal_map",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:triangle_mesh_texture_coordinate_map",
         "@rply",
     ],
 )

@@ -55,6 +55,9 @@ typedef UniquePtr<SPECTRUM_MIPMAP, SpectrumMipmapFree> SpectrumMipmap;
 typedef SharedPtr<SPECTRUM_TEXTURE, SpectrumTextureRetain,
                   SpectrumTextureRelease>
     SpectrumTexture;
+typedef SharedPtr<TEXTURE_COORDINATE_MAP, TextureCoordinateMapRetain,
+                  TextureCoordinateMapRelease>
+    TextureCoordinateMaps;
 
 }  // namespace iris
 

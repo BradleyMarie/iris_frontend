@@ -6,6 +6,7 @@
 
 #include "iris_physx_toolkit/triangle_mesh.h"
 #include "iris_physx_toolkit/triangle_mesh_normal_map.h"
+#include "iris_physx_toolkit/triangle_mesh_texture_coordinate_map.h"
 #include "rply.h"
 #include "rplyfile.h"
 #include "src/common/error.h"
@@ -648,6 +649,15 @@ ShapeResult ParsePlyMesh(Parameters& parameters, const Matrix& model_to_world,
     normal = VectorNormalize(normal, nullptr, nullptr);
   }
 
+  TextureCoordinateMaps texture_coordinate_map;
+  if (!fileData.GetUVs().empty()) {
+    ISTATUS status = TriangleMeshTextureCoordinateMapAllocate(
+        reinterpret_cast<const float_t(*)[2]>(fileData.GetUVs().data()),
+        fileData.GetUVs().size(),
+        texture_coordinate_map.release_and_get_address());
+    SuccessOrOOM(status);
+  }
+
   NormalMap front_normal_map, back_normal_map;
   if (material.second.get()) {
     front_normal_map = material.second;
@@ -663,13 +673,10 @@ ShapeResult ParsePlyMesh(Parameters& parameters, const Matrix& model_to_world,
   std::vector<Shape> shapes(fileData.GetFaces().size() / 3);
   size_t triangles_allocated;
   ISTATUS status = TriangleMeshAllocate(
-      fileData.GetVertices().data(),
-      fileData.GetUVs().empty()
-          ? nullptr
-          : reinterpret_cast<const float_t(*)[2]>(fileData.GetUVs().data()),
-      fileData.GetVertices().size(),
+      fileData.GetVertices().data(), fileData.GetVertices().size(),
       reinterpret_cast<const size_t(*)[3]>(fileData.GetFaces().data()),
-      fileData.GetFaces().size() / 3, front_normal_map.get(),
+      fileData.GetFaces().size() / 3, texture_coordinate_map.get(),
+      texture_coordinate_map.get(), front_normal_map.get(),
       back_normal_map.get(), material.first.get(), material.first.get(),
       front_emissive_material.get(), back_emissive_material.get(),
       reinterpret_cast<PSHAPE*>(shapes.data()), &triangles_allocated);
