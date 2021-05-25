@@ -12,6 +12,7 @@ class MaterialManager {
  public:
   const Material& AllocateMatteMaterial(const ReflectorTexture& kd,
                                         const FloatTexture& sigma);
+  const Material& AllocateMirrorMaterial(const ReflectorTexture& kr);
   const Material& AllocatePlasticMaterial(const ReflectorTexture& kd,
                                           const ReflectorTexture& ks,
                                           const FloatTexture& roughness,
@@ -20,6 +21,7 @@ class MaterialManager {
  private:
   std::map<std::pair<ReflectorTexture, FloatTexture>, Material>
       m_matte_materials;
+  std::map<ReflectorTexture, Material> m_mirror_materials;
   std::map<std::tuple<ReflectorTexture, ReflectorTexture, FloatTexture, bool>,
            Material>
       m_plastic_materials;

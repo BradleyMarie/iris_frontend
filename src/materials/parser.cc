@@ -1,6 +1,7 @@
 #include "src/materials/parser.h"
 
 #include "src/materials/matte.h"
+#include "src/materials/mirror.h"
 #include "src/materials/plastic.h"
 #include "src/materials/uber.h"
 
@@ -10,8 +11,10 @@ namespace {
 const Directive::Implementations<MaterialResult, const NamedTextureManager&,
                                  NormalMapManager&, TextureManager&,
                                  SpectrumManager&>
-    kImpls = {
-        {"matte", ParseMatte}, {"plastic", ParsePlastic}, {"uber", ParseUber}};
+    kImpls = {{"matte", ParseMatte},
+              {"mirror", ParseMirror},
+              {"plastic", ParsePlastic},
+              {"uber", ParseUber}};
 
 }  // namespace
 

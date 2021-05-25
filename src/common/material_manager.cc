@@ -1,6 +1,7 @@
 #include "src/common/material_manager.h"
 
 #include "iris_physx_toolkit/matte_material.h"
+#include "iris_physx_toolkit/mirror_material.h"
 #include "iris_physx_toolkit/plastic_material.h"
 #include "src/common/error.h"
 
@@ -12,6 +13,18 @@ const Material& MaterialManager::AllocateMatteMaterial(
   if (!result.get()) {
     ISTATUS status = MatteMaterialAllocate(kd.get(), sigma.get(),
                                            result.release_and_get_address());
+    SuccessOrOOM(status);
+  }
+
+  return result;
+}
+
+const Material& MaterialManager::AllocateMirrorMaterial(
+    const ReflectorTexture& kr) {
+  Material& result = m_mirror_materials[kr];
+  if (!result.get()) {
+    ISTATUS status =
+        MirrorMaterialAllocate(kr.get(), result.release_and_get_address());
     SuccessOrOOM(status);
   }
 

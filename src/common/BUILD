@@ -33,6 +33,7 @@ cc_library(
         ":error",
         ":pointer_types",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:matte_material",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit:mirror_material",
         "@com_github_bradleymarie_iris//iris_physx_toolkit:plastic_material",
     ],
 )

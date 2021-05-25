@@ -16,12 +16,26 @@ cc_library(
 )
 
 cc_library(
+    name = "mirror",
+    srcs = ["mirror.cc"],
+    hdrs = ["mirror.h"],
+    deps = [
+        ":result",
+        "//src/common:named_texture_manager",
+        "//src/common:parameters",
+        "//src/param_matchers:float_texture",
+        "//src/param_matchers:reflector_texture",
+    ],
+)
+
+cc_library(
     name = "parser",
     srcs = ["parser.cc"],
     hdrs = ["parser.h"],
     visibility = ["//src:__subpackages__"],
     deps = [
         ":matte",
+        ":mirror",
         ":plastic",
         ":result",
         ":uber",
