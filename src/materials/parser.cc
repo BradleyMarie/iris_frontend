@@ -2,6 +2,7 @@
 
 #include "src/materials/matte.h"
 #include "src/materials/plastic.h"
+#include "src/materials/uber.h"
 
 namespace iris {
 namespace {
@@ -9,7 +10,8 @@ namespace {
 const Directive::Implementations<MaterialResult, const NamedTextureManager&,
                                  NormalMapManager&, TextureManager&,
                                  SpectrumManager&>
-    kImpls = {{"matte", ParseMatte}, {"plastic", ParsePlastic}};
+    kImpls = {
+        {"matte", ParseMatte}, {"plastic", ParsePlastic}, {"uber", ParseUber}};
 
 }  // namespace
 

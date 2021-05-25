@@ -24,6 +24,7 @@ cc_library(
         ":matte",
         ":plastic",
         ":result",
+        ":uber",
         "//src/common:directive",
         "//src/common:named_texture_manager",
     ],
@@ -54,5 +55,18 @@ cc_library(
         "//src/common:parameters",
         "//src/common:spectrum_manager",
         "//src/common:texture_manager",
+    ],
+)
+
+cc_library(
+    name = "uber",
+    srcs = ["uber.cc"],
+    hdrs = ["uber.h"],
+    deps = [
+        ":result",
+        "//src/common:named_texture_manager",
+        "//src/common:parameters",
+        "//src/param_matchers:float_texture",
+        "//src/param_matchers:reflector_texture",
     ],
 )
