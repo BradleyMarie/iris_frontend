@@ -23,7 +23,8 @@ static const char* kImageMapDefaultWrap = "repeat";
 }  // namespace
 
 ReflectorTexture ParseImageMapReflector(
-    Parameters& parameters, const NamedTextureManager& named_texture_manager,
+    Parameters& parameters, const Matrix& texture_to_world,
+    const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager) {
   SingleBoolMatcher trilinear("trilinear", false, kImageMapDefaultTrilinear);
   SingleFloatMatcher maxanisotropy("maxanisotropy", false, false, (float_t)0.0,
@@ -90,7 +91,8 @@ ReflectorTexture ParseImageMapReflector(
 }
 
 FloatTexture ParseImageMapFloat(
-    Parameters& parameters, const NamedTextureManager& named_texture_manager,
+    Parameters& parameters, const Matrix& texture_to_world,
+    const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager) {
   SingleBoolMatcher trilinear("trilinear", false, kImageMapDefaultTrilinear);
   SingleFloatMatcher maxanisotropy("maxanisotropy", false, false, (float_t)0.0,

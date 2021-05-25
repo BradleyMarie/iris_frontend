@@ -1,5 +1,5 @@
-#ifndef _SRC_TEXTURES_CONSTANT_
-#define _SRC_TEXTURES_CONSTANT_
+#ifndef _SRC_TEXTURES_WINDY_
+#define _SRC_TEXTURES_WINDY_
 
 #include "src/common/named_texture_manager.h"
 #include "src/common/parameters.h"
@@ -8,16 +8,16 @@
 
 namespace iris {
 
-ReflectorTexture ParseConstantReflector(
+ReflectorTexture ParseWindyReflector(
     Parameters& parameters, const Matrix& texture_to_world,
     const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager);
 
-FloatTexture ParseConstantFloat(
-    Parameters& parameters, const Matrix& texture_to_world,
-    const NamedTextureManager& named_texture_manager,
-    TextureManager& texture_manager);
+FloatTexture ParseWindyFloat(Parameters& parameters,
+                             const Matrix& texture_to_world,
+                             const NamedTextureManager& named_texture_manager,
+                             TextureManager& texture_manager);
 
 }  // namespace iris
 
-#endif  // _SRC_TEXTURES_CONSTANT_
+#endif  // _SRC_TEXTURES_WINDY_

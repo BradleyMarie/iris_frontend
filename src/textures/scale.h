@@ -2,19 +2,21 @@
 #define _SRC_TEXTURES_SCALE_
 
 #include "src/common/named_texture_manager.h"
+#include "src/common/parameters.h"
 #include "src/common/spectrum_manager.h"
 #include "src/common/texture_manager.h"
-#include "src/common/parameters.h"
 
 namespace iris {
 
 ReflectorTexture ParseScaleReflector(
-    Parameters& parameters, const NamedTextureManager& named_texture_manager,
+    Parameters& parameters, const Matrix& texture_to_world,
+    const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager);
 
-FloatTexture ParseScaleFloat(
-    Parameters& parameters, const NamedTextureManager& named_texture_manager,
-    TextureManager& texture_manager);
+FloatTexture ParseScaleFloat(Parameters& parameters,
+                             const Matrix& texture_to_world,
+                             const NamedTextureManager& named_texture_manager,
+                             TextureManager& texture_manager);
 
 }  // namespace iris
 

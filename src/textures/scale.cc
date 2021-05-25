@@ -11,7 +11,8 @@ static const float_t kScaleTextureDefaultValue = (float_t)1.0;
 }  // namespace
 
 ReflectorTexture ParseScaleReflector(
-    Parameters& parameters, const NamedTextureManager& named_texture_manager,
+    Parameters& parameters, const Matrix& texture_to_world,
+    const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager) {
   ReflectorTextureMatcher tex1 =
       ReflectorTextureMatcher::FromUniformReflectance(
@@ -28,6 +29,7 @@ ReflectorTexture ParseScaleReflector(
 }
 
 FloatTexture ParseScaleFloat(Parameters& parameters,
+                             const Matrix& texture_to_world,
                              const NamedTextureManager& named_texture_manager,
                              TextureManager& texture_manager) {
   FloatTextureMatcher tex1 = FloatTextureMatcher::FromValue(

@@ -11,7 +11,8 @@ static const float_t kConstantTextureDefaultValue = (float_t)1.0;
 }  // namespace
 
 ReflectorTexture ParseConstantReflector(
-    Parameters& parameters, const NamedTextureManager& named_texture_manager,
+    Parameters& parameters, const Matrix& texture_to_world,
+    const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager, SpectrumManager& spectrum_manager) {
   ReflectorTextureMatcher value =
       ReflectorTextureMatcher::FromUniformReflectance(
@@ -23,7 +24,8 @@ ReflectorTexture ParseConstantReflector(
 }
 
 FloatTexture ParseConstantFloat(
-    Parameters& parameters, const NamedTextureManager& named_texture_manager,
+    Parameters& parameters, const Matrix& texture_to_world,
+    const NamedTextureManager& named_texture_manager,
     TextureManager& texture_manager) {
   FloatTextureMatcher value = FloatTextureMatcher::FromValue(
       "value", false, true, (float_t)0.0, (float_t)1.0, named_texture_manager,

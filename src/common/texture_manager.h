@@ -27,6 +27,10 @@ class TextureManager {
                                             float_t v_delta, float_t u_scale,
                                             float_t v_scale);
 
+  const ReflectorTexture& AllocateWindyReflectorTexture(
+      const Matrix& texture_to_world, const Reflector& reflector);
+  const FloatTexture& AllocateWindyFloatTexture(const Matrix& texture_to_world);
+
  private:
   std::map<Reflector, ReflectorTexture> m_constant_reflector_textures;
   std::map<float_t, FloatTexture> m_constant_float_textures;
@@ -35,6 +39,10 @@ class TextureManager {
       m_product_reflector_textures;
   std::map<std::pair<FloatTexture, FloatTexture>, FloatTexture>
       m_product_float_textures;
+
+  std::map<std::pair<Matrix, Reflector>, ReflectorTexture>
+      m_windy_reflector_textures;
+  std::map<Matrix, FloatTexture> m_windy_float_textures;
 };
 
 }  // namespace iris

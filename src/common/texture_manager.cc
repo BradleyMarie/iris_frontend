@@ -2,6 +2,7 @@
 
 #include "iris_physx_toolkit/constant_texture.h"
 #include "iris_physx_toolkit/image_texture.h"
+#include "iris_physx_toolkit/perlin_textures.h"
 #include "iris_physx_toolkit/product_texture.h"
 #include "src/common/error.h"
 
@@ -78,6 +79,32 @@ FloatTexture TextureManager::AllocateImageMapFloatTexture(FloatMipmap mipmap,
       ImageFloatTextureAllocate(mipmap.detach(), u_delta, -v_delta, u_scale,
                                 -v_scale, result.release_and_get_address());
   SuccessOrOOM(status);
+
+  return result;
+}
+
+const ReflectorTexture& TextureManager::AllocateWindyReflectorTexture(
+    const Matrix& texture_to_world, const Reflector& reflector) {
+  ReflectorTexture& result =
+      m_windy_reflector_textures[std::make_pair(texture_to_world, reflector)];
+  if (!result.get()) {
+    ISTATUS status =
+        WindyReflectorTextureAllocate(texture_to_world.get(), reflector.get(),
+                                      result.release_and_get_address());
+    SuccessOrOOM(status);
+  }
+
+  return result;
+}
+
+const FloatTexture& TextureManager::AllocateWindyFloatTexture(
+    const Matrix& texture_to_world) {
+  FloatTexture& result = m_windy_float_textures[texture_to_world];
+  if (!result.get()) {
+    ISTATUS status = WindyFloatTextureAllocate(
+        texture_to_world.get(), result.release_and_get_address());
+    SuccessOrOOM(status);
+  }
 
   return result;
 }

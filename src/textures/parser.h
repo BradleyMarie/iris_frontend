@@ -8,7 +8,7 @@
 
 namespace iris {
 
-void ParseTexture(Directive& directive,
+void ParseTexture(Directive& directive, const Matrix& texture_to_world,
                   NamedTextureManager& named_texture_manager,
                   TextureManager& texture_manager,
                   SpectrumManager& spectrum_manager);

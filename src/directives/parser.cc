@@ -1042,8 +1042,9 @@ void GeometryParser::Shape(Directive& directive) {
 }
 
 void GeometryParser::Texture(Directive& directive) {
-  ParseTexture(directive, m_graphics_state.GetNamedTextureManager(),
-               m_texture_manager, m_spectrum_manager);
+  ParseTexture(directive, m_matrix_manager.GetCurrent().first,
+               m_graphics_state.GetNamedTextureManager(), m_texture_manager,
+               m_spectrum_manager);
 }
 
 std::pair<Scene, std::vector<Light>> GeometryParser::Parse() {

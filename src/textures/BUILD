@@ -40,6 +40,7 @@ cc_library(
         ":constant",
         ":imagemap",
         ":scale",
+        ":windy",
         "//src/common:directive",
         "//src/common:texture_manager",
     ],
@@ -49,6 +50,18 @@ cc_library(
     name = "scale",
     srcs = ["scale.cc"],
     hdrs = ["scale.h"],
+    deps = [
+        "//src/common:parameters",
+        "//src/common:texture_manager",
+        "//src/param_matchers:float_texture",
+        "//src/param_matchers:reflector_texture",
+    ],
+)
+
+cc_library(
+    name = "windy",
+    srcs = ["windy.cc"],
+    hdrs = ["windy.h"],
     deps = [
         "//src/common:parameters",
         "//src/common:texture_manager",
