@@ -10,6 +10,8 @@ namespace iris {
 
 class MaterialManager {
  public:
+  const Material& AllocateAlphaMaterial(const Material& material,
+                                        const FloatTexture& alpha);
   const Material& AllocateMatteMaterial(const ReflectorTexture& kd,
                                         const FloatTexture& sigma);
   const Material& AllocateMirrorMaterial(const ReflectorTexture& kr);
@@ -19,6 +21,7 @@ class MaterialManager {
                                           bool remap_roughness);
 
  private:
+  std::map<std::pair<Material, FloatTexture>, Material> m_alpha_materials;
   std::map<std::pair<ReflectorTexture, FloatTexture>, Material>
       m_matte_materials;
   std::map<ReflectorTexture, Material> m_mirror_materials;

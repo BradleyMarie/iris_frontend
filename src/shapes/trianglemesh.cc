@@ -5,6 +5,7 @@
 #include "iris_physx_toolkit/triangle_mesh.h"
 #include "src/common/error.h"
 #include "src/common/ostream.h"
+#include "src/param_matchers/float_texture.h"
 #include "src/param_matchers/list.h"
 
 namespace iris {
@@ -17,6 +18,7 @@ typedef ListValueMatcher<IntParameter, int, 3, 3> TriangleMeshIndexListMatcher;
 
 static const std::vector<POINT3> kTriangleMeshDefaultPoints;
 static const std::vector<int> kTriangleMeshDefaultIndices;
+static const FloatTexture kTriangleMeshDefaultAlpha;
 
 }  // namespace
 
@@ -33,10 +35,18 @@ ShapeResult ParseTriangleMesh(Parameters& parameters,
   TriangleMeshPointListMatcher points("P", true, kTriangleMeshDefaultPoints);
   TriangleMeshIndexListMatcher int_indices("indices", true,
                                            kTriangleMeshDefaultIndices);
-  auto unused_parameters = parameters.MatchAllowUnused(points, int_indices);
+  FloatTextureMatcher alpha("alpha", false, true, (float_t)0.0, (float_t)1.0,
+                            named_texture_manager, texture_manager,
+                            kTriangleMeshDefaultAlpha);
+  auto unused_parameters =
+      parameters.MatchAllowUnused(points, int_indices, alpha);
   auto material = material_result(unused_parameters, material_manager,
                                   named_texture_manager, normal_map_manager,
                                   texture_manager, spectrum_manager);
+  if (alpha.Get().get()) {
+    material.first =
+        material_manager.AllocateAlphaMaterial(material.first, alpha.Get());
+  }
 
   std::vector<size_t> indices;
   for (const auto& entry : int_indices.Get()) {

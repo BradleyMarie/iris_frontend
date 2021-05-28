@@ -12,11 +12,13 @@
 #include "src/common/error.h"
 #include "src/common/ostream.h"
 #include "src/param_matchers/file.h"
+#include "src/param_matchers/float_texture.h"
 
 namespace iris {
 namespace {
 
 static const std::string kPlyMeshDefaultFilename;
+static const FloatTexture kPlyMeshDefaultAlpha;
 
 static const int kRplySuccess = 1;
 
@@ -633,10 +635,17 @@ ShapeResult ParsePlyMesh(Parameters& parameters, const Matrix& model_to_world,
                          const EmissiveMaterial& front_emissive_material,
                          const EmissiveMaterial& back_emissive_material) {
   SingleFileMatcher filename("filename");
-  auto unused_parameters = parameters.MatchAllowUnused(filename);
+  FloatTextureMatcher alpha("alpha", false, true, (float_t)0.0, (float_t)1.0,
+                            named_texture_manager, texture_manager,
+                            kPlyMeshDefaultAlpha);
+  auto unused_parameters = parameters.MatchAllowUnused(filename, alpha);
   auto material = material_result(unused_parameters, material_manager,
                                   named_texture_manager, normal_map_manager,
                                   texture_manager, spectrum_manager);
+  if (alpha.Get().get()) {
+    material.first =
+        material_manager.AllocateAlphaMaterial(material.first, alpha.Get());
+  }
 
   PlyData fileData = ReadPlyFile(filename.Get().first, filename.Get().second);
   for (auto& point : fileData.GetVertices()) {
