@@ -364,7 +364,10 @@ void MatrixManager::LookAt(Directive& directive) {
       assert(status == ISTATUS_SUCCESS);
   }
 
-  Transform(transform);
+  Matrix inverse;
+  *inverse.release_and_get_address() = MatrixGetInverse(transform.get());
+
+  Transform(inverse);
 }
 
 void MatrixManager::CoordinateSystem(Directive& directive) {
@@ -581,7 +584,8 @@ void GlobalParser::AlwaysComputeReflectiveColor(Directive& directive) {
 
 void GlobalParser::Camera(Directive& directive) {
   m_camera_factory = ParseCamera(directive);
-  m_camera_to_world = m_matrix_manager.GetCurrent().first;
+  *m_camera_to_world.release_and_get_address() =
+      MatrixGetInverse(m_matrix_manager.GetCurrent().first.get());
 }
 
 void GlobalParser::ColorExtrapolator(Directive& directive) {
