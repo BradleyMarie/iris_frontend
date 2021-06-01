@@ -2,7 +2,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_r
 
 git_repository(
     name = "com_github_bradleymarie_iris",
-    commit = "f084a57f3ff971072d5500761fe4c18adba36f06",
+    commit = "6845932106f9fe3443dab2a1c8d0638a5d891a9f",
     remote = "https://github.com/BradleyMarie/iris",
 )
 
