@@ -674,8 +674,8 @@ ShapeResult ParsePlyMesh(Parameters& parameters, const Matrix& model_to_world,
   } else if (!fileData.GetNormals().empty()) {
     ISTATUS status = TriangleMeshNormalMapAllocate(
         fileData.GetNormals().data(), fileData.GetVertices().size(),
-        front_normal_map.release_and_get_address(),
-        back_normal_map.release_and_get_address());
+        front_normal_map.release_and_get_address());
+    back_normal_map = front_normal_map;
     SuccessOrOOM(status);
   }
 
