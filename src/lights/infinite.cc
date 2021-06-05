@@ -5,7 +5,6 @@
 #include "absl/strings/match.h"
 #include "iris_advanced_toolkit/color_io.h"
 #include "iris_advanced_toolkit/lanczos_upscale.h"
-#include "iris_physx_toolkit/image_spectrum_texture.h"
 #include "iris_physx_toolkit/infinite_environmental_light.h"
 #include "src/common/error.h"
 #include "src/param_matchers/file.h"
@@ -58,7 +57,8 @@ SpectrumMipmap LoadSpectrumMipmapFromExr(
 
 LightResult ParseInfinite(Parameters& parameters,
                           SpectrumManager& spectrum_manager,
-                          const Matrix& model_to_world) {
+                          const Matrix& model_to_world,
+                          const ColorIntegrator& color_integrator) {
   SingleFileMatcher mapname("mapname");
   parameters.Match(mapname);
 
@@ -71,20 +71,10 @@ LightResult ParseInfinite(Parameters& parameters,
   SpectrumMipmap mipmap = LoadSpectrumMipmapFromExr(
       mapname.Get().second.c_str(), spectrum_manager.GetColorExtrapolator());
 
-  PSPECTRUM_MIPMAP mipmap_ptr = mipmap.detach();
-  SpectrumTexture texture;
-  ISTATUS status = ImageSpectrumTextureAllocate(
-      mipmap_ptr, (float_t)0.0, (float_t)0.0, (float_t)1.0, (float_t)1.0,
-      texture.release_and_get_address());
-  if (status != ISTATUS_SUCCESS) {
-    free(mipmap_ptr);
-  }
-  SuccessOrOOM(status);
-
   Light light;
   EnvironmentalLight environmental_light;
-  status = InfiniteEnvironmentalLightAllocate(
-      texture.get(), model_to_world.get(),
+  ISTATUS status = InfiniteEnvironmentalLightAllocate(
+      mipmap.detach(), model_to_world.get(), color_integrator.get(),
       environmental_light.release_and_get_address(),
       light.release_and_get_address());
   SuccessOrOOM(status);

@@ -21,7 +21,8 @@ static const POINT3 kPointLightDefaultTo =
 
 LightResult ParseDistant(Parameters& parameters,
                          SpectrumManager& spectrum_manager,
-                         const Matrix& model_to_world) {
+                         const Matrix& model_to_world,
+                         const ColorIntegrator& color_integrator) {
   SinglePoint3Matcher from("from", false, kPointLightDefaultFrom);
   SinglePoint3Matcher to("to", false, kPointLightDefaultTo);
   SpectrumMatcher spectrum = SpectrumMatcher::FromRgb(

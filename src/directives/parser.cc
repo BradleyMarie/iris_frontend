@@ -925,14 +925,17 @@ class GeometryParser {
  public:
   static std::pair<Scene, std::vector<Light>> Parse(
       Tokenizer& tokenizer, MatrixManager& matrix_manager,
-      SpectrumManager& spectrum_manager);
+      SpectrumManager& spectrum_manager,
+      const ColorIntegrator& color_integrator);
 
  private:
   GeometryParser(Tokenizer& tokenizer, MatrixManager& matrix_manager,
-                 SpectrumManager& spectrum_manager)
+                 SpectrumManager& spectrum_manager,
+                 const ColorIntegrator& color_integrator)
       : m_tokenizer(tokenizer),
         m_matrix_manager(matrix_manager),
-        m_spectrum_manager(spectrum_manager) {}
+        m_spectrum_manager(spectrum_manager),
+        m_color_integrator(color_integrator) {}
 
   bool ParseDirective(absl::string_view name, absl::string_view token,
                       void (GeometryParser::*implementation)(Directive&));
@@ -952,6 +955,7 @@ class GeometryParser {
   Tokenizer& m_tokenizer;
   MatrixManager& m_matrix_manager;
   SpectrumManager& m_spectrum_manager;
+  const ColorIntegrator& m_color_integrator;
   GraphicsStateManager m_graphics_state;
   MaterialManager m_material_manager;
   NormalMapManager m_normal_map_manager;
@@ -984,8 +988,9 @@ void GeometryParser::AreaLightSource(Directive& directive) {
 }
 
 void GeometryParser::LightSource(Directive& directive) {
-  auto light = ParseLight(directive, m_spectrum_manager,
-                          m_matrix_manager.GetCurrent().first);
+  auto light =
+      ParseLight(directive, m_spectrum_manager,
+                 m_matrix_manager.GetCurrent().first, m_color_integrator);
   m_scene_builder.AddLight(std::get<0>(light), std::get<1>(light));
 }
 
@@ -1167,8 +1172,10 @@ std::pair<Scene, std::vector<Light>> GeometryParser::Parse() {
 
 std::pair<Scene, std::vector<Light>> GeometryParser::Parse(
     Tokenizer& tokenizer, MatrixManager& matrix_manager,
-    SpectrumManager& spectrum_manager) {
-  GeometryParser parser(tokenizer, matrix_manager, spectrum_manager);
+    SpectrumManager& spectrum_manager,
+    const ColorIntegrator& color_integrator) {
+  GeometryParser parser(tokenizer, matrix_manager, spectrum_manager,
+                        color_integrator);
   return parser.Parse();
 }
 
@@ -1239,7 +1246,8 @@ absl::optional<RendererConfiguration> Parser::Next(
       rgb_color_space_override.value_or(std::get<11>(global_config)));
 
   auto geometry_config = GeometryParser::Parse(m_tokenizer, matrix_manager,
-                                               manager_and_interpolator.first);
+                                               manager_and_interpolator.first,
+                                               manager_and_interpolator.second);
 
   return std::make_tuple(
       std::move(geometry_config.first),

@@ -9,8 +9,9 @@
 namespace iris {
 
 LightResult ParseInfinite(Parameters& parameters,
-                         SpectrumManager& spectrum_manager,
-                         const Matrix& model_to_world);
+                          SpectrumManager& spectrum_manager,
+                          const Matrix& model_to_world,
+                          const ColorIntegrator& color_integrator);
 
 }  // namespace iris
 

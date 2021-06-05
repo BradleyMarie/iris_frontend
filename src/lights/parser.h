@@ -8,7 +8,8 @@
 namespace iris {
 
 LightResult ParseLight(Directive& directive, SpectrumManager& spectrum_manager,
-                       const Matrix& model_to_world);
+                       const Matrix& model_to_world,
+                       const ColorIntegrator& color_integrator);
 
 }  // namespace iris
 

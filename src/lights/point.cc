@@ -17,7 +17,8 @@ static const POINT3 kPointLightDefaultFrom =
 
 LightResult ParsePoint(Parameters& parameters,
                        SpectrumManager& spectrum_manager,
-                       const Matrix& model_to_world) {
+                       const Matrix& model_to_world,
+                       const ColorIntegrator& color_integrator) {
   SinglePoint3Matcher from("from", false, kPointLightDefaultFrom);
   SpectrumMatcher spectrum = SpectrumMatcher::FromRgb(
       "L", false, spectrum_manager, kPointLightDefaultL);

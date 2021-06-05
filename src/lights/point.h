@@ -10,7 +10,8 @@ namespace iris {
 
 LightResult ParsePoint(Parameters& parameters,
                        SpectrumManager& spectrum_manager,
-                       const Matrix& model_to_world);
+                       const Matrix& model_to_world,
+                       const ColorIntegrator& color_integrator);
 
 }  // namespace iris
 
