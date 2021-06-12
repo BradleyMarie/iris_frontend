@@ -140,10 +140,9 @@ std::pair<Scene, std::vector<Light>> SceneBuilder::Build() {
     result_lights.push_back(environmental_light_as_light);
   }
 
-  std::unique_ptr<bool[]> premultiplied(new bool[m_scene_shapes.size()]());
   Scene result;
   ISTATUS status = KdTreeSceneAllocate(
-      m_scene_shapes.data(), m_scene_transforms.data(), premultiplied.get(),
+      m_scene_shapes.data(), m_scene_transforms.data(), nullptr,
       m_scene_shapes.size(), environmental_light.get(),
       result.release_and_get_address());
   SuccessOrOOM(status);
