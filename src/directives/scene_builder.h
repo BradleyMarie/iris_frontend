@@ -12,7 +12,7 @@ namespace iris {
 
 class SceneBuilder {
  public:
-  SceneBuilder() : m_current(nullptr) {}
+  SceneBuilder() : m_build_instanced_object(false) {}
   SceneBuilder(const SceneBuilder&) = delete;
   SceneBuilder& operator=(const SceneBuilder&) = delete;
   ~SceneBuilder();
@@ -30,12 +30,15 @@ class SceneBuilder {
   std::pair<Scene, std::vector<Light>> Build();
 
  private:
-  std::pair<std::vector<Shape>,
-            std::vector<std::tuple<Shape, EmissiveMaterial, uint32_t>>>*
-      m_current;
+  std::vector<Shape> m_instanced_object_shapes;
+  std::vector<std::tuple<Shape, EmissiveMaterial, uint32_t>>
+      m_instanced_object_area_lights;
+  std::string m_instanced_object_name;
+  bool m_build_instanced_object;
+
   absl::flat_hash_map<
       std::string,
-      std::pair<std::vector<Shape>,
+      std::pair<Shape,
                 std::vector<std::tuple<Shape, EmissiveMaterial, uint32_t>>>>
       m_instanced_objects;
 

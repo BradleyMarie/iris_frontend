@@ -19,21 +19,19 @@ SceneBuilder::~SceneBuilder() {
 }
 
 void SceneBuilder::ObjectBegin(Directive& directive) {
-  if (m_current) {
+  if (m_build_instanced_object) {
     std::cerr << "ERROR: Mismatched ObjectBegin and ObjectEnd directives"
               << std::endl;
     exit(EXIT_FAILURE);
   }
 
-  auto name = directive.SingleQuotedString("name");
-
-  m_current = &m_instanced_objects[name];
-  m_current->first.clear();
-  m_current->second.clear();
+  m_instanced_object_name = directive.SingleQuotedString("name");
+  m_instanced_objects.erase(m_instanced_object_name);
+  m_build_instanced_object = true;
 }
 
 void SceneBuilder::ObjectInstance(Directive& directive, const Matrix& matrix) {
-  if (m_current) {
+  if (m_build_instanced_object) {
     std::cerr << "ERROR: Invalid directive between ObjectBegin and "
                  "ObjectEnd: ObjectInstance"
               << std::endl;
@@ -48,8 +46,8 @@ void SceneBuilder::ObjectInstance(Directive& directive, const Matrix& matrix) {
     exit(EXIT_FAILURE);
   }
 
-  for (const auto& entry : iter->second.first) {
-    AddShape(entry, matrix);
+  if (iter->second.first.get()) {
+    AddShape(iter->second.first, matrix);
   }
 
   for (const auto& entry : iter->second.second) {
@@ -59,24 +57,46 @@ void SceneBuilder::ObjectInstance(Directive& directive, const Matrix& matrix) {
 }
 
 void SceneBuilder::ObjectEnd(Directive& directive) {
-  if (!m_current) {
+  if (!m_build_instanced_object) {
     std::cerr << "ERROR: Mismatched ObjectBegin and ObjectEnd directives"
               << std::endl;
     exit(EXIT_FAILURE);
   }
   directive.Empty();
-  m_current = nullptr;
+
+  std::vector<PSHAPE> shapes;
+  for (const auto& shape : m_instanced_object_shapes) {
+    shapes.push_back(shape.get());
+  }
+
+  Shape shape;
+  if (shapes.size() == 1) {
+    shape = m_instanced_object_shapes[0];
+  } else {
+    ISTATUS status = KdTreeAggregateAllocate(shapes.data(), shapes.size(),
+                                             shape.release_and_get_address());
+    SuccessOrOOM(status);
+  }
+
+  auto& entry = m_instanced_objects[m_instanced_object_name];
+  entry.first = shape;
+  entry.second = std::move(m_instanced_object_area_lights);
+
+  m_instanced_object_shapes.clear();
+  m_instanced_object_area_lights.clear();
+  m_instanced_object_name.clear();
+  m_build_instanced_object = false;
 }
 
 void SceneBuilder::AddShape(const Shape& shape, const Matrix& matrix) {
-  if (m_current) {
+  if (m_build_instanced_object) {
     if (matrix.get()) {
       std::cerr << "ERROR: Transformations not supported in instanced objects"
                 << std::endl;
       exit(EXIT_FAILURE);
     }
 
-    m_current->first.push_back(shape);
+    m_instanced_object_shapes.push_back(shape);
   } else {
     m_scene_shapes.push_back(shape.get());
     ShapeRetain(m_scene_shapes.back());
@@ -88,14 +108,15 @@ void SceneBuilder::AddShape(const Shape& shape, const Matrix& matrix) {
 void SceneBuilder::AddAreaLight(const Shape& shape, const Matrix& matrix,
                                 const EmissiveMaterial& material,
                                 uint32_t face_index) {
-  if (m_current) {
+  if (m_build_instanced_object) {
     if (matrix.get()) {
       std::cerr << "ERROR: Transformations not supported in instanced objects"
                 << std::endl;
       exit(EXIT_FAILURE);
     }
 
-    m_current->second.push_back(std::make_tuple(shape, material, face_index));
+    m_instanced_object_area_lights.push_back(
+        std::make_tuple(shape, material, face_index));
   } else {
     Light light;
     ISTATUS status = AreaLightAllocate(shape.get(), face_index, matrix.get(),
