@@ -32,10 +32,10 @@ cc_library(
     deps = [
         ":error",
         ":pointer_types",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:alpha_material",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:matte_material",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:mirror_material",
-        "@com_github_bradleymarie_iris//iris_physx_toolkit:plastic_material",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit/materials:alpha",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit/materials:matte",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit/materials:mirror",
+        "@com_github_bradleymarie_iris//iris_physx_toolkit/materials:plastic",
     ],
 )
 

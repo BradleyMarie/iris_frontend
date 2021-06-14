@@ -1,9 +1,9 @@
 #include "src/common/material_manager.h"
 
-#include "iris_physx_toolkit/alpha_material.h"
-#include "iris_physx_toolkit/matte_material.h"
-#include "iris_physx_toolkit/mirror_material.h"
-#include "iris_physx_toolkit/plastic_material.h"
+#include "iris_physx_toolkit/materials/alpha.h"
+#include "iris_physx_toolkit/materials/matte.h"
+#include "iris_physx_toolkit/materials/mirror.h"
+#include "iris_physx_toolkit/materials/plastic.h"
 #include "src/common/error.h"
 
 namespace iris {

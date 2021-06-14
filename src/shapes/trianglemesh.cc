@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "iris_physx_toolkit/triangle_mesh.h"
+#include "iris_physx_toolkit/shapes/triangle_mesh.h"
 #include "src/common/error.h"
 #include "src/common/ostream.h"
 #include "src/param_matchers/float_texture.h"

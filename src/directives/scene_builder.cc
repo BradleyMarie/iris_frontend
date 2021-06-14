@@ -2,8 +2,8 @@
 
 #include <iostream>
 
+#include "iris_physx_toolkit/scenes/kd_tree.h"
 #include "iris_physx_toolkit/aggregate_environmental_light.h"
-#include "iris_physx_toolkit/kd_tree_scene.h"
 #include "src/common/error.h"
 
 namespace iris {
