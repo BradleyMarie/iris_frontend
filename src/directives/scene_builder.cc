@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "iris_physx_toolkit/scenes/kd_tree.h"
 #include "iris_physx_toolkit/aggregate_environmental_light.h"
+#include "iris_physx_toolkit/scenes/bvh.h"
 #include "src/common/error.h"
 
 namespace iris {
@@ -73,8 +73,8 @@ void SceneBuilder::ObjectEnd(Directive& directive) {
   if (shapes.size() == 1) {
     shape = m_instanced_object_shapes[0];
   } else {
-    ISTATUS status = KdTreeAggregateAllocate(shapes.data(), shapes.size(),
-                                             shape.release_and_get_address());
+    ISTATUS status = BvhAggregateAllocate(shapes.data(), shapes.size(),
+                                          shape.release_and_get_address());
     SuccessOrOOM(status);
   }
 
@@ -162,7 +162,7 @@ std::pair<Scene, std::vector<Light>> SceneBuilder::Build() {
   }
 
   Scene result;
-  ISTATUS status = KdTreeSceneAllocate(
+  ISTATUS status = BvhSceneAllocate(
       m_scene_shapes.data(), m_scene_transforms.data(), nullptr,
       m_scene_shapes.size(), environmental_light.get(),
       result.release_and_get_address());
